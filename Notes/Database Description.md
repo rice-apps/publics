@@ -1,4 +1,4 @@
-# Tables
+# INITIAL Table Ideas
 
 ## People
 - gmail
@@ -8,6 +8,7 @@
 ## Events
 - name
 - capacity
+- release time
 - location
 - image
 - details
