@@ -13,6 +13,11 @@
 - image
 - details
 
+## Checkbox
+- item
+- completed
+- event
+
 ## Counts
 - event
 - entering (boolean). 1 row is added for people both entering and leaving
