@@ -1,0 +1,11 @@
+# Large Items
+- Auth
+- Attendance counter
+  - Based on org
+  - Analytics Dashboard
+- Registration list
+  - Mailing list
+  - Registration payments (later)
+- Event page
+- Public checklist
+- Merch store (later)
