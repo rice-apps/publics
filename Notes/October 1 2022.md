@@ -2,6 +2,7 @@
 
 ## Agenda
 - Introduce Team Members
+  - Play Gartic Phone
 - Introduce Project
 - Create Slack
 - Plan scrum time
