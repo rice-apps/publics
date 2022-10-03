@@ -8,4 +8,8 @@ module.exports = {
     extend: {},
   },
   plugins: [require('daisyui')],
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 3a0b3fd (add npm and fix tailwind)
