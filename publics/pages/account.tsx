@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../utils/db'
 import Auth from '../components/Auth'
 import Account from '../components/Account'
+import { Session } from '@supabase/supabase-js'
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
-  const [session, setSession] = useState(null)
+  const [session, setSession] = useState<Session | null>(null)
 
   useEffect(() => {
     let mounted = true
@@ -27,7 +28,7 @@ export default function Home() {
 
     getInitialSession()
 
-    const { subscription } = supabase.auth.onAuthStateChange(
+    const { data } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session)
       }
@@ -36,7 +37,7 @@ export default function Home() {
     return () => {
       mounted = false
 
-      subscription?.unsubscribe()
+      data?.subscription?.unsubscribe()
     }
   }, [])
 
