@@ -106,17 +106,17 @@
   dependencies:
     "cross-fetch" "^3.1.5"
 
-"@supabase/gotrue-js@^2.0.0-rc.4":
-  "integrity" "sha512-fs8xtYivHEmL6OK8EdsI83S4pPptejuPsQeScA+3ESg/AnjH34qZX64M/0xMYntQWdT43sU6mVoipSlg2kM3LA=="
-  "resolved" "https://registry.npmjs.org/@supabase/gotrue-js/-/gotrue-js-2.0.0-rc.6.tgz"
-  "version" "2.0.0-rc.6"
+"@supabase/gotrue-js@^2.0.0-rc.10":
+  "integrity" "sha512-y4jxZlf6eFoz0EP3EeU2QZnwI2WfpvkzAhURAAkn36Abol5QQhHpCbTWBEZhqOUk0cDtKZzgjsc5UQeep72qHA=="
+  "resolved" "https://registry.npmjs.org/@supabase/gotrue-js/-/gotrue-js-2.0.0-rc.10.tgz"
+  "version" "2.0.0-rc.10"
   dependencies:
     "cross-fetch" "^3.1.5"
 
 "@supabase/postgrest-js@^1.0.0-rc.5":
-  "integrity" "sha512-rBOyhK+qLd2fdX6WbCW3e9gY9qbwC5Zeso6QWM+00RlRz3k156lxnreVpe4KKGXNT3JMqJwAHXjQ2lbxmtBJqg=="
-  "resolved" "https://registry.npmjs.org/@supabase/postgrest-js/-/postgrest-js-1.0.0-rc.5.tgz"
-  "version" "1.0.0-rc.5"
+  "integrity" "sha512-Oe3f9T1TGUdbBStEMJbYSKxIbkAc53ccARhq4zcwBn1NS7/aBK3LTUNEc5qEn4wZGSGtnCLNf+Xc9BSn+IM6bQ=="
+  "resolved" "https://registry.npmjs.org/@supabase/postgrest-js/-/postgrest-js-1.0.0-rc.6.tgz"
+  "version" "1.0.0-rc.6"
   dependencies:
     "cross-fetch" "^3.1.5"
 
@@ -129,19 +129,19 @@
     "websocket" "^1.0.34"
 
 "@supabase/storage-js@^2.0.0-rc.1":
-  "integrity" "sha512-KovBS7+uJYu8KSvwWPFB6ZPAFFZFnj6s72GvDqhkWpGHIC1OLijYQ9/sRWq2Y+G6HofB8szz4+KLvtyxrgX6AQ=="
-  "resolved" "https://registry.npmjs.org/@supabase/storage-js/-/storage-js-2.0.0-rc.2.tgz"
-  "version" "2.0.0-rc.2"
+  "integrity" "sha512-X2bWQnZd4POlxb2iFueso1Rz2uMNv8SeD3cluC+kf7u01pglzF3h6xZatbibeyOM2Zf9j2SyociZ4FJgmcHmFw=="
+  "resolved" "https://registry.npmjs.org/@supabase/storage-js/-/storage-js-2.0.0-rc.3.tgz"
+  "version" "2.0.0-rc.3"
   dependencies:
     "cross-fetch" "^3.1.5"
 
 "@supabase/supabase-js@^2.0.0-rc.10":
-  "integrity" "sha512-0yjcWm7YnyPcuHl4OOhUkWzyyvFpGeuKdK0x5HKVROApadVcUZEz5/Zng8J32TbmD0nSMhU/IDBYhVfjZrLSYw=="
-  "resolved" "https://registry.npmjs.org/@supabase/supabase-js/-/supabase-js-2.0.0-rc.10.tgz"
-  "version" "2.0.0-rc.10"
+  "integrity" "sha512-AegNFh663MZq/IH8jxDNJfH1S1iipVdUifKM0uuUaxUDC0zfxtGbBC6YW2OJE3Dn5t3zBYbBWE/g9q5je03Z9A=="
+  "resolved" "https://registry.npmjs.org/@supabase/supabase-js/-/supabase-js-2.0.0-rc.11.tgz"
+  "version" "2.0.0-rc.11"
   dependencies:
     "@supabase/functions-js" "^2.0.0-rc.1"
-    "@supabase/gotrue-js" "^2.0.0-rc.4"
+    "@supabase/gotrue-js" "^2.0.0-rc.10"
     "@supabase/postgrest-js" "^1.0.0-rc.5"
     "@supabase/realtime-js" "^2.0.0-rc.5"
     "@supabase/storage-js" "^2.0.0-rc.1"
@@ -649,9 +649,9 @@
     "esutils" "^2.0.2"
 
 "electron-to-chromium@^1.4.251":
-  "integrity" "sha512-EpuHPqu8YhonqLBXHoU6hDJCD98FCe6KDoet3/gY1qsQ6usjJoHqBH2YIVs8FXaAtHwVL8Uqa/fsYao/vq9VWQ=="
-  "resolved" "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.4.276.tgz"
-  "version" "1.4.276"
+  "integrity" "sha512-KNhIzgLiJmDDC444dj9vEOpZEgsV96ult9Iff98Vanumn+ShJHd5se8aX6KeVxdc0YQeqdrezBZv89rleDbvSg=="
+  "resolved" "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.4.270.tgz"
+  "version" "1.4.270"
 
 "emoji-regex@^9.2.2":
   "integrity" "sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg=="
@@ -2126,9 +2126,9 @@
     "which-boxed-primitive" "^1.0.2"
 
 "update-browserslist-db@^1.0.9":
-  "integrity" "sha512-OztqDenkfFkbSG+tRxBeAnCVPckDBcvibKd35yDONx6OU8N7sqgwc7rCbkJ/WcYtVRZ4ba68d6byhC21GFh7sQ=="
-  "resolved" "https://registry.npmjs.org/update-browserslist-db/-/update-browserslist-db-1.0.10.tgz"
-  "version" "1.0.10"
+  "integrity" "sha512-/xsqn21EGVdXI3EXSum1Yckj3ZVZugqyOZQ/CxYPBD/R+ko9NSUScf8tFF4dOKY+2pvSSJA/S+5B8s4Zr4kyvg=="
+  "resolved" "https://registry.npmjs.org/update-browserslist-db/-/update-browserslist-db-1.0.9.tgz"
+  "version" "1.0.9"
   dependencies:
     "escalade" "^3.1.1"
     "picocolors" "^1.0.0"
