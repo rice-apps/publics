@@ -18,10 +18,6 @@ const Home: NextPage = () => {
           Button
         </button>
       </main>
-
-      <footer>
-        Footer text
-      </footer>
     </div>
   )
 }
