@@ -92,6 +92,11 @@ export default function Create() {
           </label>
           <input type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
         </div>
+        <div>
+          <input type="submit" value="Submit" className="btn" />
+          <input type="reset" value="Reset" className="btn-link" />
+        </div>
+        
       </main>
     </div>
   )
