@@ -1,24 +1,23 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
+import { supabase } from '../../utils/db'
 
 import { useRouter } from 'next/router'
 
-const details = () => {
+export async function getServerSideProps(context) {
+    console.log(context)
 
-    const event = {
-        "created_at": new Date(2022, 10, 15, 20, 0, 0),
-        "name": "NOD",
-        "capacity": 500,
-        "event_size": 500,
-        "waitlist_size": 100,
-        "admins": [1, 2, 3],
-        "counters": [1, 2, 3],
-        "description": "Some description blablab",
-        "event_datetime": new Date('2022-10-15 20:10:10.555555'),
-        "registration_datetime": new Date('2022-10-13 14:30:10.555555'),
-        "slug": "mock data",
-        "registration": true,
+    const { data, error } = await supabase.from("events").select(`name, description, event_datetime, registration_datetime, registration`).eq("slug", context.params.slug)
+
+    if (error) throw (error)
+    console.log(data)
+    return {
+        props: { data },
     }
+}
+const details = (props) => {
+
+    const event = props.data
 
     const router = useRouter()
     const { eventName } = router.query
