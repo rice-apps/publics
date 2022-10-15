@@ -3,42 +3,6 @@ import Head from 'next/head'
 
 import { useRouter } from 'next/router'
 
-/* const eventNOD = {
-    "created_at": new Date(2022, 10, 15, 20, 0, 0),
-    "name": "NOD",
-    "capacity": 500,
-    "event_size": 500,
-    "waitlist_size": 100,
-    "admins": [1, 2, 3],
-    "counters": [1, 2, 3],
-    "description": "Some description blablab",
-    "event_datetime": new Date('2022-10-15 20:10:10.555555'),
-    "registration_datetime": '2022-10-13 20:10:10.555555',
-    "slug": "mock data",
-    "registration": true,
-}
-
-const eventA = {
-    "created_at": new Date(2022, 10, 15, 20, 0, 0),
-    "name": "Event A",
-    "capacity": 500,
-    "event_size": 500,
-    "waitlist_size": 100,
-    "admins": [1, 2, 3],
-    "counters": [1, 2, 3],
-    "description": "Some description blablab",
-    "event_datetime": new Date('2022-10-15 20:10:10.555555'),
-    "registration_datetime": '2022-10-13 20:10:10.555555',
-    "slug": "mock data",
-    "registration": true,
-}
-
-const events = {
-    "NOD": eventNOD,
-    "A": eventA
-} */
-
-
 const details = () => {
 
     const event = {
