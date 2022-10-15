@@ -2,6 +2,23 @@ import Head from 'next/head'
 import { useState, useEffect } from 'react'
 
 export default function Create() {
+  
+  const [name, setName] = useState(String)
+  const [capacity, setCapacity] = useState(Number)
+  const [signup, setSignup] = useState(Number)
+  const [waitlist, setWaitlist] = useState(Number)
+  const [description, setDescription] = useState(String)
+  const [eventDate, setEventDate] = useState(Date)
+  const [eventTimeStart, setEventTimeStart] = useState(String)
+  const [eventTimeEnd, setEventTimeEnd] = useState(String)
+  const [signupDateStart, setSignupDateStart] = useState(Date)
+  const [signupDateEnd, setSignupDateEnd] = useState(Date)
+  const [signupTimeStart, setSignupTimeStart] = useState(String)
+  const [signupTimeEnd, setSignupTimeEnd] = useState(String)
+  const [slug, setSlug] = useState(String)
+  //const [eventTime, setEventTime] = useState({varThree:new Time()});
+
+
   return (
     <div>
       <Head>
@@ -18,79 +35,79 @@ export default function Create() {
           <label className="label">
             <span className="label-text">What is the name of your event?</span>
           </label>
-          <input type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
+          <input value={name} onChange={(e)=>setName(e.target.value)} type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
         </div>
         <div className="form-control w-full max-w-xs">
           <label className="label">
             <span className="label-text">What is the maximum capacity of your event?</span>
           </label>
-          <input type="number" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
+          <input value={capacity} onChange={(e)=>setCapacity(e.target.valueAsNumber)} type="number" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
         </div>
         <div className="form-control w-full max-w-xs">
           <label className="label">
             <span className="label-text">What is the maximum signup size for your event?</span>
           </label>
-          <input type="number" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
+          <input value={signup} onChange={(e)=>setSignup(e.target.valueAsNumber)} type="number" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
         </div>
         <div className="form-control w-full max-w-xs">
           <label className="label">
             <span className="label-text">What is the maximum waitlist size for your event?</span>
           </label>
-          <input type="number" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
+          <input value={waitlist} onChange={(e)=>setWaitlist(e.target.valueAsNumber)} type="number" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
         </div>
         <div className="form-control">
           <label className="label">
             <span className="label-text">Enter a description for your event here</span>
           </label> 
-          <textarea className="textarea textarea-bordered max-w-xs h-24" placeholder="Bio"></textarea>
+          <textarea value={description} onChange={(e)=>setDescription(e.target.value)} className="textarea textarea-bordered max-w-xs h-24" placeholder="Bio"></textarea>
         </div>
         <div className="form-control w-full max-w-xs">
           <label className="label">
             <span className="label-text">What is the date of your event?</span>
           </label>
-          <input type="date" placeholder="Enter valid date" className="input input-bordered w-full max-w-xs" />
+          <input value={eventDate} onChange={(e)=>setEventDate(e.target.value)} type="date" placeholder="Enter valid date" className="input input-bordered w-full max-w-xs" />
         </div>
         <div className="form-control w-full max-w-xs">
           <label className="label">
             <span className="label-text">What is the starting time of your event?</span>
           </label>
-          <input type="time" placeholder="Enter valid time" className="input input-bordered w-full max-w-xs" />
+          <input value={eventTimeStart} onChange={(e)=>setEventTimeStart(e.target.value)} type="time" placeholder="Enter valid time" className="input input-bordered w-full max-w-xs" />
         </div>
         <div className="form-control w-full max-w-xs">
           <label className="label">
             <span className="label-text">What is the ending time of your event?</span>
           </label>
-          <input type="time" placeholder="Enter valid time" className="input input-bordered w-full max-w-xs" />
+          <input value={eventTimeEnd} onChange={(e)=>setEventTimeEnd(e.target.value)} type="time" placeholder="Enter valid time" className="input input-bordered w-full max-w-xs" />
         </div>
         <div className="form-control w-full max-w-xs">
           <label className="label">
             <span className="label-text">What is the starting date of registration?</span>
           </label>
-          <input type="date" placeholder="Enter valid date" className="input input-bordered w-full max-w-xs" />
+          <input value={signupDateStart} onChange={(e)=>setSignupDateStart(e.target.value)} type="date" placeholder="Enter valid date" className="input input-bordered w-full max-w-xs" />
         </div>
         <div className="form-control w-full max-w-xs">
           <label className="label">
             <span className="label-text">What is the starting time of registration?</span>
           </label>
-          <input type="time" placeholder="Enter valid time" className="input input-bordered w-full max-w-xs" />
+          <input value={signupTimeStart} onChange={(e)=>setSignupTimeStart(e.target.value)} type="time" placeholder="Enter valid time" className="input input-bordered w-full max-w-xs" />
         </div>
         <div className="form-control w-full max-w-xs">
           <label className="label">
             <span className="label-text">What is the ending date of registration?</span>
           </label>
-          <input type="date" placeholder="Enter valid date" className="input input-bordered w-full max-w-xs" />
+          <input value={signupDateEnd} onChange={(e)=>setSignupDateEnd(e.target.value)} type="date" placeholder="Enter valid date" className="input input-bordered w-full max-w-xs" />
         </div>
         <div className="form-control w-full max-w-xs">
           <label className="label">
             <span className="label-text">What is the ending time of registration?</span>
           </label>
-          <input type="time" placeholder="Enter valid time" className="input input-bordered w-full max-w-xs" />
+          <input value={signupTimeEnd} onChange={(e)=>setSignupTimeEnd(e.target.value)} type="time" placeholder="Enter valid time" className="input input-bordered w-full max-w-xs" />
         </div>
         <div className="form-control w-full max-w-xs">
           <label className="label">
             <span className="label-text">Enter a unique URL name you want for your event (e.g., nod22)</span>
           </label>
-          <input type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
+          <input value={slug} onChange={(e)=>setSlug(e.target.value)} type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
         </div>
       </main>
     </div>
