@@ -16,13 +16,23 @@ export default function Create() {
   const [signupTimeStart, setSignupTimeStart] = useState(String)
   const [signupTimeEnd, setSignupTimeEnd] = useState(String)
   const [slug, setSlug] = useState(String)
-  //const [eventTime, setEventTime] = useState({varThree:new Time()});
 
   function refreshPage() {
     window.location.reload();
   }
   
-
+  function printing() {
+    console.log(name);
+    console.log(capacity);
+    console.log(signup);
+    console.log(waitlist);
+    console.log(description);
+    console.log(eventDate);
+    console.log(eventTimeStart);
+    console.log(eventTimeEnd);
+    console.log(signupDateStart);
+    console.log(signupTimeStart);
+  }
   
   return (
     <div id = "form">
@@ -115,7 +125,7 @@ export default function Create() {
           <input value={slug} onChange={(e)=>setSlug(e.target.value)} type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
         </div>
         <div>
-          <input type="submit" value="Submit" className="btn" />
+          <input type="submit" value="Submit" className="btn" onClick={printing}/>
           <input type="submit" value="Reset" className="btn" onClick={refreshPage}/>
         </div>
         
