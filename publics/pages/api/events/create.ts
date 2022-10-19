@@ -6,50 +6,39 @@ export default withApiAuth(async function ProtectedRoute(
     supabaseServerClient
 ) {
     const body = req.body;
-    //Add lots of if statements to make sure everything looks right
-    if (!body.name) {
-        return res.status(400).json({data : 'Name not found!'});
-    }
-    //Not sure if we need to enter ID or slug?
 
-    //Gross code, will fix later please don't yell at us :)
-    //TODO add type checks later
-    if (!body.created_at) {
-        return res.status(400).json({data : 'Creation timestamp not found!'});
+    const fields = [
+        "name", 
+        "created_at", 
+        "capacity", 
+        "signup_size", 
+        "waitlist_size",
+        "admins", 
+        "counters", 
+        "description", 
+        "event_datetime", 
+        "registration_datetime", 
+        "registration"
+    ];
+
+    //Send an error if there are more/less elements in the data than we can put into the table
+    if (Object.keys(body).length != fields.length) {
+        return res.status(400).json({data : "Data not in correct format; Number of fields is incorrect"})
     }
-    if (!body.capacity) {
-        return res.status(400).json({data : 'Capacity not found!'});
-    }
-    if (!body.signup_size) {
-        return res.status(400).json({data : 'Signup size not found!'});
-    }
-    if (!body.waitlist_size) {
-        return res.status(400).json({data : 'Waitlist Size not found!'});
-    }
-    if (!body.admins) {
-        return res.status(400).json({data : 'Admins not found!'});
-    }
-    if (!body.counters) {
-        return res.status(400).json({data : 'Counters not found!'});
-    }
-    if (!body.description) {
-        return res.status(400).json({data : 'Description not found!'});
-    }
-    if (!body.event_datetime) {
-        return res.status(400).json({data : 'Event timestamp not found!'});
-    }
-    if (!body.registration_datetime) {
-        return res.status(400).json({data : 'Registration timestamp not found!'});
-    }
-    if (!body.registration) {
-        return res.status(400).json({data : 'Registration status not found!'});
+    //Send an error if a field is missing
+    for (let field in fields) {
+        if (!body[field]) {
+            return res.status(400).json({data : `${field} not Found!`})
+        }
     }
 
+    //Writing to the DB
     const {data, error} = await supabaseServerClient.from("events").insert(body).single();
 
+    //Sending the response back
     if(error) {
         res.status(400).json({data : "Error!"})
     } else {
-        res.status(200).json({data : `Created ${data?.name}!`})
+        res.status(200).json({data : `Created ${data?['name'] : null}!`})
     }
 });
