@@ -17,7 +17,7 @@ export default withApiAuth(async function ProtectedRoute(
         "counters", 
         "description", 
         "event_datetime", 
-        "registration_datetime", 
+        "registration_datetime",    
         "registration"
     ];
 
@@ -37,7 +37,7 @@ export default withApiAuth(async function ProtectedRoute(
 
     //Sending the response back
     if(error) {
-        res.status(400).json({data : "Error!"})
+        res.status(400).json({data : "Error!: " + error})
     } else {
         res.status(200).json({data : `Created ${data?['name'] : null}!`})
     }
