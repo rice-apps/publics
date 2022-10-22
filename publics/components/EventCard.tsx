@@ -10,7 +10,8 @@ export default function EventCard(props: Props) {
     console.log("props" + props)
     return (
         <div className="card w-full bg-base-100 shadow-xl hover:scale-110 transition-transform">
-            <figure><img src="https://placeimg.com/400/225/arch" alt="Shoes" /></figure><div className="card-body">
+            <figure><img src="https://placeimg.com/400/225/arch" alt="Shoes" /></figure>
+            <div className="card-body">
                 <h2 className="card-title">{props.event.name}</h2>
                 <p>{props.event.description}</p>
                 <div className="card-actions justify-end">
