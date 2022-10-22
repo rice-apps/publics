@@ -1,18 +1,12 @@
 import EventCard from "../../components/EventCard"
 import { supabase } from "../../utils/db"
+import type { ListEvent } from "../../utils/types"
 
-const mockData = [{
-    name : "NOD",
-    description: "Horny",
-    date: new Date(2022,10,15, 22,0)
-},
-{
-    name: "Baker 13",
-    description: "Naked run",
-    date: new Date(2022, 10, 13, 23, 0)
+type Props = {
+    data: ListEvent[]
 }
-]
-function Events(props: any) {
+
+function Events(props: Props) {
     console.log(props.data)
     return (
         <div className="grid grid-cols-4 gap-4">
@@ -26,7 +20,7 @@ function Events(props: any) {
 export async function getServerSideProps() {
     const { data, error } = await supabase
     .from('events')
-    .select()
+    .select(`name, description, slug`)
     if (error) {
         throw error
     }
@@ -35,12 +29,3 @@ export async function getServerSideProps() {
 }
 
 export default Events
-
-// export default function Events(props: any) {
-//     return (
-//         <div className="grid grid-cols-4 gap-4">
-//             {.map((event) => <EventCard event={event}/>)}
-            
-//         </div>
-//     )
-// }
