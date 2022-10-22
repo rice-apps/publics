@@ -7,7 +7,6 @@ type Props = {
 
 export default function EventCard(props: Props) {
     const router = useRouter()
-    console.log("props" + props)
     return (
         <div className="card w-full bg-base-100 shadow-xl hover:scale-110 transition-transform">
             <figure><img src="https://placeimg.com/400/225/arch" alt="Shoes" /></figure>
