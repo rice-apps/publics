@@ -23,7 +23,6 @@ function MyApp({
       <Component {...pageProps} />
     </SessionContextProvider>
   )
-  //You can now determine if a user is authenticated by checking that the user object returned by the useUser() hook is defined.
 }
 
 export default MyApp
