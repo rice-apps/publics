@@ -1,5 +1,5 @@
 export default function EventCard(props: any) {
-   
+    console.log("props" + props)
     return (
         <div className="card w-full bg-base-100 shadow-xl">
             <figure><img src="https://placeimg.com/400/225/arch" alt="Shoes" /></figure><div className="card-body">
