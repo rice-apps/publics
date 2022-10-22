@@ -1,9 +1,6 @@
 import Head from 'next/head'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../utils/db'
-import Auth from '../../components/Auth'
-import Account from '../../components/Account'
-import { Session } from '@supabase/supabase-js'
 
 export default function Create() {
   
