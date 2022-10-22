@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { themeChange } from 'theme-change'
+import Link from 'next/link'
 
 export default function Navbar() {
     useEffect(() => {
@@ -7,7 +8,7 @@ export default function Navbar() {
     }, [])
     const themes: string[] = ["light", "dark", "cupcake", "bumblebee", "emerald", "corporate", "synthwave", "retro", "cyberpunk", "valentine", "halloween", "garden", "forest", "aqua", "lofi", "pastel", "fantasy", "wireframe", "black", "luxury", "dracula", "cmyk", "autumn", "business", "acid", "lemonade", "night", "coffee", "winter"];
 
-    const navbar_content = (<><li><a>Item 1</a></li>
+    const navbar_content = (<><li><Link href="events">Events</Link></li>
         <li tabIndex={0}>
             <a className="justify-between">
                 Parent
@@ -31,7 +32,7 @@ export default function Navbar() {
                         {navbar_content}
                     </ul>
                 </div>
-                <a className="btn btn-ghost normal-case text-xl">Publics</a>
+                <Link href="/"><a className="btn btn-ghost normal-case text-xl">Publics</a></Link>
             </div>
             <div className="navbar-center hidden lg:flex">
                 <ul className="menu menu-horizontal p-0">

@@ -8,23 +8,25 @@ type Props = {
 
 function Events(props: Props) {
     return (
-        <div className="grid grid-cols-4 gap-4">
-            {props.data.map((event) => <EventCard event={event}/>)}
-            
+        <div className="p-3">
+            <h1>Events</h1>
+            <div className="grid grid-cols-4 gap-4">
+                {props.data.map((event) => <EventCard event={event} />)}
+            </div>
         </div>
     )
 }
-  
+
 // This gets called on every request
 export async function getServerSideProps() {
     const { data, error } = await supabase
-    .from('events')
-    .select(`name, description, slug`)
+        .from('events')
+        .select(`name, description, slug`)
     if (error) {
         throw error
     }
-    return {props: {data}} // will be passed to the page component as props
-    
+    return { props: { data } } // will be passed to the page component as props
+
 }
 
 export default Events
