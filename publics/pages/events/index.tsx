@@ -7,7 +7,6 @@ type Props = {
 }
 
 function Events(props: Props) {
-    console.log(props.data)
     return (
         <div className="grid grid-cols-4 gap-4">
             {props.data.map((event) => <EventCard event={event}/>)}
