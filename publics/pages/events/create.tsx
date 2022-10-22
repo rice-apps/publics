@@ -1,5 +1,9 @@
 import Head from 'next/head'
 import { useState, useEffect } from 'react'
+import { supabase } from '../../utils/db'
+import Auth from '../../components/Auth'
+import Account from '../../components/Account'
+import { Session } from '@supabase/supabase-js'
 
 export default function Create() {
   
@@ -8,18 +12,15 @@ export default function Create() {
   const [signup, setSignup] = useState(Number)
   const [waitlist, setWaitlist] = useState(Number)
   const [description, setDescription] = useState(String)
-  const [eventDate, setEventDate] = useState(Date)
-  const [eventTimeStart, setEventTimeStart] = useState(String)
-  const [eventTimeEnd, setEventTimeEnd] = useState(String)
-  const [signupDateStart, setSignupDateStart] = useState(Date)
-  const [signupDateEnd, setSignupDateEnd] = useState(Date)
-  const [signupTimeStart, setSignupTimeStart] = useState(String)
-  const [signupTimeEnd, setSignupTimeEnd] = useState(String)
+  const [eventDateTime, setEventDateTime] = useState(Date)
+  const [signupDateTime, setSignupDateTime] = useState(Date)
   const [slug, setSlug] = useState(String)
 
+  /*
   function refreshPage() {
     window.location.reload();
   }
+  */
   
   function printing() {
     console.log(name);
@@ -27,12 +28,19 @@ export default function Create() {
     console.log(signup);
     console.log(waitlist);
     console.log(description);
-    console.log(eventDate);
-    console.log(eventTimeStart);
-    console.log(eventTimeEnd);
-    console.log(signupDateStart);
-    console.log(signupTimeStart);
+    console.log(eventDateTime);
+    console.log(signupDateTime);
+    console.log(slug);
   }
+
+  
+  async function insert() {
+    const { error } = await supabase
+      .from('events')
+      .insert({name: name, capacity: capacity, signup_size: signup, waitlist_size: waitlist, description: description, 
+               event_datetime: eventDateTime, registration_datetime: signupDateTime, slug: slug})
+  }
+  
   
   return (
     <div id = "form">
@@ -78,45 +86,45 @@ export default function Create() {
         </div>
         <div className="form-control w-full max-w-xs">
           <label className="label">
-            <span className="label-text">What is the date of your event?</span>
+            <span className="label-text">What is the date and time of your event?</span>
           </label>
-          <input type="date" placeholder="Enter valid date" className="input input-bordered w-full max-w-xs" />
+          <input value={eventDate} onChange={(e)=>setEventDate(e.target.value)} type="date" placeholder="Enter valid date" className="input input-bordered w-full max-w-xs" />
         </div>
         <div className="form-control w-full max-w-xs">
           <label className="label">
-            <span className="label-text">What is the starting time of your event?</span>
+            <span className="label-text">What is the starting date and time of registration?</span>
           </label>
-          <input type="time" placeholder="Enter valid time" className="input input-bordered w-full max-w-xs" />
+          <input value={eventTimeStart} onChange={(e)=>setEventTimeStart(e.target.value)} type="time" placeholder="Enter valid time" className="input input-bordered w-full max-w-xs" />
         </div>
         <div className="form-control w-full max-w-xs">
           <label className="label">
             <span className="label-text">What is the ending time of your event?</span>
           </label>
-          <input type="time" placeholder="Enter valid time" className="input input-bordered w-full max-w-xs" />
+          <input value={eventTimeEnd} onChange={(e)=>setEventTimeEnd(e.target.value)} type="time" placeholder="Enter valid time" className="input input-bordered w-full max-w-xs" />
         </div>
         <div className="form-control w-full max-w-xs">
           <label className="label">
             <span className="label-text">What is the starting date of registration?</span>
           </label>
-          <input type="date" placeholder="Enter valid date" className="input input-bordered w-full max-w-xs" />
+          <input value={signupDateStart} onChange={(e)=>setSignupDateStart(e.target.value)} type="date" placeholder="Enter valid date" className="input input-bordered w-full max-w-xs" />
         </div>
         <div className="form-control w-full max-w-xs">
           <label className="label">
             <span className="label-text">What is the starting time of registration?</span>
           </label>
-          <input type="time" placeholder="Enter valid time" className="input input-bordered w-full max-w-xs" />
+          <input value={signupTimeStart} onChange={(e)=>setSignupTimeStart(e.target.value)} type="time" placeholder="Enter valid time" className="input input-bordered w-full max-w-xs" />
         </div>
         <div className="form-control w-full max-w-xs">
           <label className="label">
             <span className="label-text">What is the ending date of registration?</span>
           </label>
-          <input type="date" placeholder="Enter valid date" className="input input-bordered w-full max-w-xs" />
+          <input value={signupDateEnd} onChange={(e)=>setSignupDateEnd(e.target.value)} type="date" placeholder="Enter valid date" className="input input-bordered w-full max-w-xs" />
         </div>
         <div className="form-control w-full max-w-xs">
           <label className="label">
             <span className="label-text">What is the ending time of registration?</span>
           </label>
-          <input type="time" placeholder="Enter valid time" className="input input-bordered w-full max-w-xs" />
+          <input value={signupTimeEnd} onChange={(e)=>setSignupTimeEnd(e.target.value)} type="time" placeholder="Enter valid time" className="input input-bordered w-full max-w-xs" />
         </div>
         <div className="form-control w-full max-w-xs">
           <label className="label">
@@ -125,8 +133,7 @@ export default function Create() {
           <input type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
         </div>
         <div>
-          <input type="submit" value="Submit" className="btn" onClick={printing}/>
-          <input type="submit" value="Reset" className="btn" onClick={refreshPage}/>
+          <input type="submit" value="Submit" className="btn" onClick={insert}/>
         </div>
         
       </main>
