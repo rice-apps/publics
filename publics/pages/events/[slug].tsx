@@ -18,10 +18,9 @@ export async function getServerSideProps(context) {
     }
 }
 const details = (props) => {
-    // const router = useRouter()
-    // const { eventName } = router.query
-
     const event = props.data[0]
+
+    // process datetimes
     event.registration_datetime = new Date(event.registration_datetime)
     event.event_datetime = new Date(event.event_datetime)
 
