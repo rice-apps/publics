@@ -1,8 +1,11 @@
 import Head from 'next/head'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../utils/db'
+import { useRouter } from 'next/router'
+
 
 export default function Create() {
+  const router = useRouter()
   
   const [name, setName] = useState(String)
   const [capacity, setCapacity] = useState(Number)
@@ -37,6 +40,11 @@ export default function Create() {
       .from('events')
       .insert({name: name, capacity: capacity, signup_size: signup, waitlist_size: waitlist, description: description, 
                event_datetime: eventDateTime, registration_datetime: signupDateTime, slug: slug})
+    if (error) {
+      alert(error.message);
+    } else {
+      router.push(slug);
+    }
   }
   
   
