@@ -12,6 +12,7 @@ export default function Create() {
   const [eventDateTime, setEventDateTime] = useState(Date)
   const [signupDateTime, setSignupDateTime] = useState(Date)
   const [slug, setSlug] = useState(String)
+  const[currDateTime, setCurrDateTime] = useState(Date)
 
   /*
   function refreshPage() {
@@ -20,6 +21,7 @@ export default function Create() {
   */
   
   function printing() {
+    setCurrDateTime(Date());
     console.log(name);
     console.log(capacity);
     console.log(signup);
@@ -28,14 +30,16 @@ export default function Create() {
     console.log(eventDateTime);
     console.log(signupDateTime);
     console.log(slug);
+    console.log(currDateTime);
   }
 
   
   async function insert() {
+    setCurrDateTime(Date());
     const { error } = await supabase
       .from('events')
       .insert({name: name, capacity: capacity, signup_size: signup, waitlist_size: waitlist, description: description, 
-               event_datetime: eventDateTime, registration_datetime: signupDateTime, slug: slug})
+               event_datetime: eventDateTime, registration_datetime: signupDateTime, slug: slug, created_at: currDateTime})
   }
   
   
