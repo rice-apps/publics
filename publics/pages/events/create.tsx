@@ -40,7 +40,10 @@ export default function Create() {
     }
     if (orgs) {
       setOrgs(orgs)
-    }
+      if (orgs.length > 0) {
+        setHost(orgs[0].organization.id)
+      }
+    } 
   }
 
   useEffect(() => {
@@ -114,7 +117,6 @@ export default function Create() {
             <div className="sm:flex">
               <div className="form-control w-full max-w-xs mr-2">
                 <select className="select select-bordered w-full max-w-xs" onChange={(e) => setHost(e.target.value)}>
-                  // add options for orgs
                   {orgs.length > 0 ? orgs.map((org) => (
                     <option value={org.organization.id}>{org.organization.name}</option>
                   )) : <option disabled value="null">You are not a part of any organizations</option>}
@@ -124,13 +126,13 @@ export default function Create() {
                 </label>
               </div>
               <div className="form-control w-full max-w-xs mr-2">
-                <input value={location} onChange={(e) => setLocation(e.target.value)} required type="text" className="input input-bordered w-full max-w-xs" />
+                <input value={location} onChange={(e) => setLocation(e.target.value)} type="text" required className="input input-bordered w-full max-w-xs" />
                 <label className="label">
                   <span className="label-text-alt">Location</span>
                 </label>
               </div>
               <div className="form-control w-full max-w-xs">
-                <input value={capacity} onChange={(e) => setCapacity(e.target.valueAsNumber)} required type="text" className="input input-bordered w-full max-w-xs" />
+                <input value={capacity} onChange={(e) => setCapacity(e.target.valueAsNumber)} type="number" required className="input input-bordered w-full max-w-xs" />
                 <label className="label">
                   <span className="label-text-alt">Capacity</span>
                 </label>
@@ -166,13 +168,13 @@ export default function Create() {
                   </label>
                 </div>
                 <div className="form-control w-full max-w-xs mr-2">
-                  <input value={signupSize} onChange={(e) => setSignupSize(e.target.valueAsNumber)} required type="text" className="input input-bordered w-full max-w-xs" />
+                  <input value={signupSize} onChange={(e) => setSignupSize(e.target.valueAsNumber)} required type="number" className="input input-bordered w-full max-w-xs" />
                   <label className="label">
                     <span className="label-text-alt">Registration Maximum</span>
                   </label>
                 </div>
                 <div className="form-control w-full max-w-xs">
-                  <input value={waitlistSize} onChange={(e) => setWaitlistSize(e.target.valueAsNumber)} required type="text" className="input input-bordered w-full max-w-xs" />
+                  <input value={waitlistSize} onChange={(e) => setWaitlistSize(e.target.valueAsNumber)} required type="number" className="input input-bordered w-full max-w-xs" />
                   <label className="label">
                     <span className="label-text-alt">Waitlist Maximum</span>
                   </label>
