@@ -85,9 +85,11 @@ export default function Create() {
         <h1>
           Create an Event
         </h1>
-        <div>
-          <h2>Event Details</h2>
-          <hr></hr>
+        <div className="form-control w-full max-w-xs" style={{width: 264, height: 52}}>
+          <input value={name} onChange={(e)=>setName(e.target.value)} type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
+          <label className="label">
+            <span className="label-text-alt">What is the name of your event?</span>
+          </label>
         </div>
         <form>
           <div className="p-2">
