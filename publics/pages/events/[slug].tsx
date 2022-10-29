@@ -10,8 +10,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         )`)
         .eq("slug", context.params.slug)
         .single()
-
-    if (error) throw (error)
+    if (error) {
+        return {
+            notFound: true
+        }
+    }
     console.log(data)
 
     // if no event is found, redirect to 404 page
@@ -59,23 +62,26 @@ const details = (props: Props) => {
     return (
         <div>
             <main>
-                <div className="hero min-h-screen bg-base-200">
+                <div className="hero min-h-[70vh] bg-base-200 object-left-top">
                     <div className="hero-content flex-col lg:flex-row">
-                        <img src="https://visit-oxford.s3.amazonaws.com/wp-content/uploads/2018/05/16180528/pum.jpg" className="max-w-sm rounded-lg shadow-2xl" />
+                        <img src="https://as2.ftcdn.net/v2/jpg/03/09/55/15/1000_F_309551534_hkPIgAAsyc5EQg0Ny2bUYh8ttkUWc8fA.jpg" className="max-w-sm rounded-lg shadow-2xl" />
                         <div>
                             <h1 className="text-5xl font-bold">{event.name}</h1>
                             <p className="text-xl">{weekday[event.event_datetime.getDay()] + ", " + month[event.event_datetime.getMonth()] + " " + event.event_datetime.getDate() + "th"} </p>
-
-                            <div style = display: flex, justify-content: space-between>
-                            <img className="object-scale-down h-5 w-5" src={event.organization.photo} />
-                            <p className="">Hosted by {event.organization.name}</p>
+                            <span>
+                                <p className=""> <img className="rounded h-5 w-5 inline object-center" src={event.organization.photo} /> Hosted by {event.organization.name}</p>
+                            </span>
+                            <p className="py-6">Description: {event.description}</p>
+                            
                         </div>
-
-                        <p className="py-6">Description: {event.description}</p>
-                        <button className="btn btn-primary">Get Started</button>
-                    </div>
+                    </div>               
                 </div>
-        </div >
+                <div className="hero min-h-[20vh] object-left-top">
+                    <div className="hero-content flex-col lg:flex-row">
+                        <p className="py-6">Register for Event</p>
+                        <button className="btn btn-primary">Register</button>
+                    </div> 
+                </div>
 
                 {/* <div className="hero min-h-screen bg-base-200">
                     <div className="hero-content">
