@@ -19,6 +19,8 @@ export default function Create() {
   const [signupSize, setSignupSize] = useState(Number)
   const [waitlistSize, setWaitlistSize] = useState(Number)
 
+  
+
   const [orgs, setOrgs] = useState([])
 
   /*
@@ -48,26 +50,41 @@ export default function Create() {
 
   useEffect(() => {
     getOrgs()
+    setRegistrationDatetime(null)
+    setSignupSize(null)
+    setWaitlistSize(null)
   }, [])
 
 
   async function insert() {
     //setCurrDateTime(Date().toLocaleUpperCase());
+    console.log(registrationDatetime)
+    console.log(signupSize)
+    console.log(waitlistSize)
+    let insert = {
+      name: name,
+      slug: slug,
+      event_datetime: eventDateTime,
+      organization: host,
+      location: location,
+      capacity: capacity,
+      description: description,
+      registration: registration,
+    }
+    if (!registrationDatetime === null) {
+      insert.registration_datetime = registrationDatetime
+    }
+    if (signupSize !== null) {
+      insert.signup_size = signupSize
+    }
+    if (waitlistSize !== null) {
+      insert.waitlist_size = waitlistSize
+    }
+
+
     const { error } = await supabase
       .from('events')
-      .insert({
-        name: name,
-        slug: slug,
-        event_datetime: eventDateTime,
-        organization: host,
-        location: location,
-        capacity: capacity,
-        description: description,
-        registration: registration,
-        registration_datetime: registrationDatetime,
-        signup_size: signupSize,
-        waitlist_size: waitlistSize
-      })
+      .insert(insert)
     if (error) {
       alert(error.message);
     } else {
@@ -98,19 +115,19 @@ export default function Create() {
           <div className="p-2">
             <div className="sm:flex">
               <div className="form-control w-full max-w-xs mr-2">
-                <input value={name} onChange={(e) => setName(e.target.value)} required type="text" className="input input-bordered w-full max-w-xs" />
+                <input value={name} onChange={(e) => setName(e.target.value)} type="text" required className="input input-bordered w-full max-w-xs" />
                 <label className="label">
                   <span className="label-text-alt">Name of event</span>
                 </label>
               </div>
               <div className="form-control w-full max-w-xs mr-2">
-                <input value={slug} onChange={(e) => setSlug(e.target.value)} required type="text" className="input input-bordered w-full max-w-xs" />
+                <input value={slug} onChange={(e) => setSlug(e.target.value)} type="text" required className="input input-bordered w-full max-w-xs" />
                 <label className="label">
                   <span className="label-text-alt">Slug</span>
                 </label>
               </div>
               <div className="form-control w-full max-w-xs">
-                <input value={eventDateTime} onChange={(e) => setEventDateTime(e.target.value)} required type="datetime-local" className="input input-bordered w-full max-w-xs" />
+                <input value={eventDateTime} onChange={(e) => setEventDateTime(e.target.value)} type="datetime-local" required className="input input-bordered w-full max-w-xs" />
                 <label className="label">
                   <span className="label-text-alt">Date</span>
                 </label>
