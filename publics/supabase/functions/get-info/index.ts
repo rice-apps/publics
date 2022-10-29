@@ -3,7 +3,6 @@
 // This enables autocomplete, go to definition, etc.
 
 import { serve } from "https://deno.land/std@0.131.0/http/server.ts"
-import { v4 as uuidv4 } from 'https://esm.sh/uuid'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
 
@@ -14,7 +13,7 @@ export const supabase = createClient(supabaseUrl!, supabaseAnonKey!)
 
 
 serve(async (req) => {
-  const { email } = await req.json()
+  const { id, email } = await req.json()
   const username = email.split("@")[0]
 
   const response = await fetch(`https://search.rice.edu/json/people/p/0/0/?q=${username}`, {
@@ -41,7 +40,7 @@ serve(async (req) => {
     .from('profiles')
     .insert([
       { 
-        id: uuidv4(),
+        id: id,
         first_name: json.results[0].name.split(" ")[0],
         last_name: json.results[0].name.split(" ")[1],
         college: json.results[0].college,
