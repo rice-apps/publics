@@ -5,12 +5,12 @@
 import { serve } from "https://deno.land/std@0.131.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
-
-const supabaseUrl=deno.env.get('SUPABASE_URL')
-const supabaseServiceKey=deno.env.get("SUPABASE_SERVICE_KEY")
-
-export const supabase = createClient(supabaseUrl!, supabaseAnonKey!)
-
+const supabaseClient = createClient(
+  // Supabase API URL - env var exported by default.
+  Deno.env.get('SUPABASE_URL') ?? '',
+  // Supabase API ANON KEY - env var exported by default.
+  Deno.env.get('SUPABASE_SERVICE_KEY') ?? '',
+)
 
 serve(async (req) => {
   const { id, email } = await req.json()
@@ -36,7 +36,7 @@ serve(async (req) => {
 
   
   //add entry to supabase if not already there
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from('profiles')
     .insert([
       { 
