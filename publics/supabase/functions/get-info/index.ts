@@ -44,6 +44,7 @@ serve(async (req) => {
         id: uuidv4(),
         first_name: json.results[0].name.split(" ")[0],
         last_name: json.results[0].name.split(" ")[1],
+        college: json.results[0].college,
         netid: json.results[0].netid,
         can_create_event: false,
         },
