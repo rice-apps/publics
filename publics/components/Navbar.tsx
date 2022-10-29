@@ -22,7 +22,7 @@ export default function Navbar() {
         <li><a>Item 3</a></li></>)
 
     return (
-        <div className="navbar bg-base-100 border-b-2 border-b-secondary">
+        <div className="navbar bg-base-100">
             <div className="navbar-start">
                 <div className="dropdown">
                     <label tabIndex={0} className="btn btn-ghost lg:hidden">
@@ -40,11 +40,23 @@ export default function Navbar() {
                 </ul>
             </div>
             <div className="navbar-end">
-                <select data-choose-theme className="select select-bordered max-w-xs mr-2">
-                    {themes.map((theme) => (
-                        <option value={theme}>{theme.toLocaleUpperCase()}</option>
-                    ))}
-                </select>
+                <div className="dropdown dropdown-end">
+                    <label tabIndex={0} className="m-1">
+                        <div className="avatar hover:scale-110 hover:drop-shadow-lg transition-all">
+                            <div className="w-16 rounded-full mr-2">
+                                <img src="https://placeimg.com/192/192/animals" />
+                            </div>
+                        </div>
+                    </label>
+                    <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 border border-secondary">
+                        <select data-choose-theme className="select select-bordered max-w-xs mr-2">
+                            {themes.map((theme) => (
+                                <option value={theme}>{theme.toLocaleUpperCase()}</option>
+                            ))}
+                        </select>
+                        <li><Link href="/account">Account</Link></li>
+                    </ul>
+                </div>
             </div>
         </div>
     )
