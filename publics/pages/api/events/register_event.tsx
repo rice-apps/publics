@@ -8,18 +8,9 @@ export default withApiAuth(async function ProtectedRoute(
     const body = req.body;
 
     const fields = [
-        "name", 
-        "capacity", 
-        "signup_size", 
-        "waitlist_size",
-        //admins?
-        //counters? 
-        "description", 
-        "event_datetime", 
-        "registration_datetime",    
-        "registration",
-        //"organization",
-        "location",
+        "event",
+        "person",
+        "override"
     ];
 
     //Send an error if a field is missing
@@ -30,7 +21,7 @@ export default withApiAuth(async function ProtectedRoute(
     })
 
     //Writing to the DB
-    const {data, error} = await supabaseServerClient.from("events").insert(body).single();
+    const {data, error} = await supabaseServerClient.from("registrations").insert(body).single();
 
     //Sending the response back
     if(error) {
