@@ -14,6 +14,4 @@ const nextConfig = {
   },
 }
 
-nextConfig.resolve.alias['@'] = path.join(__dirname, 'src')
-
 module.exports = nextConfig
