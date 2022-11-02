@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../utils/db'
 
-export default function Account({ session }) {
+export default function Account({ session }: { session: any }) {
   const [loading, setLoading] = useState(true)
   const [first_name, setFirst] = useState(null)
   const [last_name, setLast] = useState(null)
