@@ -6,7 +6,7 @@ export default withApiAuth(async function ProtectedRoute(
     supabaseServerClient
 ) {
     const body = req.body;
-
+    
     const fields = [
         "name", 
         "capacity", 
