@@ -110,7 +110,21 @@ export default function Create() {
       background: "#AC1FB8";
       borderRadius: "8px";
 
+    }
 
+    const Style = uploadStyle{
+      width: "151px";
+      height: "19px";
+      fontFamily: 'Inter';
+      fontStyle: "normal";
+      fontWeight: "500";
+      fontSize: "16px";
+      lineHeight: "19px";
+
+      color: "#212429";
+      flex: "none";
+      order: "0";
+      flexGrow: "0";
     }
 
   }
@@ -222,7 +236,7 @@ export default function Create() {
                 </label>
               </div>
               <div>
-                <button className="btn">
+                <button className="btn" style = {uploadStyle as React.CSSProperties}>
                   Upload Cover Photo
                 </button>
               </div>
