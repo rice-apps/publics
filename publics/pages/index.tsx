@@ -1,5 +1,6 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
+import Link from 'next/link'
 
 const Home: NextPage = () => {
   return (
@@ -17,7 +18,9 @@ const Home: NextPage = () => {
             <div>
               <h1 className="text-5xl font-bold">Fun!</h1>
               <p className="py-6">Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda excepturi exercitationem quasi. In deleniti eaque aut repudiandae et a id nisi.</p>
-              <a className="btn btn-primary" href="/events">View Events</a>
+              <button className='btn btn-primary'>
+                <Link href="/events">View Events</Link>
+              </button>
             </div>
           </div>
         </div>
