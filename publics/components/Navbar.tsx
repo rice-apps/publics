@@ -32,7 +32,9 @@ export default function Navbar() {
                         {navbar_content}
                     </ul>
                 </div>
-                <Link href="/"><a className="btn btn-ghost normal-case text-xl">Publics</a></Link>
+                <span className="btn btn-ghost normal-case text-xl">
+                    <Link href="/">Publics</Link>
+                </span>
             </div>
             <div className="navbar-center hidden lg:flex">
                 <ul className="menu menu-horizontal p-0">
@@ -57,6 +59,11 @@ export default function Navbar() {
                         <li><Link href="/account">Account</Link></li>
                     </ul>
                 </div>
+                <select data-choose-theme className="select select-bordered max-w-xs mr-2">
+                    {themes.map((theme) => (
+                        <option value={theme} key={theme}>{theme.toLocaleUpperCase()}</option>
+                    ))}
+                </select>
             </div>
         </div>
     )
