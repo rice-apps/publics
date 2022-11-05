@@ -2,6 +2,7 @@ import Head from 'next/head'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../utils/db'
 import { useRouter } from 'next/router'
+import React from 'react'
 
 export default function Create() {
   const router = useRouter()
@@ -50,6 +51,64 @@ export default function Create() {
     setWaitlistSize(null)
   }, [])
 
+  /*const buttons = Array.from(document.getElementsByClassName("btn"));
+  buttons.forEach(bn => {
+    if 
+  })
+  const submit = document.getElementsByClassName("btn sm:float-right");
+  submit = {
+    bac
+  }*/
+
+  const FormStyle = () => {
+    const Style = titleStyle{
+      position: "relative";
+      width: "247px";
+      height: "39px";
+      left: "64px";
+      top: "139px";
+
+      fontFamily: 'Inter';
+      fontStyle: "normal";
+      fontWeight: 700;
+      fontSize: "32px";
+      lineHeight: "39px";
+
+      color: "#212429";
+      
+    }
+
+    const Style = formInputStyle{
+      background: "#FFFFFF";
+      /* Accent */
+      border: "2px solid #D9D9D9";
+      borderRadius: "8px";
+           
+
+
+    }
+    const Style = submitStyle{
+      display: "flex";
+      flexDirection: "row";
+      justifyContent: "center";
+      alignItems: "flex-start";
+      padding: "16px";
+      gap: "16px";
+
+      position: "absolute";
+      width: "165px";
+      height: "51px";
+      left: "1051px";
+      top: "1024px";
+
+      /* Primary */
+      background: "#AC1FB8";
+      borderRadius: "8px";
+
+
+    }
+
+  }
 
   async function insert() {
     //setCurrDateTime(Date().toLocaleUpperCase());
@@ -107,7 +166,7 @@ export default function Create() {
       </Head>
 
       <main>
-        <h1>
+        <h1 style = {titleStyle as React.CSSProperties}>
           Create an Event
         </h1>
         <div className="form-control w-full max-w-xs" style={{width: 264, height: 52}}>
@@ -206,7 +265,7 @@ export default function Create() {
               </div>
             </div>
             <div>
-              <input type="submit" value="Submit" className="btn btn-primary sm:float-right" onClick={insert} />
+              <input type="submit" value="Submit" className="btn sm:float-right background-color:#AC1FB8" style = {submitStyle as React.CSSProperties} onClick={insert} />
             </div>
           </div>
         </form>
