@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../utils/db'
 
+<<<<<<< HEAD
 export default function Account({ session }: { session: any }) {
+=======
+export default function Account({session }) {
+>>>>>>> added details of event list, wip date formatting of myevents
   const [loading, setLoading] = useState(true)
-  const [first_name, setFirst] = useState(null)
-  const [last_name, setLast] = useState(null)
-  const [netid, setNetid] = useState(null)
+  const [first_name, setFirst] = useState<string | null>(null)
+  const [last_name, setLast] = useState<string | null>(null)
+  const [netid, setNetid] = useState<string | null>(null)
 
   async function getCurrentUser() {
     const {
@@ -45,7 +49,12 @@ export default function Account({ session }: { session: any }) {
         setNetid(data.netid)
       }
     } catch (error) {
-      alert(error.message)
+      if (error instanceof Error)
+      {
+        //alert(error.message)
+        console.log(error.message);
+      }
+      
     } finally {
       setLoading(false)
     }
@@ -56,9 +65,9 @@ export default function Account({ session }: { session: any }) {
   }, [session])
 
   type Profile = {
-    first_name: string
-    last_name: string
-    netid: string
+    first_name: string | null
+    last_name: string | null
+    netid: string | null
     id?: string
     updated_at?: Date
   }
@@ -82,7 +91,7 @@ export default function Account({ session }: { session: any }) {
         throw error
       }
     } catch (error) {
-      alert(error.message)
+      //alert(error.message)
     } finally {
       setLoading(false)
     }
