@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../utils/db'
 import { useRouter } from 'next/router'
 import React from 'react'
+import CSS from 'csstype';
 
 export default function Create() {
   const router = useRouter()
@@ -56,78 +57,60 @@ export default function Create() {
     setWaitlistSize(null)
   }, [])
 
-  /*const buttons = Array.from(document.getElementsByClassName("btn"));
-  buttons.forEach(bn => {
-    if 
-  })
-  const submit = document.getElementsByClassName("btn sm:float-right");
-  submit = {
-    bac
-  }*/
+  const titleStyle: CSS.Properties = {
+    position: "relative",
+    width: "247px",
+    height: "39px",
+    left: "64px",
+    top: "139px",
 
-  const FormStyle = () => {
-    const Style = titleStyle{
-      position: "relative";
-      width: "247px";
-      height: "39px";
-      left: "64px";
-      top: "139px";
+    fontFamily: 'Inter',
+    fontStyle: "normal",
+    fontWeight: 700,
+    fontSize: "32px",
+    lineHeight: "39px",
 
-      fontFamily: 'Inter';
-      fontStyle: "normal";
-      fontWeight: 700;
-      fontSize: "32px";
-      lineHeight: "39px";
+    color: "#212429"
+    
+  };
+  const submitStyle: CSS.Properties ={
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "flex-start",
+    padding: "16px",
+    gap: "16px",
 
-      color: "#212429";
-      
-    }
+    position: "relative",
+    width: "165px",
+    height: "51px",
+    left: "1051px",
+    top: "1024px",
 
-    const Style = formInputStyle{
-      background: "#FFFFFF";
-      /* Accent */
-      border: "2px solid #D9D9D9";
-      borderRadius: "8px";
-           
+    background: "#AC1FB8",
+    borderRadius: "8px"
 
+  };
+  const uploadStyle: CSS.Properties = {
+    width: "151px",
+    height: "19px",
+    fontFamily: 'Inter',
+    fontStyle: "normal",
+    fontWeight: "500",
+    fontSize: "16px",
+    lineHeight: "19px",
 
-    }
-    const Style = submitStyle{
-      display: "flex";
-      flexDirection: "row";
-      justifyContent: "center";
-      alignItems: "flex-start";
-      padding: "16px";
-      gap: "16px";
-
-      position: "absolute";
-      width: "165px";
-      height: "51px";
-      left: "1051px";
-      top: "1024px";
-
-      /* Primary */
-      background: "#AC1FB8";
-      borderRadius: "8px";
-
-    }
-
-    const Style = uploadStyle{
-      width: "151px";
-      height: "19px";
-      fontFamily: 'Inter';
-      fontStyle: "normal";
-      fontWeight: "500";
-      fontSize: "16px";
-      lineHeight: "19px";
-
-      color: "#212429";
-      flex: "none";
-      order: "0";
-      flexGrow: "0";
-    }
-
-  }
+    color: "#212429",
+    flex: "none",
+    order: "0",
+    flexGrow: "0",
+  };
+  const formInputStyle: CSS.Properties = {
+    background: "#FFFFFF",
+    border: "2px solid #D9D9D9",
+    borderRadius: "8px"
+  };
+  
 
   async function insert() {
     //setCurrDateTime(Date().toLocaleUpperCase());
@@ -175,7 +158,7 @@ export default function Create() {
       </Head>
 
       <main>
-        <h1 style = {titleStyle as React.CSSProperties}>
+        <h1 style = {titleStyle}>
           Create an Event
         </h1>
         <div>
@@ -236,7 +219,7 @@ export default function Create() {
                 </label>
               </div>
               <div>
-                <button className="btn" style = {uploadStyle as React.CSSProperties}>
+                <button className="btn" style = {uploadStyle}>
                   Upload Cover Photo
                 </button>
               </div>
@@ -272,7 +255,7 @@ export default function Create() {
               </div>
             </div>
             <div>
-              <input type="submit" value="Submit" className="btn sm:float-right background-color:#AC1FB8" style = {submitStyle as React.CSSProperties} onClick={insert} />
+              <input type="submit" value="Submit" className="btn sm:float-right background-color:#AC1FB8" style = {submitStyle} onClick={insert} />
             </div>
           </div>
         </form>
