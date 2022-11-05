@@ -12,13 +12,11 @@ export default withApiAuth(async function ProtectedRoute(
         "capacity", 
         "signup_size", 
         "waitlist_size",
-        //admins?
-        //counters? 
         "description", 
         "event_datetime", 
         "registration_datetime",    
         "registration",
-        //"organization",
+        "slug",
         "location",
     ];
 
