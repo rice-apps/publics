@@ -8,12 +8,12 @@ const create: NextApiHandler = async (req, res) => {
     const serverclient = createServerSupabaseClient({ req, res })
 
     // Check if we have a session
-    await serverclient.auth.getUser()
     const {
        data: { session },
       } = await serverclient.auth.getSession()
   
       if (!session) {
+          //ALWAYS REACHES HERE!!!
           return res.status(401).json({
               error: 'not_authenticated',
               description: 'The user does not have an active session or is not authenticated!!!',
