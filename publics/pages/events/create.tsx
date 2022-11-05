@@ -16,10 +16,35 @@ export default function Create() {
   const [description, setDescription] = useState(String)
 
   const [registration, setRegistration] = useState(Boolean)
-  const [registrationDatetime, setRegistrationDatetime] = useState<undefined | string>(undefined)
-  const [signupSize, setSignupSize] = useState<undefined | number>(undefined)
-  const [waitlistSize, setWaitlistSize] = useState<undefined | number>(undefined)
+  const [registrationDatetime, setRegistrationDatetime] = useState(Date)
+  const [signupSize, setSignupSize] = useState(Number)
+  const [waitlistSize, setWaitlistSize] = useState(Number)
   const [orgs, setOrgs] = useState(Array<any>)
+
+  /*
+  function reg_datetime(checked:boolean, date:string) {
+    if (checked) {
+      setRegistrationDatetime(date)
+    } else {
+      setRegistrationDatetime(null)
+    }
+  }
+
+  function signup(checked:boolean, num:number) {
+    if (checked) {
+      setSignupSize(num)
+    } else {
+      setSignupSize(null)
+    }
+  }
+
+  function waitlist(checked:boolean, num:number) {
+    if (checked) {
+      setWaitlistSize(num)
+    } else {
+      setWaitlistSize(null)
+    }
+  }
 
   /*
   function refreshPage() {
@@ -46,18 +71,12 @@ export default function Create() {
 
   useEffect(() => {
     getOrgs()
-    setRegistrationDatetime(undefined)
-    setSignupSize(undefined)
-    setWaitlistSize(undefined)
+    setRegistration(false)
   }, [])
   
 
   async function insert() {
-    //setCurrDateTime(Date().toLocaleUpperCase());
-    console.log(registrationDatetime)
-    console.log(signupSize)
-    console.log(waitlistSize)
-    let insert_temp1 = {
+    let insert1 = {
       name: name,
       slug: slug,
       event_datetime: eventDateTime,
@@ -67,27 +86,44 @@ export default function Create() {
       description: description,
       registration: registration,
     }
+    /*
     let insert_temp2 = {};
     let insert_temp3 = {};
     let insert_temp4 = {};
-    if (registrationDatetime !== null) {
+    if (registrationDatetime !== undefined) {
       insert_temp2 = {
         registration_datetime: registrationDatetime
       }
     }
-    if (signupSize !== -1) {
+    if (signupSize !== undefined) {
       insert_temp3 = {
         signup_size: signupSize
       }
     }
-    if (waitlistSize !== -1) {
+    if (waitlistSize !== undefined) {
       insert_temp4 = {
         waitlist_size: waitlistSize
       }
     }
 
     let insert = Object.assign({}, insert_temp1, insert_temp2, insert_temp3, insert_temp4);
-
+    */
+   let insert2 = {};
+   if (registration) {
+    insert2 = {
+      registration_datetime: registrationDatetime,
+      signup_size: signupSize,
+      waitlist_size: waitlistSize
+    }
+   } else {
+    var nullval = null
+    insert2 = {
+      registration_datetime: nullval,
+      signup_size: nullval,
+      waitlist_size: nullval
+    }
+   }
+   let insert = Object.assign({}, insert1, insert2);
     const { error } = await supabase
       .from('events')
       .insert(insert)
@@ -187,19 +223,19 @@ export default function Create() {
             <div className={`${registration ? "" : "hidden"}`}>
               <div className={`sm:flex`}>
                 <div className="form-control w-full max-w-xs mr-2">
-                  <input value={registrationDatetime} onChange={(e) => setRegistrationDatetime(e.target.value)} required type="datetime-local" className="input input-bordered w-full max-w-xs" />
+                  <input value={registrationDatetime} onChange={(e) => setRegistrationDatetime(e.target.value)} type="datetime-local" className="input input-bordered w-full max-w-xs" />
                   <label className="label">
                     <span className="label-text-alt">Registration opens</span>
                   </label>
                 </div>
                 <div className="form-control w-full max-w-xs mr-2">
-                  <input value={signupSize} onChange={(e) => setSignupSize(e.target.valueAsNumber)} required type="number" className="input input-bordered w-full max-w-xs" />
+                  <input value={signupSize} onChange={(e) => setSignupSize(e.target.valueAsNumber)} type="number" className="input input-bordered w-full max-w-xs" />
                   <label className="label">
                     <span className="label-text-alt">Registration Maximum</span>
                   </label>
                 </div>
                 <div className="form-control w-full max-w-xs">
-                  <input value={waitlistSize} onChange={(e) => setWaitlistSize(e.target.valueAsNumber)} required type="number" className="input input-bordered w-full max-w-xs" />
+                  <input value={waitlistSize} onChange={(e) => setWaitlistSize(e.target.valueAsNumber)} type="number" className="input input-bordered w-full max-w-xs" />
                   <label className="label">
                     <span className="label-text-alt">Waitlist Maximum</span>
                   </label>
