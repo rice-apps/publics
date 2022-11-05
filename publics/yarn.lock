@@ -94,10 +94,10 @@
   "resolved" "https://registry.npmjs.org/@rushstack/eslint-patch/-/eslint-patch-1.2.0.tgz"
   "version" "1.2.0"
 
-"@supabase/auth-helpers-nextjs@^0.4.5":
-  "integrity" "sha512-LNn7FX2/Bm/nBQVfRlG9zVoueikbxIz20yFfR391XPQVjL4xppPgMC+f8j0rm2CT4PCf9gfQanyqlStbMd+Tzw=="
-  "resolved" "https://registry.npmjs.org/@supabase/auth-helpers-nextjs/-/auth-helpers-nextjs-0.4.5.tgz"
-  "version" "0.4.5"
+"@supabase/auth-helpers-nextjs@^0.4.4":
+  "integrity" "sha512-oLP383tf/rJabQPL9sb52g2EXpgVQvGsqce1rffnyayH4HL9niCESdVObl7t99/cbf2KrZI6hSstx9XrdRNOvA=="
+  "resolved" "https://registry.npmjs.org/@supabase/auth-helpers-nextjs/-/auth-helpers-nextjs-0.4.4.tgz"
+  "version" "0.4.4"
   dependencies:
     "@supabase/auth-helpers-shared" "0.2.2"
 
