@@ -7,10 +7,6 @@ export default function Account({ session }: { session: any }) {
   const [last_name, setLast] = useState(null)
   const [netid, setNetid] = useState(null)
 
-  useEffect(() => {
-    getProfile()
-  }, [session])
-
   async function getCurrentUser() {
     const {
       data: { session },
@@ -54,6 +50,10 @@ export default function Account({ session }: { session: any }) {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    getProfile()
+  }, [session])
 
   type Profile = {
     first_name: string

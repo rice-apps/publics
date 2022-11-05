@@ -42,7 +42,7 @@ export default function Navbar() {
             <div className="navbar-end">
                 <select data-choose-theme className="select select-bordered max-w-xs mr-2">
                     {themes.map((theme) => (
-                        <option value={theme}>{theme.toLocaleUpperCase()}</option>
+                        <option value={theme} key={theme}>{theme.toLocaleUpperCase()}</option>
                     ))}
                 </select>
             </div>

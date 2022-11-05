@@ -11,7 +11,7 @@ function Events(props: Props) {
         <div className="p-3">
             <h1>Events</h1>
             <div className="grid grid-cols-4 gap-4">
-                {props.data.map((event) => <EventCard event={event} />)}
+                {props.data.map((event) => <div key={event.name}><EventCard event={event} /></div>)}
             </div>
         </div>
     )
