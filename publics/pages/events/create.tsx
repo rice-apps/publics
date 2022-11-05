@@ -15,13 +15,10 @@ export default function Create() {
   const [description, setDescription] = useState(String)
 
   const [registration, setRegistration] = useState(Boolean)
-  const [registrationDatetime, setRegistrationDatetime] = useState(Date)
-  const [signupSize, setSignupSize] = useState(Number)
-  const [waitlistSize, setWaitlistSize] = useState(Number)
-
-  
-
-  const [orgs, setOrgs] = useState([])
+  const [registrationDatetime, setRegistrationDatetime] = useState<Date | undefined>(undefined)
+  const [signupSize, setSignupSize] = useState<Number | undefined>(undefined)
+  const [waitlistSize, setWaitlistSize] = useState<Number | undefined>(undefined)
+  const [orgs, setOrgs] = useState(Array<any>)
 
   /*
   function refreshPage() {
@@ -31,17 +28,15 @@ export default function Create() {
 
   async function getOrgs() {
     const { data: { user } } = await supabase.auth.getUser()
-    console.log(user)
-    const { data: orgs, error } = await supabase
+    const { data: org, error } = await supabase
       .from('organizations_admins')
       .select('organization ( id, name )')
       .eq('profile', user?.id)
-    console.log(orgs)
     if (error) {
       throw error
     }
-    if (orgs) {
-      setOrgs(orgs)
+    if (org) {
+      setOrgs(org)
       if (orgs.length > 0) {
         setHost(orgs[0].organization.id)
       }
@@ -61,7 +56,7 @@ export default function Create() {
     console.log(registrationDatetime)
     console.log(signupSize)
     console.log(waitlistSize)
-    let insert = {
+    let insert_temp1 = {
       name: name,
       slug: slug,
       event_datetime: eventDateTime,
@@ -71,16 +66,26 @@ export default function Create() {
       description: description,
       registration: registration,
     }
-    if (!registrationDatetime === null) {
-      insert.registration_datetime = registrationDatetime
+    let insert_temp2 = {};
+    let insert_temp3 = {};
+    let insert_temp4 = {};
+    if (registrationDatetime !== null) {
+      insert_temp2 = {
+        registration_datetime: registrationDatetime
+      }
     }
-    if (signupSize !== null) {
-      insert.signup_size = signupSize
+    if (signupSize !== -1) {
+      insert_temp3 = {
+        signup_size: signupSize
+      }
     }
-    if (waitlistSize !== null) {
-      insert.waitlist_size = waitlistSize
+    if (waitlistSize !== -1) {
+      insert_temp4 = {
+        waitlist_size: waitlistSize
+      }
     }
 
+    let insert = Object.assign({}, insert_temp1, insert_temp2, insert_temp3, insert_temp4);
 
     const { error } = await supabase
       .from('events')
@@ -136,9 +141,9 @@ export default function Create() {
             <div className="sm:flex">
               <div className="form-control w-full max-w-xs mr-2">
                 <select className="select select-bordered w-full max-w-xs" onChange={(e) => setHost(e.target.value)}>
-                  {orgs.length > 0 ? orgs.map((org) => (
-                    <option value={org.organization.id}>{org.organization.name}</option>
-                  )) : <option disabled value="null">You are not a part of any organizations</option>}
+                  {orgs.length > 0 ? orgs.map(org => (
+                    <option key={org.organization.id}>{org.organization.name}</option>
+                  )) : <option disabled key="null">You are not a part of any organizations</option>}
                 </select>
                 <label className="label">
                   <span className="label-text-alt">Host</span>
