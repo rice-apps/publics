@@ -16,9 +16,9 @@ export default function Create() {
   const [description, setDescription] = useState(String)
 
   const [registration, setRegistration] = useState(Boolean)
-  const [registrationDatetime, setRegistrationDatetime] = useState<Date | undefined>(undefined)
-  const [signupSize, setSignupSize] = useState<Number | undefined>(undefined)
-  const [waitlistSize, setWaitlistSize] = useState<Number | undefined>(undefined)
+  const [registrationDatetime, setRegistrationDatetime] = useState<undefined | string>(undefined)
+  const [signupSize, setSignupSize] = useState<undefined | number>(undefined)
+  const [waitlistSize, setWaitlistSize] = useState<undefined | number>(undefined)
   const [orgs, setOrgs] = useState(Array<any>)
 
   /*
