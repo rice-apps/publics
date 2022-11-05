@@ -12,6 +12,7 @@ function MyApp({
 }: AppProps<{
   initialSession : Session
 }>) {
+  
   const router = useRouter()
   const [supabaseClient] = useState(() => createBrowserSupabaseClient())
 
