@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../utils/db'
 import { useRouter } from 'next/router'
 import React from 'react'
-import CSS from 'csstype';
 
 export default function Create() {
   const router = useRouter()
@@ -47,64 +46,10 @@ export default function Create() {
 
   useEffect(() => {
     getOrgs()
-    setRegistrationDatetime(null)
-    setSignupSize(null)
-    setWaitlistSize(null)
+    setRegistrationDatetime(undefined)
+    setSignupSize(undefined)
+    setWaitlistSize(undefined)
   }, [])
-
-  const titleStyle: CSS.Properties = {
-    position: "relative",
-    width: "247px",
-    height: "39px",
-    left: "64px",
-    top: "139px",
-
-    fontFamily: 'Inter',
-    fontStyle: "normal",
-    fontWeight: 700,
-    fontSize: "32px",
-    lineHeight: "39px",
-
-    color: "#212429"
-    
-  };
-  const submitStyle: CSS.Properties ={
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "flex-start",
-    padding: "16px",
-    gap: "16px",
-
-    position: "relative",
-    width: "165px",
-    height: "51px",
-    left: "1051px",
-    top: "1024px",
-
-    background: "#AC1FB8",
-    borderRadius: "8px"
-
-  };
-  const uploadStyle: CSS.Properties = {
-    width: "151px",
-    height: "19px",
-    fontFamily: 'Inter',
-    fontStyle: "normal",
-    fontWeight: "500",
-    fontSize: "16px",
-    lineHeight: "19px",
-
-    color: "#212429",
-    flex: "none",
-    order: "0",
-    flexGrow: "0",
-  };
-  const formInputStyle: CSS.Properties = {
-    background: "#FFFFFF",
-    border: "2px solid #D9D9D9",
-    borderRadius: "8px"
-  };
   
 
   async function insert() {
@@ -163,7 +108,7 @@ export default function Create() {
       </Head>
 
       <main>
-        <h1 style = {titleStyle}>
+        <h1>
           Create an Event
         </h1>
         <div className="form-control w-full max-w-xs" style={{width: 264, height: 52}}>
@@ -226,7 +171,7 @@ export default function Create() {
                 </label>
               </div>
               <div>
-                <button className="btn" style = {uploadStyle}>
+                <button className="btn">
                   Upload Cover Photo
                 </button>
               </div>
@@ -262,7 +207,7 @@ export default function Create() {
               </div>
             </div>
             <div>
-              <input type="submit" value="Submit" className="btn sm:float-right background-color:#AC1FB8" style = {submitStyle} onClick={insert} />
+              <input type="submit" value="Submit" className="btn sm:float-right background-color:#AC1FB8" onClick={insert} />
             </div>
           </div>
         </form>
