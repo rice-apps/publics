@@ -62,25 +62,51 @@ const details = (props: Props) => {
     return (
         <div>
             <main>
-                <div className="hero min-h-[70vh] bg-base-200 object-left-top">
-                    <div className="hero-content flex-col lg:flex-row">
+                <div className="hero min-h-[60vh] object-left-top">
+                    <div className="hero-content items-stretch lg:flex-row min-w-[70vw] place-content-start space-x-8 max-w-[70vw]">
                         <img src="https://as2.ftcdn.net/v2/jpg/03/09/55/15/1000_F_309551534_hkPIgAAsyc5EQg0Ny2bUYh8ttkUWc8fA.jpg" className="max-w-sm rounded-lg shadow-2xl" />
-                        <div>
+                        <div className="flex flex-col space-y-4">
                             <h1 className="text-5xl font-bold">{event.name}</h1>
                             <p className="text-xl">{weekday[event.event_datetime.getDay()] + ", " + month[event.event_datetime.getMonth()] + " " + event.event_datetime.getDate() + "th"} </p>
                             <span>
                                 <p className=""> <img className="rounded h-5 w-5 inline object-center" src={event.organization.photo} /> Hosted by {event.organization.name}</p>
                             </span>
-                            <p className="py-6">Description: {event.description}</p>
-                            
+                            <p className="">Description: {event.description}</p>
+
                         </div>
-                    </div>               
+                    </div>
                 </div>
-                <div className="hero min-h-[20vh] object-left-top">
-                    <div className="hero-content flex-col lg:flex-row">
-                        <p className="py-6">Register for Event</p>
+                <div className="divider"></div>
+                <div className="min-h-[20vh] flex-col sm:px-10 md:px-24">
+                    <h2 className="mb-2">Register for Event</h2>
+                    <div className="flex-wrap flex flex-col lg:flex-row  place-content-start min-w-[70vw] items-start space-x-8 max-w-[70vw]">
+                        <div className="form-control w-full max-w-[16rem]">
+                            <input type="text" placeholder="" className="input input-bordered w-full max-w-[16rem]" />
+                            <label className="label">
+                                <span className="label-text-alt">First Name</span>
+
+                            </label>
+                        </div>
+
+                        <div className="form-control w-full max-w-[16rem]">
+                            <input type="text" placeholder="" className="input input-bordered w-full max-w-[16rem]" />
+                            <label className="label">
+                                <span className="label-text-alt">Last Name</span>
+
+                            </label>
+                        </div>
+
+                        <div className="form-control w-full max-w-[16rem]">
+                            <input type="text" placeholder="" className="input input-bordered w-full max-w-[16rem]" />
+                            <label className="label">
+                                <span className="label-text-alt">Net ID</span>
+
+                            </label>
+                        </div>
+
                         <button className="btn btn-primary">Register</button>
-                    </div> 
+
+                    </div>
                 </div>
 
                 {/* <div className="hero min-h-screen bg-base-200">
