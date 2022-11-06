@@ -1,0 +1,11 @@
+# Setup Day
+- Make sure everyone has npm and node
+- Make sure everyone has git
+- Make sure everyone has .env.local file
+- Make sure everyone has supabase
+- Explain daisyui, explain tailwind, explain next, explain supabase
+- Assign starter projects
+  - Server side auth
+  - Create event
+  - Detail event
+  - List event

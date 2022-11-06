@@ -4,6 +4,7 @@ import type { AppProps } from 'next/app'
 import { useRouter } from 'next/router'
 import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs'
 import { SessionContextProvider, Session } from '@supabase/auth-helpers-react'
+import Layout from '../components/Layout'
 import { supabase } from '../utils/db';
 
 function MyApp({ 
@@ -44,7 +45,11 @@ function MyApp({
 		};
 	}, []);
 
-	return <Component {...pageProps} session={session} user={session?.user} />;
-}
+	return (
+    <Layout>
+        <Component {...pageProps} session={session} user={session?.user} />;
+    </Layout>
+
+  )
 
 export default MyApp

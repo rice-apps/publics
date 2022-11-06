@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../utils/db'
 import Auth from '../components/Auth'
 import Account from '../components/Account'
-import { Session } from '@supabase/supabase-js'
+import { Session } from '@supabase/auth-helpers-react'
 
 export default function Home({ session: Session }) {
 
