@@ -44,7 +44,11 @@ function MyApp({
 		};
 	}, []);
 
-	return <Component {...pageProps} session={session} user={session?.user} />;
+	return (
+    <Layout>
+        <Component {...pageProps} session={session} user={session?.user} />;
+    </Layout>
+  )
 }
 
 export default MyApp
