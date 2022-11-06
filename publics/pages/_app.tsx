@@ -49,7 +49,7 @@ function MyApp({
     <Layout>
         <Component {...pageProps} session={session} user={session?.user} />;
     </Layout>
-
   )
+}
 
 export default MyApp
