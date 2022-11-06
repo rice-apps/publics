@@ -33,6 +33,7 @@ const create: NextApiHandler = async (req, res) => {
           "registration",
           "slug",
           "location",
+          "organization"
       ];
   
       //Send an error if a field is missing
@@ -43,12 +44,12 @@ const create: NextApiHandler = async (req, res) => {
       });
   
       //Writing to the DB
-      const {data, error} = await serverclient.from("events").insert(body).single();
+      const {error} = await serverclient.from("events").insert(body).single();
       //Sending the response back
       if(error) {
-          res.status(400).json({data : "Error!: " + error})
+          res.status(400).json({data : "Error!: " + error.message})
       } else {
-          res.status(200).json({data : `Created ${data?['name'] : null}!`})
+          res.status(200).json({data : `Created ${body?.name}!`})
       }
 }
 
