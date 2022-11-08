@@ -37,18 +37,6 @@ function ResultPage(props: EventDetails) {
                     <td><input type="checkbox" className="checkbox checkbox-primary" /></td>
                 </tr>
                 </tbody> 
-                <tfoot>
-                <tr>
-                    <th></th> 
-                    <th>Date and Time</th> 
-                    <th>First Name</th> 
-                    <th>Last Name</th> 
-                    <th>Email Address</th> 
-                    <th>NetID</th> 
-                    <th>Residentail Colleger</th>
-                    <th>Wristband?</th>
-                </tr>
-                </tfoot>
             </table>
             </div>
         </div>
