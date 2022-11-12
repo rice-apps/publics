@@ -34,9 +34,9 @@ export default function Create() {
     if (org) {
       setOrgs(org)
       if (org.length > 0) {
-        setHost(org[0].organization.name)
+        const name = org[0].organization.id
+        setHost(name)
       }
-      console.log(host)
     } 
     
   }
@@ -47,7 +47,7 @@ export default function Create() {
     setRegistrationDatetime(null)
     setSignupSize(null)
     setWaitlistSize(null)
-  }, [])  
+  }, [])
 
   async function insert() {
     let insert1 = {
@@ -60,6 +60,7 @@ export default function Create() {
       description: description,
       registration: registration,
     }
+
    let insert2 = {};
    if (registration) {
     insert2 = {
@@ -70,16 +71,19 @@ export default function Create() {
    }
 
    let insert = Object.assign({}, insert1, insert2);
-
+   console.log("insert is:", insert)
     const { error } = await supabase
       .from('events')
       .insert(insert)
       .single();
     if (error) {
       alert(error.message);
-    } else {
-      router.push(slug);
     }
+    /*
+    } else {
+      router.push(`/events/${slug}`);
+    }
+    */
   }
 
   return (
@@ -121,9 +125,9 @@ export default function Create() {
             </div>
             <div className="sm:flex">
               <div className="form-control w-full max-w-xs mr-2">
-                <select className="select select-bordered w-full max-w-xs hover:border-[#AC1FB8]" onChange={(e) => setHost(e.target.value)}>
+                <select className="select select-bordered w-full max-w-xs hover:border-[#AC1FB8]" onChange={(e) => {setHost(e.target.value)}}>
                   {orgs.length > 0 ? orgs.map(org => (
-                    <option key={org.organization.id}>{org.organization.name}</option>
+                    <option key={org.organization.id} value={org.organization.id}>{org.organization.name}</option>
                   )) : <option disabled key="null">You are not a part of any organizations</option>}
                 </select>
                 <label className="label">
