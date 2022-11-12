@@ -34,10 +34,10 @@ function eventCardDate(datetime: string) {
     var day = getOrdinal(dt.getDate())
     var date = dt.toLocaleDateString('en-us', { weekday:"long", month:"long", day:"numeric"});
     var time = dt.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
-   
+    console.log("weekday: " + weekday + " month: " + month + " day: " + day)
+    console.log("good one: " + date)
 
-
-    return `$date @ ${time}`
+    return `${weekday}, ${month} ${day} @ ${time}`
 
 }
 
