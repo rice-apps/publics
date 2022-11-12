@@ -17,35 +17,23 @@ export default function Auth() {
   }
 
   return (
-    <div className="row flex-center flex">
-      <div className="col-6 form-widget">
-        <h1 className="header">Supabase + Next.js</h1>
-        <form>
-          <p className="description">
-            Sign in with your Rice Gmail
-          </p>
-          <div>
-            <input
-              className="inputField"
-              type="email"
-              placeholder="Your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div>
-            <button
-              onClick={(e) => {
-                e.preventDefault()
-                handleLogin()
-              }}
-              className="button block"
-              disabled={loading}
-            >
-              <span>Sign In With Rice Google</span>
-            </button>
-          </div>
-        </form>
+    <div className="hero min-h-screen bg-base-200">
+      <div className="hero-content text-center">
+        <div className="max-w-md">
+          <img src="https://placeimg.com/500/250/arch" className="max-w-sm rounded-lg shadow-2xl" />
+          <h1 className="text-5xl font-bold">Publics</h1>
+          <p className="py-6">Sentence description for publics application.</p>
+          <button
+            onClick={(e) => {
+              e.preventDefault()
+              handleLogin()
+            }}
+            className="btn btn-outline-primary"
+            disabled={loading}
+          >
+            <span>Sign In With Rice Google</span>
+          </button>
+        </div>
       </div>
     </div>
   )
