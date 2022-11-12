@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import React from 'react'
 
 export default function Create() {
+  
   const router = useRouter()
 
   const [name, setName] = useState(String)
@@ -16,41 +17,10 @@ export default function Create() {
   const [description, setDescription] = useState(String)
 
   const [registration, setRegistration] = useState(Boolean)
-  const [registrationDatetime, setRegistrationDatetime] = useState(Date)
-  const [signupSize, setSignupSize] = useState(Number)
-  const [waitlistSize, setWaitlistSize] = useState(Number)
+  const [registrationDatetime, setRegistrationDatetime] = useState<string | null>(Date)
+  const [signupSize, setSignupSize] = useState<number | null>(Number)
+  const [waitlistSize, setWaitlistSize] = useState<number | null>(Number)
   const [orgs, setOrgs] = useState(Array<any>)
-
-  /*
-  function reg_datetime(checked:boolean, date:string) {
-    if (checked) {
-      setRegistrationDatetime(date)
-    } else {
-      setRegistrationDatetime(null)
-    }
-  }
-
-  function signup(checked:boolean, num:number) {
-    if (checked) {
-      setSignupSize(num)
-    } else {
-      setSignupSize(null)
-    }
-  }
-
-  function waitlist(checked:boolean, num:number) {
-    if (checked) {
-      setWaitlistSize(num)
-    } else {
-      setWaitlistSize(null)
-    }
-  }
-
-  /*
-  function refreshPage() {
-    window.location.reload();
-  }
-  */
 
   async function getOrgs() {
     const { data: { user } } = await supabase.auth.getUser()
@@ -63,17 +33,21 @@ export default function Create() {
     }
     if (org) {
       setOrgs(org)
-      if (orgs.length > 0) {
-        setHost(orgs[0].organization.id)
+      if (org.length > 0) {
+        setHost(org[0].organization.name)
       }
+      console.log(host)
     } 
+    
   }
 
   useEffect(() => {
     getOrgs()
     setRegistration(false)
-  }, [])
-  
+    setRegistrationDatetime(null)
+    setSignupSize(null)
+    setWaitlistSize(null)
+  }, [])  
 
   async function insert() {
     let insert1 = {
@@ -86,28 +60,6 @@ export default function Create() {
       description: description,
       registration: registration,
     }
-    /*
-    let insert_temp2 = {};
-    let insert_temp3 = {};
-    let insert_temp4 = {};
-    if (registrationDatetime !== undefined) {
-      insert_temp2 = {
-        registration_datetime: registrationDatetime
-      }
-    }
-    if (signupSize !== undefined) {
-      insert_temp3 = {
-        signup_size: signupSize
-      }
-    }
-    if (waitlistSize !== undefined) {
-      insert_temp4 = {
-        waitlist_size: waitlistSize
-      }
-    }
-
-    let insert = Object.assign({}, insert_temp1, insert_temp2, insert_temp3, insert_temp4);
-    */
    let insert2 = {};
    if (registration) {
     insert2 = {
@@ -115,25 +67,20 @@ export default function Create() {
       signup_size: signupSize,
       waitlist_size: waitlistSize
     }
-   } else {
-    var nullval = null
-    insert2 = {
-      registration_datetime: nullval,
-      signup_size: nullval,
-      waitlist_size: nullval
-    }
    }
+
    let insert = Object.assign({}, insert1, insert2);
+
     const { error } = await supabase
       .from('events')
       .insert(insert)
+      .single();
     if (error) {
       alert(error.message);
     } else {
       router.push(slug);
     }
   }
-
 
   return (
     <div id="form">
@@ -213,7 +160,7 @@ export default function Create() {
               <div className="form-control">
                 <label className="label cursor-pointer">
                   <span className="label-text mr-2">Allow registration</span>
-                  <input type="checkbox" className= "checked:bg-fuchsia-700" checked={registration} onChange={(e) => setRegistration(e.target.checked)} />
+                  <input checked={registration} onChange={(e) => setRegistration(e.target.checked)} type="checkbox" className= "checked:bg-fuchsia-700" />
                 </label>
               </div>
             </div>
