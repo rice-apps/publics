@@ -12,7 +12,7 @@ function Events(props: Props) {
             <div className="grid grid-cols-2">
                 {/* this one */}
             </div>
-            <div className="divider">OR</div>
+            <div className="divider"></div>
             <div className="px-8 grid grid-cols-3 gap-4">
                 {props.eventList.map((event) => <EventCard event={event} />)}
             </div>
