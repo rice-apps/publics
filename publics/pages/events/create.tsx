@@ -3,9 +3,9 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../utils/db'
 import { useRouter } from 'next/router'
 import React from 'react'
-import CSS from 'csstype';
 
 export default function Create() {
+  
   const router = useRouter()
 
   const [name, setName] = useState(String)
@@ -17,107 +17,40 @@ export default function Create() {
   const [description, setDescription] = useState(String)
 
   const [registration, setRegistration] = useState(Boolean)
-  const [registrationDatetime, setRegistrationDatetime] = useState(Date)
-  const [signupSize, setSignupSize] = useState(Number)
-  const [waitlistSize, setWaitlistSize] = useState(Number)
-
-  
-
-  const [orgs, setOrgs] = useState([])
-
-  /*
-  function refreshPage() {
-    window.location.reload();
-  }
-  */
+  const [registrationDatetime, setRegistrationDatetime] = useState<string | null>(Date)
+  const [signupSize, setSignupSize] = useState<number | null>(Number)
+  const [waitlistSize, setWaitlistSize] = useState<number | null>(Number)
+  const [orgs, setOrgs] = useState(Array<any>)
 
   async function getOrgs() {
     const { data: { user } } = await supabase.auth.getUser()
-    console.log(user)
-    const { data: orgs, error } = await supabase
+    const { data: org, error } = await supabase
       .from('organizations_admins')
       .select('organization ( id, name )')
       .eq('profile', user?.id)
-    console.log(orgs)
     if (error) {
       throw error
     }
-    if (orgs) {
-      setOrgs(orgs)
-      if (orgs.length > 0) {
-        setHost(orgs[0].organization.id)
+    if (org) {
+      setOrgs(org)
+      if (org.length > 0) {
+        setHost(org[0].organization.name)
       }
+      console.log(host)
     } 
+    
   }
 
   useEffect(() => {
     getOrgs()
+    setRegistration(false)
     setRegistrationDatetime(null)
     setSignupSize(null)
     setWaitlistSize(null)
-  }, [])
-
-  const titleStyle: CSS.Properties = {
-    position: "relative",
-    width: "247px",
-    height: "39px",
-    left: "64px",
-    top: "139px",
-
-    fontFamily: 'Inter',
-    fontStyle: "normal",
-    fontWeight: 700,
-    fontSize: "32px",
-    lineHeight: "39px",
-
-    color: "#212429"
-    
-  };
-  const submitStyle: CSS.Properties ={
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "flex-start",
-    padding: "16px",
-    gap: "16px",
-
-    position: "relative",
-    width: "165px",
-    height: "51px",
-    left: "1051px",
-    top: "1024px",
-
-    background: "#AC1FB8",
-    borderRadius: "8px"
-
-  };
-  const uploadStyle: CSS.Properties = {
-    width: "151px",
-    height: "19px",
-    fontFamily: 'Inter',
-    fontStyle: "normal",
-    fontWeight: "500",
-    fontSize: "16px",
-    lineHeight: "19px",
-
-    color: "#212429",
-    flex: "none",
-    order: "0",
-    flexGrow: "0",
-  };
-  const formInputStyle: CSS.Properties = {
-    background: "#FFFFFF",
-    border: "2px solid #D9D9D9",
-    borderRadius: "8px"
-  };
-  
+  }, [])  
 
   async function insert() {
-    //setCurrDateTime(Date().toLocaleUpperCase());
-    console.log(registrationDatetime)
-    console.log(signupSize)
-    console.log(waitlistSize)
-    let insert = {
+    let insert1 = {
       name: name,
       slug: slug,
       event_datetime: eventDateTime,
@@ -127,27 +60,27 @@ export default function Create() {
       description: description,
       registration: registration,
     }
-    if (!registrationDatetime === null) {
-      insert.registration_datetime = registrationDatetime
+   let insert2 = {};
+   if (registration) {
+    insert2 = {
+      registration_datetime: registrationDatetime,
+      signup_size: signupSize,
+      waitlist_size: waitlistSize
     }
-    if (signupSize !== null) {
-      insert.signup_size = signupSize
-    }
-    if (waitlistSize !== null) {
-      insert.waitlist_size = waitlistSize
-    }
+   }
 
+   let insert = Object.assign({}, insert1, insert2);
 
     const { error } = await supabase
       .from('events')
       .insert(insert)
+      .single();
     if (error) {
       alert(error.message);
     } else {
       router.push(slug);
     }
   }
-
 
   return (
     <div id="form">
@@ -157,31 +90,30 @@ export default function Create() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main>
-        <h1 style = {titleStyle}>
+      <main className = "h-screen bg-[#F5F5F5]">
+        <h1 className = "text-2xl normal-case leading-[3rem] font-family: inter font-bold">
           Create an Event
         </h1>
         <div>
-          <h2>Event Details</h2>
-          <hr></hr>
+          <h2 className = "text-lg leading-10 normal-case font-family: inter font-medium">Event Details</h2>
         </div>
         <form>
           <div className="p-2">
             <div className="sm:flex">
               <div className="form-control w-full max-w-xs mr-2">
-                <input value={name} onChange={(e) => setName(e.target.value)} type="text" required className="input input-bordered w-full max-w-xs" />
+                <input value={name} onChange={(e) => setName(e.target.value)} type="text" required className="input input-bordered w-full max-w-xs hover:border-[#AC1FB8]" />
                 <label className="label">
                   <span className="label-text-alt">Name of event</span>
                 </label>
               </div>
               <div className="form-control w-full max-w-xs mr-2">
-                <input value={slug} onChange={(e) => setSlug(e.target.value)} type="text" required className="input input-bordered w-full max-w-xs" />
+                <input value={slug} onChange={(e) => setSlug(e.target.value)} type="text" required className="input input-bordered w-full max-w-xs hover:border-[#AC1FB8]" />
                 <label className="label">
                   <span className="label-text-alt">Slug</span>
                 </label>
               </div>
               <div className="form-control w-full max-w-xs">
-                <input value={eventDateTime} onChange={(e) => setEventDateTime(e.target.value)} type="datetime-local" required className="input input-bordered w-full max-w-xs" />
+                <input value={eventDateTime} onChange={(e) => setEventDateTime(e.target.value)} type="datetime-local" required className="input input-bordered w-full max-w-xs hover:border-[#AC1FB8]" />
                 <label className="label">
                   <span className="label-text-alt">Date</span>
                 </label>
@@ -189,23 +121,23 @@ export default function Create() {
             </div>
             <div className="sm:flex">
               <div className="form-control w-full max-w-xs mr-2">
-                <select className="select select-bordered w-full max-w-xs" onChange={(e) => setHost(e.target.value)}>
-                  {orgs.length > 0 ? orgs.map((org) => (
-                    <option value={org.organization.id}>{org.organization.name}</option>
-                  )) : <option disabled value="null">You are not a part of any organizations</option>}
+                <select className="select select-bordered w-full max-w-xs hover:border-[#AC1FB8]" onChange={(e) => setHost(e.target.value)}>
+                  {orgs.length > 0 ? orgs.map(org => (
+                    <option key={org.organization.id}>{org.organization.name}</option>
+                  )) : <option disabled key="null">You are not a part of any organizations</option>}
                 </select>
                 <label className="label">
-                  <span className="label-text-alt">Host</span>
+                  <span className="label-text-alt hover:border-[#AC1FB8]">Host</span>
                 </label>
               </div>
               <div className="form-control w-full max-w-xs mr-2">
-                <input value={location} onChange={(e) => setLocation(e.target.value)} type="text" required className="input input-bordered w-full max-w-xs" />
+                <input value={location} onChange={(e) => setLocation(e.target.value)} type="text" required className="input input-bordered w-full max-w-xs hover:border-[#AC1FB8]" />
                 <label className="label">
                   <span className="label-text-alt">Location</span>
                 </label>
               </div>
               <div className="form-control w-full max-w-xs">
-                <input value={capacity} onChange={(e) => setCapacity(e.target.valueAsNumber)} type="number" required className="input input-bordered w-full max-w-xs" />
+                <input value={capacity} onChange={(e) => setCapacity(e.target.valueAsNumber)} type="number" required className="input input-bordered w-full max-w-xs hover:border-[#AC1FB8]" />
                 <label className="label">
                   <span className="label-text-alt">Capacity</span>
                 </label>
@@ -213,13 +145,13 @@ export default function Create() {
             </div>
             <div className="sm:flex">
               <div className="form-control w-full max-w-xs mr-2">
-                <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="textarea textarea-bordered max-w-xs h-24"></textarea>
+                <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="textarea textarea-bordered max-w-xs h-24 hover:border-[#AC1FB8]"></textarea>
                 <label className="label">
                   <span className="label-text-alt">Description</span>
                 </label>
               </div>
               <div>
-                <button className="btn" style = {uploadStyle}>
+                <button className="btn normal-case text-black font-family: inter bg-[#D9D9D9] border-none hover:bg-fuchsia-300">
                   Upload Cover Photo
                 </button>
               </div>
@@ -228,26 +160,29 @@ export default function Create() {
               <div className="form-control">
                 <label className="label cursor-pointer">
                   <span className="label-text mr-2">Allow registration</span>
-                  <input type="checkbox" className="checkbox" checked={registration} onChange={(e) => setRegistration(e.target.checked)} />
+                  <input checked={registration} onChange={(e) => setRegistration(e.target.checked)} type="checkbox" className= "checked:bg-fuchsia-700" />
                 </label>
               </div>
             </div>
             <div className={`${registration ? "" : "hidden"}`}>
+              <div>
+                <h2 className = "text-lg leading-10 normal-case font-family: inter font-medium">Registration Details</h2>
+              </div>
               <div className={`sm:flex`}>
                 <div className="form-control w-full max-w-xs mr-2">
-                  <input value={registrationDatetime} onChange={(e) => setRegistrationDatetime(e.target.value)} required type="datetime-local" className="input input-bordered w-full max-w-xs" />
+                  <input value={registrationDatetime} onChange={(e) => setRegistrationDatetime(e.target.value)} required type="datetime-local" className="input input-bordered w-full max-w-xs hover:border-[#AC1FB8]" />
                   <label className="label">
-                    <span className="label-text-alt">Registration opens</span>
+                    <span className="label-text-alt">Date registration opens</span>
                   </label>
                 </div>
-                <div className="form-control w-full max-w-xs mr-2">
-                  <input value={signupSize} onChange={(e) => setSignupSize(e.target.valueAsNumber)} required type="number" className="input input-bordered w-full max-w-xs" />
+                <div className="form-control w-full max-w-xs mr-2" >
+                  <input value={signupSize} onChange={(e) => setSignupSize(e.target.valueAsNumber)} required type="number" className="input input-bordered w-full max-w-xs hover:border-[#AC1FB8]" />
                   <label className="label">
                     <span className="label-text-alt">Registration Maximum</span>
                   </label>
                 </div>
                 <div className="form-control w-full max-w-xs">
-                  <input value={waitlistSize} onChange={(e) => setWaitlistSize(e.target.valueAsNumber)} required type="number" className="input input-bordered w-full max-w-xs" />
+                  <input value={waitlistSize} onChange={(e) => setWaitlistSize(e.target.valueAsNumber)} required type="number" className="input input-bordered w-full max-w-xs hover:border-[#AC1FB8]" />
                   <label className="label">
                     <span className="label-text-alt">Waitlist Maximum</span>
                   </label>
@@ -255,7 +190,7 @@ export default function Create() {
               </div>
             </div>
             <div>
-              <input type="submit" value="Submit" className="btn sm:float-right background-color:#AC1FB8" style = {submitStyle} onClick={insert} />
+              <input type="submit" value="Submit" className="btn sm:float-right normal-case font-family: inter bg-[#AC1FB8] hover:bg-fuchsia-900 border-none font-sans" onClick={insert} />
             </div>
           </div>
         </form>

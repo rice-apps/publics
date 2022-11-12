@@ -1,15 +1,11 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../utils/db'
 
-export default function Account({ session }) {
+export default function Account({ session }: { session: any }) {
   const [loading, setLoading] = useState(true)
   const [first_name, setFirst] = useState(null)
   const [last_name, setLast] = useState(null)
   const [netid, setNetid] = useState(null)
-
-  useEffect(() => {
-    getProfile()
-  }, [session])
 
   async function getCurrentUser() {
     const {
@@ -55,6 +51,10 @@ export default function Account({ session }) {
     }
   }
 
+  useEffect(() => {
+    getProfile()
+  }, [session])
+
   type Profile = {
     first_name: string
     last_name: string
@@ -92,7 +92,7 @@ export default function Account({ session }) {
     <div className="form-widget">
       <div>
         <label htmlFor="email">Email</label>
-        <input id="email" type="text" value={session.user.email} disabled />
+        <input id="email" type="text" value={session.data.session.user.email} disabled />
       </div>
       <div>
         <label htmlFor="first_name">First Name</label>
