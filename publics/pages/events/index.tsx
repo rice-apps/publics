@@ -24,7 +24,7 @@ function Events(props: Props) {
                 {/* this one */}
             </div>
             <div className="divider">OR</div>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="px-8 grid grid-cols-3 gap-4">
                 {props.eventList.map((event) => <EventCard event={event} />)}
             </div>
         </>
