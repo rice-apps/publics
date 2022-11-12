@@ -4,6 +4,10 @@ import type { AppProps } from 'next/app'
 import { useRouter } from 'next/router'
 import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs'
 import { SessionContextProvider, Session } from '@supabase/auth-helpers-react'
+<<<<<<< HEAD
+=======
+import Layout from '../components/Layout'
+>>>>>>> cff54cae9e9ddcdfdc61a60bf54dc5b9a3f8de3a
 import { supabase } from '../utils/db';
 
 function MyApp({ 
