@@ -23,10 +23,48 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             notFound: true
         }
     }
+
+    // const { data, error } = await supabase
+    //     .storage
+    //     .from('event-images')
+    //     .download("bakerchristmas2022.jpeg")
+
+    // console.log("Error" + error)
+
+    // // const url = URL.createObjectURL(dataImg)
+    // console.log("Img: " + dataImg)
+
     return {
         props: { data },
     }
 }
+
+const downloadImage = async (path: string) => {
+    try {
+
+        const { data } = await supabase
+            .storage
+            .listBuckets()
+
+        console.log(data)
+        // console.log(error)
+
+        // if (error != null) {
+        //     throw error
+        // }
+
+        if (!data) {
+            return
+        }
+
+        //const url = URL.createObjectURL(data)
+        //setAvatarUrl(url)
+    } catch (error: any) {
+        console.log('Error downloading image: ', error.message)
+    }
+}
+
+
 
 type EventDetail = {
     name: string
@@ -58,13 +96,16 @@ const details = (props: Props) => {
     event.registration_datetime = new Date(event.registration_datetime)
     event.event_datetime = new Date(event.event_datetime)
     console.log(event)
+    // downloadImage("")
 
     return (
         <div>
             <main>
                 <div className="hero min-h-[60vh] object-left-top">
-                    <div className="hero-content items-stretch lg:flex-row min-w-[70vw] place-content-start space-x-8 max-w-[70vw]">
-                        <img src="https://as2.ftcdn.net/v2/jpg/03/09/55/15/1000_F_309551534_hkPIgAAsyc5EQg0Ny2bUYh8ttkUWc8fA.jpg" className="max-w-sm rounded-lg shadow-2xl" />
+                    <div className="hero-content items-stretch lg:flex-row items-center min-w-[70vw] place-content-start space-x-8 max-w-[70vw]">
+                        {/* <img src="" className="max-w-sm rounded-lg shadow-2xl" /> */}
+
+                        <img src="https://as2.ftcdn.net/v2/jpg/03/09/55/15/1000_F_309551534_hkPIgAAsyc5EQg0Ny2bUYh8ttkUWc8fA.jpg" className="object-cover min-w-[30%] max-w-[30%] min-h-sm rounded-lg shadow-2xl" />
                         <div className="flex flex-col space-y-4">
                             <h1 className="text-5xl font-bold">{event.name}</h1>
                             <p className="text-xl">{weekday[event.event_datetime.getDay()] + ", " + month[event.event_datetime.getMonth()] + " " + event.event_datetime.getDate() + "th"} </p>
@@ -77,57 +118,12 @@ const details = (props: Props) => {
                     </div>
                 </div>
                 <div className="divider"></div>
-                <div className="min-h-[20vh] flex-col sm:px-10 md:px-24">
+                <div className="min-h-[15vh] flex-col sm:px-10 md:px-24">
                     <h2 className="mb-2">Register for Event</h2>
                     <div className="flex-wrap flex flex-col lg:flex-row  place-content-start min-w-[70vw] items-start space-x-8 max-w-[70vw]">
-                        <div className="form-control w-full max-w-[16rem]">
-                            <input type="text" placeholder="" className="input input-bordered w-full max-w-[16rem]" />
-                            <label className="label">
-                                <span className="label-text-alt">First Name</span>
-
-                            </label>
-                        </div>
-
-                        <div className="form-control w-full max-w-[16rem]">
-                            <input type="text" placeholder="" className="input input-bordered w-full max-w-[16rem]" />
-                            <label className="label">
-                                <span className="label-text-alt">Last Name</span>
-
-                            </label>
-                        </div>
-
-                        <div className="form-control w-full max-w-[16rem]">
-                            <input type="text" placeholder="" className="input input-bordered w-full max-w-[16rem]" />
-                            <label className="label">
-                                <span className="label-text-alt">Net ID</span>
-
-                            </label>
-                        </div>
-
                         <button className="btn btn-primary">Register</button>
-
                     </div>
                 </div>
-
-                {/* <div className="hero min-h-screen bg-base-200">
-                    <div className="hero-content">
-                        <div className="max-w-md">
-                            <h1 className="text-5xl font-bold">{event.name} Details!</h1>
-                            <p>Name: {event.name}</p>
-                            <p>Event Date: {event.event_datetime.getMonth() + 1 + "/" + event.event_datetime.getDate()}</p>
-                            <p>Event Time: {event.event_datetime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                            <p>Registration Date: {event.registration_datetime.getMonth() + 1 + "/" + event.registration_datetime.getDate()}</p>
-                            <p>Registration Time: {event.registration_datetime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                            <p>Capacity: {event.capacity}</p>
-                            <p>Waitlist: {event.waitlist_size}</p>
-                            <p>Description: {event.description}</p>
-
-                            <div className="hero justify-end">
-                                <button className="btn btn-primary" disabled={!event.registration}>Sign Up</button>
-                            </div>
-                        </div>
-                    </div>
-                </div> */}
             </main >
         </div >
     )
