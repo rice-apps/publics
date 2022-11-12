@@ -15,7 +15,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             notFound: true
         }
     }
-    console.log(data)
 
     // if no event is found, redirect to 404 page
     if (data === null) {
@@ -24,47 +23,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         }
     }
 
-    // const { data, error } = await supabase
-    //     .storage
-    //     .from('event-images')
-    //     .download("bakerchristmas2022.jpeg")
-
-    // console.log("Error" + error)
-
-    // // const url = URL.createObjectURL(dataImg)
-    // console.log("Img: " + dataImg)
-
     return {
         props: { data },
     }
 }
-
-const downloadImage = async (path: string) => {
-    try {
-
-        const { data } = await supabase
-            .storage
-            .listBuckets()
-
-        console.log(data)
-        // console.log(error)
-
-        // if (error != null) {
-        //     throw error
-        // }
-
-        if (!data) {
-            return
-        }
-
-        //const url = URL.createObjectURL(data)
-        //setAvatarUrl(url)
-    } catch (error: any) {
-        console.log('Error downloading image: ', error.message)
-    }
-}
-
-
 
 type EventDetail = {
     name: string
@@ -95,15 +57,12 @@ const details = (props: Props) => {
 
     event.registration_datetime = new Date(event.registration_datetime)
     event.event_datetime = new Date(event.event_datetime)
-    console.log(event)
-    // downloadImage("")
 
     return (
         <div>
             <main>
                 <div className="hero min-h-[60vh] object-left-top">
                     <div className="hero-content items-stretch lg:flex-row items-center min-w-[70vw] place-content-start space-x-8 max-w-[70vw]">
-                        {/* <img src="" className="max-w-sm rounded-lg shadow-2xl" /> */}
 
                         <img src="https://as2.ftcdn.net/v2/jpg/03/09/55/15/1000_F_309551534_hkPIgAAsyc5EQg0Ny2bUYh8ttkUWc8fA.jpg" className="object-cover min-w-[30%] max-w-[30%] min-h-sm rounded-lg shadow-2xl" />
                         <div className="flex flex-col space-y-4">
@@ -120,9 +79,7 @@ const details = (props: Props) => {
                 <div className="divider"></div>
                 <div className="min-h-[15vh] flex-col sm:px-10 md:px-24">
                     <h2 className="mb-2">Register for Event</h2>
-                    <div className="flex-wrap flex flex-col lg:flex-row  place-content-start min-w-[70vw] items-start space-x-8 max-w-[70vw]">
-                        <button className="btn btn-primary">Register</button>
-                    </div>
+                    <button className="btn btn-primary">Register</button>
                 </div>
             </main >
         </div >
