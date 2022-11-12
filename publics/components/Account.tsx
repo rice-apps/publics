@@ -1,11 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../utils/db'
 
-<<<<<<< HEAD
-export default function Account({ session }: { session: any }) {
-=======
 export default function Account({session }) {
->>>>>>> added details of event list, wip date formatting of myevents
   const [loading, setLoading] = useState(true)
   const [first_name, setFirst] = useState<string | null>(null)
   const [last_name, setLast] = useState<string | null>(null)

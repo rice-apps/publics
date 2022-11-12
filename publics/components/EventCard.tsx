@@ -34,10 +34,10 @@ function eventCardDate(datetime: string) {
     var day = getOrdinal(dt.getDate())
     var date = dt.toLocaleDateString('en-us', { weekday:"long", month:"long", day:"numeric"});
     var time = dt.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
-    console.log("weekday: " + weekday + " month: " + month + " day: " + day)
-    console.log("good one: " + date)
+   
 
-    return `${weekday}, ${month} ${day} @ ${time}`
+
+    return `$date @ ${time}`
 
 }
 
@@ -47,12 +47,7 @@ export default function EventCard(props: Props) {
     console.log(eventCardDate(props.event.event_datetime))
     console.log("registration datetime:" + props.event.registration_datetime)
     return (
-<<<<<<< HEAD
-        <div className="card w-full bg-base-100 shadow-xl hover:scale-110 transition-transform border border-primary">
-            <figure><img src="https://placeimg.com/400/225/arch" alt="Shoes" /></figure>
-=======
         <div className="card w-full bg-base-100 shadow-xl hover:scale-110 transition-transform">
->>>>>>> added details of event list, wip date formatting of myevents
             <div className="card-body">
                 <h2 className="card-title">{props.event.name}</h2>
                 <p>{new Date(props.event.event_datetime).toDateString()} </p>
