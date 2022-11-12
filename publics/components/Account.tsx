@@ -68,74 +68,23 @@ export default function Account({session }) {
     updated_at?: Date
   }
 
-  async function updateProfile({ first_name, last_name, netid }: Profile) {
-    try {
-      setLoading(true)
-      const user = await getCurrentUser()
-
-      const updates = {
-        id: user.id,
-        first_name,
-        last_name,
-        netid,
-        updated_at: new Date(),
-      }
-
-      let { error } = await supabase.from('profiles').upsert(updates)
-
-      if (error) {
-        throw error
-      }
-    } catch (error) {
-      //alert(error.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   return (
-    <div className="form-widget">
-      <div>
-        <label htmlFor="email">Email</label>
-        <input id="email" type="text" value={session.data.session.user.email} disabled />
-      </div>
-      <div>
-        <label htmlFor="first_name">First Name</label>
-        <input
-          id="first_name"
-          type="text"
-          value={first_name || ''}
-          onChange={(e) => setFirst(e.target.value)}
-        />
-      </div>
-      <div>
-        <label htmlFor='last_name'>Last Name</label>
-        <input
-          id="last_name"
-          type="text"
-          value={last_name || ''}
-          onChange={(e) => setLast(e.target.value)}
-        />
-      </div>
+    <main className='px-3'>
+      <h1>Your Account Info</h1>
+      <div className="form-widget">
+        <h3>Email: {session.user.email}</h3>
+        <h3>Name: {first_name} {last_name}</h3>
+        <h3>NetID: {netid}</h3>
 
-      <div>
-        <button
-          className="button primary block"
-          onClick={() => updateProfile({ first_name, last_name, netid })}
-          disabled={loading}
-        >
-          {loading ? 'Loading ...' : 'Update'}
-        </button>
+        <div>
+          <button
+            className="btn btn-error"
+            onClick={() => supabase.auth.signOut()}
+          >
+            Sign Out
+          </button>
+        </div>
       </div>
-
-      <div>
-        <button
-          className="button block"
-          onClick={() => supabase.auth.signOut()}
-        >
-          Sign Out
-        </button>
-      </div>
-    </div>
+    </main>
   )
 }
