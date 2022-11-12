@@ -11,9 +11,15 @@
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.4.4",
     "@supabase/auth-helpers-react": "^0.3.1",
+<<<<<<< HEAD
     "@supabase/supabase-js": "^2.0.0-rc.10",
     "daisyui": "^2.31.0",
     "next": "12.3.1",
+=======
+    "@supabase/supabase-js": "^2.0.5",
+    "daisyui": "^2.38.1",
+    "next": "13.0.2",
+>>>>>>> cff54cae9e9ddcdfdc61a60bf54dc5b9a3f8de3a
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "theme-change": "^2.2.0"
