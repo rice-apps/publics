@@ -1,18 +1,17 @@
-import { useState, useEffect } from 'react'
 import type { AppProps } from 'next/app';
-import { supabase } from '../utils/db'
 import Auth from '../components/Auth'
 import Account from '../components/Account'
 import { Session } from '@supabase/auth-helpers-react'
 
-export default function Home({ session }: AppProps) {
-
+export default function Home({session}: AppProps<{
+  session: Session;
+}>) {
   return (
-    <div className="container" style={{ padding: '50px 0 100px 0' }}>
-      {!session?.data.session ? (
+    <div className="container">
+      {!session ? (
         <Auth />
       ) : (
-        <Account key={session.data.session.user?.id} session={session} />
+        <Account key={session.user?.id} session={session} />
       )}
     </div>
   )
