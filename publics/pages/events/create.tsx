@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../utils/db'
 import { useRouter } from 'next/router'
 import React from 'react'
+import CSS from 'csstype';
 
 export default function Create() {
   
@@ -17,10 +18,19 @@ export default function Create() {
   const [description, setDescription] = useState(String)
 
   const [registration, setRegistration] = useState(Boolean)
-  const [registrationDatetime, setRegistrationDatetime] = useState<string | null>(Date)
-  const [signupSize, setSignupSize] = useState<number | null>(Number)
-  const [waitlistSize, setWaitlistSize] = useState<number | null>(Number)
-  const [orgs, setOrgs] = useState(Array<any>)
+  const [registrationDatetime, setRegistrationDatetime] = useState(Date)
+  const [signupSize, setSignupSize] = useState(Number)
+  const [waitlistSize, setWaitlistSize] = useState(Number)
+
+  
+
+  const [orgs, setOrgs] = useState([])
+
+  /*
+  function refreshPage() {
+    window.location.reload();
+  }
+  */
 
   async function getOrgs() {
     const { data: { user } } = await supabase.auth.getUser()
@@ -34,9 +44,9 @@ export default function Create() {
     if (org) {
       setOrgs(org)
       if (org.length > 0) {
-        setHost(org[0].organization.name)
+        const name = org[0].organization.id
+        setHost(name)
       }
-      console.log(host)
     } 
     
   }
@@ -47,7 +57,62 @@ export default function Create() {
     setRegistrationDatetime(null)
     setSignupSize(null)
     setWaitlistSize(null)
-  }, [])  
+  }, [])
+
+  const titleStyle: CSS.Properties = {
+    position: "relative",
+    width: "247px",
+    height: "39px",
+    left: "64px",
+    top: "139px",
+
+    fontFamily: 'Inter',
+    fontStyle: "normal",
+    fontWeight: 700,
+    fontSize: "32px",
+    lineHeight: "39px",
+
+    color: "#212429"
+    
+  };
+  const submitStyle: CSS.Properties ={
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "flex-start",
+    padding: "16px",
+    gap: "16px",
+
+    position: "relative",
+    width: "165px",
+    height: "51px",
+    left: "1051px",
+    top: "1024px",
+
+    background: "#AC1FB8",
+    borderRadius: "8px"
+
+  };
+  const uploadStyle: CSS.Properties = {
+    width: "151px",
+    height: "19px",
+    fontFamily: 'Inter',
+    fontStyle: "normal",
+    fontWeight: "500",
+    fontSize: "16px",
+    lineHeight: "19px",
+
+    color: "#212429",
+    flex: "none",
+    order: "0",
+    flexGrow: "0",
+  };
+  const formInputStyle: CSS.Properties = {
+    background: "#FFFFFF",
+    border: "2px solid #D9D9D9",
+    borderRadius: "8px"
+  };
+  
 
   async function insert() {
     let insert1 = {
@@ -60,6 +125,7 @@ export default function Create() {
       description: description,
       registration: registration,
     }
+
    let insert2 = {};
    if (registration) {
     insert2 = {
@@ -70,16 +136,19 @@ export default function Create() {
    }
 
    let insert = Object.assign({}, insert1, insert2);
-
+   console.log("insert is:", insert)
     const { error } = await supabase
       .from('events')
       .insert(insert)
       .single();
     if (error) {
       alert(error.message);
-    } else {
-      router.push(slug);
     }
+    /*
+    } else {
+      router.push(`/events/${slug}`);
+    }
+    */
   }
 
   return (
@@ -90,9 +159,9 @@ export default function Create() {
         <meta name="eventcreate" content="Form for creating new event" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      
+
       <main className = "h-screen bg-[#F5F5F5]">
-        <h1 className = "mr-2 text-2xl normal-case flex font-family-inter font-bold">
+        <h1 className = "text-2xl normal-case leading-[3rem] font-family: inter font-bold">
           Create an Event
         </h1>
         <h2 className = "space-x-10 text-lg left-[15px] leading-[3rem] normal-case font-family-inter font-medium">Event Details</h2>
@@ -121,9 +190,9 @@ export default function Create() {
             </div>
             <div className="sm:flex">
               <div className="form-control w-full max-w-xs mr-2">
-                <select className="select select-bordered w-full max-w-xs hover:border-[#AC1FB8]" onChange={(e) => setHost(e.target.value)}>
+                <select className="select select-bordered w-full max-w-xs hover:border-[#AC1FB8]" onChange={(e) => {setHost(e.target.value)}}>
                   {orgs.length > 0 ? orgs.map(org => (
-                    <option key={org.organization.id}>{org.organization.name}</option>
+                    <option key={org.organization.id} value={org.organization.id}>{org.organization.name}</option>
                   )) : <option disabled key="null">You are not a part of any organizations</option>}
                 </select>
                 <label className="label">
@@ -151,7 +220,7 @@ export default function Create() {
                 </label>
               </div>
               <div>
-                <button className="btn normal-case text-black font-family: inter bg-[#D9D9D9] border-none hover:bg-fuchsia-300">
+                <button className="btn" style = {uploadStyle}>
                   Upload Cover Photo
                 </button>
               </div>
@@ -190,7 +259,7 @@ export default function Create() {
               </div>
             </div>
             <div>
-              <input type="submit" value="Submit" className="btn sm:float-right normal-case font-family: inter bg-[#AC1FB8] hover:bg-fuchsia-900 border-none font-sans" onClick={insert} />
+              <input type="submit" value="Submit" className="btn sm:float-right background-color:#AC1FB8" style = {submitStyle} onClick={insert} />
             </div>
           </div>
         </form>
