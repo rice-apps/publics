@@ -84,19 +84,19 @@ export default function Create() {
 
   return (
     <div id="form">
+
       <Head>
         <title>Create Event Form</title>
         <meta name="eventcreate" content="Form for creating new event" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
+      
       <main className = "h-screen bg-[#F5F5F5]">
-        <h1 className = "text-2xl normal-case leading-[3rem] font-family: inter font-bold">
+        <h1 className = "mr-2 text-2xl normal-case flex font-family-inter font-bold">
           Create an Event
         </h1>
-        <div>
-          <h2 className = "text-lg leading-10 normal-case font-family: inter font-medium">Event Details</h2>
-        </div>
+        <h2 className = "space-x-10 text-lg left-[15px] leading-[3rem] normal-case font-family-inter font-medium">Event Details</h2>
+        <div className="space-x-10 divider leading-[1rem] h-[0.5px] w-[950px]"></div>
         <form>
           <div className="p-2">
             <div className="sm:flex">
@@ -160,7 +160,7 @@ export default function Create() {
               <div className="form-control">
                 <label className="label cursor-pointer">
                   <span className="label-text mr-2">Allow registration</span>
-                  <input checked={registration} onChange={(e) => setRegistration(e.target.checked)} type="checkbox" className= "checked:bg-fuchsia-700" />
+                  <input checked={registration} onChange={(e) => setRegistration(e.target.checked)} type="checkbox" className= "checkbox checkbox-sm checbox-bg-fuchsia-700" />
                 </label>
               </div>
             </div>
