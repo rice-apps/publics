@@ -169,7 +169,7 @@ export default function Create() {
                 </label>
               </div>
               <div>
-                <button className="btn normal-case border-0 bg-gray-400 hover:bg-fuchsia-500">
+                <button className="btn normal-case border-0 bg-gray-400 hover:bg-fuchsia-700">
                   Upload Cover Photo
                 </button>
               </div>
