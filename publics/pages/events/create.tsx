@@ -7,7 +7,7 @@ import CSS from 'csstype';
 
 export default function Create() {
   
-  const router = useRouter()
+  // const router = useRouter()
 
   const [name, setName] = useState(String)
   const [slug, setSlug] = useState(String)
@@ -22,15 +22,7 @@ export default function Create() {
   const [signupSize, setSignupSize] = useState(Number)
   const [waitlistSize, setWaitlistSize] = useState(Number)
 
-  
-
   const [orgs, setOrgs] = useState([])
-
-  /*
-  function refreshPage() {
-    window.location.reload();
-  }
-  */
 
   async function getOrgs() {
     const { data: { user } } = await supabase.auth.getUser()
