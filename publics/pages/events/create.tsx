@@ -51,8 +51,6 @@ export default function Create() {
     setWaitlistSize(null)
   }, [])
 
-  
-
   async function insert() {
     let insert1 = {
       name: name,
