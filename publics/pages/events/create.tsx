@@ -59,59 +59,6 @@ export default function Create() {
     setWaitlistSize(null)
   }, [])
 
-  const titleStyle: CSS.Properties = {
-    position: "relative",
-    width: "247px",
-    height: "39px",
-    left: "64px",
-    top: "139px",
-
-    fontFamily: 'Inter',
-    fontStyle: "normal",
-    fontWeight: 700,
-    fontSize: "32px",
-    lineHeight: "39px",
-
-    color: "#212429"
-    
-  };
-  const submitStyle: CSS.Properties ={
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "flex-start",
-    padding: "16px",
-    gap: "16px",
-
-    position: "relative",
-    width: "165px",
-    height: "51px",
-    left: "1051px",
-    top: "1024px",
-
-    background: "#AC1FB8",
-    borderRadius: "8px"
-
-  };
-  const uploadStyle: CSS.Properties = {
-    width: "151px",
-    height: "19px",
-    fontFamily: 'Inter',
-    fontStyle: "normal",
-    fontWeight: "500",
-    fontSize: "16px",
-    lineHeight: "19px",
-
-    color: "#212429",
-    flex: "none",
-    order: "0",
-    flexGrow: "0",
-  };
-  const formInputStyle: CSS.Properties = {
-    background: "#FFFFFF",
-    border: "2px solid #D9D9D9",
-    borderRadius: "8px"
-  };
   
 
   async function insert() {
@@ -161,28 +108,30 @@ export default function Create() {
       </Head>
 
       <main className = "h-screen bg-[#F5F5F5]">
-        <h1 className = "text-2xl normal-case leading-[3rem] font-family: inter font-bold">
+        <h1 className = "mx-3 text-2xl normal-case leading-[3rem] font-family: inter font-bold">
           Create an Event
         </h1>
-        <h2 className = "space-x-10 text-lg left-[15px] leading-[3rem] normal-case font-family-inter font-medium">Event Details</h2>
-        <div className="space-x-10 divider leading-[1rem] h-[0.5px] w-[950px]"></div>
+        <div className='leading-[1rem]'>
+          <h2 className = "mx-3 text-lg leading-[2rem] normal-case font-family-inter font-medium">Event Details</h2>
+          <div className="mx-3 divider leading-[1px] h-[0.5px] w-[950px]"></div>
+        </div>
         <form>
           <div className="p-2">
             <div className="sm:flex">
               <div className="form-control w-full max-w-xs mr-2">
-                <input value={name} onChange={(e) => setName(e.target.value)} type="text" required className="input input-bordered w-full max-w-xs hover:border-[#AC1FB8]" />
+                <input value={name} onChange={(e) => setName(e.target.value)} type="text" required className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700" />
                 <label className="label">
                   <span className="label-text-alt">Name of event</span>
                 </label>
               </div>
               <div className="form-control w-full max-w-xs mr-2">
-                <input value={slug} onChange={(e) => setSlug(e.target.value)} type="text" required className="input input-bordered w-full max-w-xs hover:border-[#AC1FB8]" />
+                <input value={slug} onChange={(e) => setSlug(e.target.value)} type="text" required className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700" />
                 <label className="label">
                   <span className="label-text-alt">Slug</span>
                 </label>
               </div>
               <div className="form-control w-full max-w-xs">
-                <input value={eventDateTime} onChange={(e) => setEventDateTime(e.target.value)} type="datetime-local" required className="input input-bordered w-full max-w-xs hover:border-[#AC1FB8]" />
+                <input value={eventDateTime} onChange={(e) => setEventDateTime(e.target.value)} type="datetime-local" required className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700" />
                 <label className="label">
                   <span className="label-text-alt">Date</span>
                 </label>
@@ -190,23 +139,23 @@ export default function Create() {
             </div>
             <div className="sm:flex">
               <div className="form-control w-full max-w-xs mr-2">
-                <select className="select select-bordered w-full max-w-xs hover:border-[#AC1FB8]" onChange={(e) => {setHost(e.target.value)}}>
+                <select className="select select-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700" onChange={(e) => {setHost(e.target.value)}}>
                   {orgs.length > 0 ? orgs.map(org => (
                     <option key={org.organization.id} value={org.organization.id}>{org.organization.name}</option>
                   )) : <option disabled key="null">You are not a part of any organizations</option>}
                 </select>
                 <label className="label">
-                  <span className="label-text-alt hover:border-[#AC1FB8]">Host</span>
+                  <span className="label-text-alt hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700">Host</span>
                 </label>
               </div>
               <div className="form-control w-full max-w-xs mr-2">
-                <input value={location} onChange={(e) => setLocation(e.target.value)} type="text" required className="input input-bordered w-full max-w-xs hover:border-[#AC1FB8]" />
+                <input value={location} onChange={(e) => setLocation(e.target.value)} type="text" required className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700" />
                 <label className="label">
                   <span className="label-text-alt">Location</span>
                 </label>
               </div>
               <div className="form-control w-full max-w-xs">
-                <input value={capacity} onChange={(e) => setCapacity(e.target.valueAsNumber)} type="number" required className="input input-bordered w-full max-w-xs hover:border-[#AC1FB8]" />
+                <input value={capacity} onChange={(e) => setCapacity(e.target.valueAsNumber)} type="number" required className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700" />
                 <label className="label">
                   <span className="label-text-alt">Capacity</span>
                 </label>
@@ -214,13 +163,13 @@ export default function Create() {
             </div>
             <div className="sm:flex">
               <div className="form-control w-full max-w-xs mr-2">
-                <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="textarea textarea-bordered max-w-xs h-24 hover:border-[#AC1FB8]"></textarea>
+                <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="textarea textarea-bordered max-w-xs h-24 hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"></textarea>
                 <label className="label">
                   <span className="label-text-alt">Description</span>
                 </label>
               </div>
               <div>
-                <button className="btn" style = {uploadStyle}>
+                <button className="btn normal-case border-0 bg-gray-400 hover:bg-fuchsia-500">
                   Upload Cover Photo
                 </button>
               </div>
@@ -228,8 +177,8 @@ export default function Create() {
             <div className='sm:flex'>
               <div className="form-control">
                 <label className="label cursor-pointer">
-                  <span className="label-text mr-2">Allow registration</span>
-                  <input checked={registration} onChange={(e) => setRegistration(e.target.checked)} type="checkbox" className= "checkbox checkbox-sm checbox-bg-fuchsia-700" />
+                  <span className="label-text mr-2">Allow registration?</span>
+                  <input checked={registration} onChange={(e) => setRegistration(e.target.checked)} type="checkbox" className= "h-5 w-5 accent-fuchsia-700 border-fuchsia-100 dark:focus:ring-fuchsia-700 focus:ring-2 dark:bg-fuchsia-100 dark:border-fuchsia-900 checked:dark:bg-fuchsia-100" />
                 </label>
               </div>
             </div>
@@ -239,19 +188,19 @@ export default function Create() {
               </div>
               <div className={`sm:flex`}>
                 <div className="form-control w-full max-w-xs mr-2">
-                  <input value={registrationDatetime} onChange={(e) => setRegistrationDatetime(e.target.value)} required type="datetime-local" className="input input-bordered w-full max-w-xs hover:border-[#AC1FB8]" />
+                  <input value={registrationDatetime} onChange={(e) => setRegistrationDatetime(e.target.value)} required type="datetime-local" className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700" />
                   <label className="label">
                     <span className="label-text-alt">Date registration opens</span>
                   </label>
                 </div>
                 <div className="form-control w-full max-w-xs mr-2" >
-                  <input value={signupSize} onChange={(e) => setSignupSize(e.target.valueAsNumber)} required type="number" className="input input-bordered w-full max-w-xs hover:border-[#AC1FB8]" />
+                  <input value={signupSize} onChange={(e) => setSignupSize(e.target.valueAsNumber)} required type="number" className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700" />
                   <label className="label">
                     <span className="label-text-alt">Registration Maximum</span>
                   </label>
                 </div>
                 <div className="form-control w-full max-w-xs">
-                  <input value={waitlistSize} onChange={(e) => setWaitlistSize(e.target.valueAsNumber)} required type="number" className="input input-bordered w-full max-w-xs hover:border-[#AC1FB8]" />
+                  <input value={waitlistSize} onChange={(e) => setWaitlistSize(e.target.valueAsNumber)} required type="number" className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700" />
                   <label className="label">
                     <span className="label-text-alt">Waitlist Maximum</span>
                   </label>
@@ -259,7 +208,7 @@ export default function Create() {
               </div>
             </div>
             <div>
-              <input type="submit" value="Submit" className="btn sm:float-right background-color:#AC1FB8" style = {submitStyle} onClick={insert} />
+              <input type="submit" value="Submit" className="btn sm:float-right normal-case border-0 bg-[#AC1FB8] hover:bg-fuchsia-900 focus:outline-none focus:ring focus:ring-fuchsia-700" onClick={insert} />
             </div>
           </div>
         </form>
