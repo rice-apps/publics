@@ -16,20 +16,27 @@ interface rowObject {
     college: string,
 }
 
+
 function ResultPage(props: EventDetails) {
  
     const [loading, setLoading] = useState(true)
     const [registrations, setRegistrations] = useState<rowObject[]>([]);
     const [event, setEvent] = useState("");
+    const [emails, setEmails] = useState<string[]>([]);
 
     //Gets the public that the user accessing this page is an admin of
     async function getPublic() {
         //TODO populate this with data that uses the auth of the person using this site
         //Find the event that this person is an admit of and return it
-        return 'afdbe8da-f2cd-47a2-848c-6c5aa891b881';
+        supabase.auth.getUser().then((value) => {
+            console.log(value)
+        })
+        return '239e8d30-f3ad-4a52-8834-7973324004f1';
     };
     //Gets the set of registrations for the given event
     async function getRegistrations(event: string) {
+        //Holds emails of registered people, used when copying to clipboard
+        let email_copy = [];
         const {data, error} = await supabase.
         from("registrations")
         .select(`
@@ -59,7 +66,7 @@ function ResultPage(props: EventDetails) {
             if (profiles == null) {
                 return []
             }
-            //TODO fix this, typescript for some reason doesn't think that I can index the profiles object with the given keys
+            //TODO fix this, I don't understand typescript and for some reason it doesn't think that I can index the profiles object with the given keys
             //ERROR Element implicitly has an 'any' type because expression of type '"created_at"' can't be used to index type 'Object'. Property 'created_at' does not exist on type 'Object'
             var formatted_object = {
                 "created_at" : new Date(current_object["created_at"]).toLocaleString(),
@@ -70,11 +77,19 @@ function ResultPage(props: EventDetails) {
                 "college" : Object.values(profiles)[3],
             }
 
+            email_copy.push(Object.values(profiles)[4] + "@rice.edu");
+
             formatted_data[i] = formatted_object;
         }
 
+        setEmails(email_copy)
+
         return formatted_data;
     }; 
+
+    function copyEmails() {
+        navigator.clipboard.writeText(emails.join(' '))
+    }
 
     //Getting the public
     getPublic().then((value) => {
@@ -94,7 +109,7 @@ function ResultPage(props: EventDetails) {
                 <h1>{props.eventName}: Event Results</h1>
             </div>
             <div className="btn-group btn-group-vertical lg:btn-group-horizontal">
-                <button className="btn">Copy Emails</button>
+                <button className="btn" onClick={copyEmails()}>Copy Emails</button>
                 <button className="btn">Add Attendee</button>
             </div>
             <div className="overflow-x-auto">
@@ -137,7 +152,7 @@ function ResultPage(props: EventDetails) {
 function Page() {
     return (
         <div>
-            <ResultPage eventName={"Sid 80's"}></ResultPage>
+            <ResultPage eventName={"Sid80s"}></ResultPage>
         </div>
     );
 }
