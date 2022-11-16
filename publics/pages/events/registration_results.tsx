@@ -24,7 +24,7 @@ interface rowObject {
 function ResultPage(props: EventDetails) {
  
     const [loading, setLoading] = useState(true)
-    const [registrations, setRegistrations] = useState<rowObject[]>([]);
+    const[registration, setRegistration] = useState<rowObject[]>([]);
     let event = "";
     let emails: string[] = [];
     //netID used in adding an attendee
@@ -52,19 +52,19 @@ function ResultPage(props: EventDetails) {
         //Holds emails of registered people, used when copying to clipboard
         let email_arr = [];
         const {data, error} = await supabase.
-        from("registrations")
-        .select(`
-            person,
-            created_at,
-            profiles (
-                id,
-                first_name,
-                last_name,
-                college,
-                netid
-            )
-        `)
-        .eq('event', event)
+            from("registrations")
+            .select(`
+                person,
+                created_at,
+                profiles (
+                    id,
+                    first_name,
+                    last_name,
+                    college,
+                    netid
+                )
+            `)
+            //.eq('event', event)
         
         let formatted_data: rowObject[] = []
 
@@ -109,10 +109,11 @@ function ResultPage(props: EventDetails) {
 
     //Adds an attendee to the backend
     async function addAttendee(netID: string) {
+        console.log('got called')
         //TODO figure out query to add attendee given only netID
 
         //refresh table after adding attendee
-        setLoading(true);
+        //setLoading(true);
     }
 
     //Removes an attendee given their UUID from this event
@@ -126,13 +127,16 @@ function ResultPage(props: EventDetails) {
         // //Updates table after removing person
         // setLoading(true);
         //refreshing table after adding attendee
-        setLoading(true);
+        //setLoading(true);
     }
 
-    getRegistrations(event).then((registrations) => {
-        setLoading(false)
-        setRegistrations(registrations)
-    });
+    if (loading) {
+        getRegistrations(event).then((registrations) => {
+            setRegistration(registrations)
+            setLoading(false)
+            //setRegistrations(registrations)
+        });
+    }
 
     //Getting registration table on first render
     //update_registration_table();
@@ -181,7 +185,7 @@ function ResultPage(props: EventDetails) {
                 </thead> 
                 <tbody>
                 {
-                        registrations.map((row, index) => {
+                        registration.map((row, index) => {
                             return <tr key = {index}>
                             <th></th>
                             <td>
