@@ -4,37 +4,57 @@ import { render } from 'react-dom';
 import { useEffect, useState } from 'react';
 import { createServerSupabaseClient} from '@supabase/auth-helpers-nextjs';
 
-//Simple type holding necessary details for an event
+/**
+ * Simple type containing a friendly name for an event, and the UUID of the event
+ */
 type EventDetails = {
+    //friendly name
     eventName: string,
-    eventID: string,
+    //uuid of event
+    eventID: string, //Using string as unsure what UUID type is in TS
 }
 
-//Simple type holding values to be put into a row
+/**
+ * Simple interface containing values stored within a row in the table of registrations presented to the userp
+ */
 interface rowObject {
+    //uuid of person
     person_id: string,
+    //date this registration was created
     created_at : string,
+    //first name of registered person
     first_name : string,
+    //last name of registered person
     last_name : string,
+    //email of registered person
     email : string,
+    //netid of registered
     netid : string,
+    //residential college that that registered person is contained within
     college: string,
 }
 
-
-function ResultPage(props: EventDetails) {
+/**
+ * Page holding registration results. Check figma for design source
+ */
+function ResultPage() {
  
-    //Loading data from backend
+    //is the data for this page loading still loading?
     const [loading, setLoading] = useState(true)
+    //Array of registration entries formatted as an array of row objects
     const [registration, setRegistration] = useState<rowObject[]>([]);
+    //Event details for this page
     const [eventDetails, setEventDetails] = useState<EventDetails>();
+    //netID of user to add to registration table, used with the add attendee button
     const [netID, setNetID] = useState("");
+    //array of emails presented within the registration table, used to copy emails to clipboard
     const [emails, setEmails] = useState<string[]>([]);
     let email_arr: string[] = [];
-    //netID used in adding an attendee
-
     
-    //Gets the public that the user accessing this page is an admin of
+    /**
+     * Gets the event that this user is an admin of, if they are one
+     * @returns Event Details corresponding to said event
+     */
     async function getEvent(): Promise<EventDetails> {
         //TODO populate this with data that uses the auth of the person using this site
 
@@ -42,17 +62,21 @@ function ResultPage(props: EventDetails) {
         //still returns null
         //const {data, error} = await supabase.auth.getUser();
         //console.log(data)
+
+        //Dummy data
         return {
             eventName: "sid80s", 
             eventID: '239e8d30-f3ad-4a52-8834-7973324004f1'
         }
     };
 
-
-    //Gets the set of registrations for the given event
-    //Returns the an array of rowObject that is taken from data from the backend
-    async function getRegistrations(event_detail: EventDetails) {
-        //Holds emails of registered people, used when copying to clipboard
+    /**
+     * Gets registrations from backend for appropriate event and reformats them into an array of row objects
+     * @param event_detail - information for the event we want to get information for
+     * @returns Array of row objects based on registration table on backend
+     */
+    async function getRegistrations(event_detail: EventDetails): Promise<rowObject[]> {
+        //Gets raw backend data corresponding to our event
         const {data, error} = await supabase.
             from("registrations")
             .select(`
@@ -68,6 +92,7 @@ function ResultPage(props: EventDetails) {
             `)
             .eq('event', event_detail.eventID)
         
+        //Holds data reformatted as array of rowobjects
         let formatted_data: rowObject[] = []
 
         if (error) {
@@ -94,21 +119,26 @@ function ResultPage(props: EventDetails) {
                 "college" : Object.values(profiles)[3],
             }
 
+            //Appending email to global email array
             email_arr.push(Object.values(profiles)[4] + "@rice.edu");
 
             formatted_data[i] = formatted_object;
         }
         
-
         return formatted_data;
     }; 
 
-    //Copies emails to clipboard
+    /**
+     * Copies set of emails to clipboard
+     */
     function copyEmails() {
         navigator.clipboard.writeText(emails!.join(' '))
     }
 
-    //Adds an attendee to the backend
+    /**
+     * Registers attendee to this event given an inputted netID
+     * @param netID 
+     */
     async function addAttendee(netID: string) {
         const {data, error} = await supabase
         .from("profiles")
@@ -127,8 +157,6 @@ function ResultPage(props: EventDetails) {
 
             console.log(res);
 
-
-            //refresh table after adding attendee
             setLoading(true);
         } else {
             //TODO throw bigger error!
@@ -136,7 +164,10 @@ function ResultPage(props: EventDetails) {
         }
     }
 
-    //Removes an attendee given their UUID from this event
+    /**
+     * Unregisters attendee from this event. Updates backend and refreshes page
+     * @param user_id 
+     */
     async function removeAttendee(user_id: string) {
         const res = await supabase.
         from("registrations")
@@ -148,7 +179,11 @@ function ResultPage(props: EventDetails) {
         setLoading(true);
     }
 
+    /**
+     * Initial call that populates page
+     */
     if (loading) {
+        //Get the event, and then get registrations for that event. Set state once data is available.
         getEvent().then((event_detail) => {
             getRegistrations(event_detail).then((registrations) => {
                 //Get the event we are looking at
