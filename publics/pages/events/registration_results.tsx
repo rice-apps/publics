@@ -2,12 +2,14 @@ import { supabase } from '../../utils/db'
 import { GetServerSideProps } from 'next'
 import { render } from 'react-dom';
 import { useEffect, useState } from 'react';
+import { createServerSupabaseClient} from '@supabase/auth-helpers-nextjs';
 
 type EventDetails = {
     eventName: string,
 }
 
 interface rowObject {
+    person_id: string,
     created_at : string,
     first_name : string,
     last_name : string,
@@ -23,20 +25,29 @@ function ResultPage(props: EventDetails) {
     const [registrations, setRegistrations] = useState<rowObject[]>([]);
     const [event, setEvent] = useState("");
     const [emails, setEmails] = useState<string[]>([]);
+    //netID used in adding an attendee
+    const [netdID, setNetID] = useState("");
 
+    
     //Gets the public that the user accessing this page is an admin of
-    async function getPublic() {
+    //TODO
+    async function getEvent() {
         //TODO populate this with data that uses the auth of the person using this site
+
         //Find the event that this person is an admit of and return it
-        supabase.auth.getUser().then((value) => {
-            console.log(value)
-        })
-        return '239e8d30-f3ad-4a52-8834-7973324004f1';
+        //still returns null
+        const {data, error} = await supabase.auth.getUser();
+        console.log(data)
+        const event_id = '239e8d30-f3ad-4a52-8834-7973324004f1';
+        setEvent(event_id)
     };
+
+
     //Gets the set of registrations for the given event
+    //Returns the an array of rowObject that is taken from data from the backend
     async function getRegistrations(event: string) {
         //Holds emails of registered people, used when copying to clipboard
-        let email_copy = [];
+        let email_arr = [];
         const {data, error} = await supabase.
         from("registrations")
         .select(`
@@ -69,6 +80,7 @@ function ResultPage(props: EventDetails) {
             //TODO fix this, I don't understand typescript and for some reason it doesn't think that I can index the profiles object with the given keys
             //ERROR Element implicitly has an 'any' type because expression of type '"created_at"' can't be used to index type 'Object'. Property 'created_at' does not exist on type 'Object'
             var formatted_object = {
+                "person_id" : current_object["person"],
                 "created_at" : new Date(current_object["created_at"]).toLocaleString(),
                 "first_name" : Object.values(profiles)[1],
                 "last_name" : Object.values(profiles)[2],
@@ -77,12 +89,12 @@ function ResultPage(props: EventDetails) {
                 "college" : Object.values(profiles)[3],
             }
 
-            email_copy.push(Object.values(profiles)[4] + "@rice.edu");
+            email_arr.push(Object.values(profiles)[4] + "@rice.edu");
 
             formatted_data[i] = formatted_object;
         }
 
-        setEmails(email_copy)
+        setEmails(email_arr)
 
         return formatted_data;
     }; 
@@ -91,15 +103,39 @@ function ResultPage(props: EventDetails) {
         navigator.clipboard.writeText(emails.join(' '))
     }
 
-    //Getting the public
-    getPublic().then((value) => {
-        if(value != null) {
-            getRegistrations(value).then((value) => {
-                setLoading(false)
-                setRegistrations(value)
-            })
-        }
-    })
+    //Adds an attendee to the backend
+    async function addAttendee(netID: string) {
+        setLoading(true);
+        update_registration_table();
+    }
+
+    //Removes an attendee given their UUID from this event
+    async function removeAttendee(user_id: string) {
+        const res = await supabase.
+        from("registrations")
+        .delete()
+        .match({"event": event})
+        .match({"person": user_id});
+
+        //Updates table after removing person
+        setLoading(true);
+        update_registration_table();
+        console.log(res)
+    }
+
+    //gets registration table data from the backend and adds it to the front end after reformatting it
+    async function update_registration_table() {
+        //Todo make this a one time call
+        await getEvent();
+
+        getRegistrations(event).then((registrations) => {
+            setLoading(false)
+            setRegistrations(registrations)
+        });
+    }
+
+    //Getting registration table on first render
+    update_registration_table();
 
     if (loading) return <div>Loading...</div>
 
@@ -110,13 +146,30 @@ function ResultPage(props: EventDetails) {
             </div>
             <div className="btn-group btn-group-vertical lg:btn-group-horizontal">
                 <button className="btn" onClick={copyEmails()}>Copy Emails</button>
-                <button className="btn">Add Attendee</button>
+                <label htmlFor="my-modal" className="btn">Add Attendee</label>
+                <input type="checkbox" id="my-modal" className="modal-toggle" />
+                <div className="modal">
+                <div className="modal-box">
+                    <h3 className="font-bold text-lg">Add attendee</h3>
+                    <div className="form-control w-full max-w-xs">
+                    <input type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" onChange={(event) => setNetID(event.target.value)}/>
+                    <label className="label">
+                        <span className="label-text-alt">netID</span>
+                    </label>
+                    </div>
+                    <div className="modal-action">
+                        <label htmlFor="my-modal" className="btn">Cancel</label>
+                        <label htmlFor="my-modal" className="btn btn-primary">Add</label>
+                    </div>
+                </div>
+                </div>
             </div>
             <div className="overflow-x-auto">
             <table className="table table-compact w-full">
                 <thead>
                 <tr>
                     <th></th> 
+                    <th>Remove?</th>
                     <th>Date and Time</th> 
                     <th>First Name</th> 
                     <th>Last Name</th> 
@@ -131,6 +184,22 @@ function ResultPage(props: EventDetails) {
                         registrations.map((row, index) => {
                             return <tr key = {index}>
                             <th></th>
+                            <td>
+                                <label htmlFor="my-modal" className="btn btn-square">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                </label>
+                                <input type="checkbox" id="my-modal" className="modal-toggle" />
+                                <div className="modal">
+                                <div className="modal-box">
+                                    <h3 className="font-bold text-lg">Are you sure you want to remove {row["first_name"] + " " + row["last_name"] + "?"}</h3>
+
+                                    <div className="modal-action">
+                                        <label htmlFor="my-modal" className="btn">Cancel</label>
+                                        <label htmlFor="my-modal" className="btn btn-primary">Remove</label>
+                                    </div>
+                                </div>
+                                </div>
+                            </td>
                             <td>{row["created_at"]}</td>
                             <td>{row["first_name"]}</td>
                             <td>{row["last_name"]}</td>
