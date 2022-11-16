@@ -24,7 +24,7 @@ function ResultPage(props: EventDetails) {
     const [loading, setLoading] = useState(true)
     const [registrations, setRegistrations] = useState<rowObject[]>([]);
     let event = "";
-    const [emails, setEmails] = useState<string[]>([]);
+    let emails: string[] = [];
     //netID used in adding an attendee
     let netID = "";
 
@@ -97,11 +97,12 @@ function ResultPage(props: EventDetails) {
             formatted_data[i] = formatted_object;
         }
 
-        setEmails(email_arr)
+        emails = email_arr
 
         return formatted_data;
     }; 
 
+    //Copies emails to clipboard
     function copyEmails() {
         navigator.clipboard.writeText(emails.join(' '))
     }
