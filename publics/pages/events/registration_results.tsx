@@ -28,9 +28,10 @@ function ResultPage(props: EventDetails) {
     const [loading, setLoading] = useState(true)
     const [registration, setRegistration] = useState<rowObject[]>([]);
     const [eventDetails, setEventDetails] = useState<EventDetails>();
-    let emails: string[] = [];
+    const [netID, setNetID] = useState("");
+    const [emails, setEmails] = useState<string[]>([]);
+    let email_arr: string[] = [];
     //netID used in adding an attendee
-    let netID = "";
 
     
     //Gets the public that the user accessing this page is an admin of
@@ -52,7 +53,6 @@ function ResultPage(props: EventDetails) {
     //Returns the an array of rowObject that is taken from data from the backend
     async function getRegistrations(event_detail: EventDetails) {
         //Holds emails of registered people, used when copying to clipboard
-        let email_arr = [];
         const {data, error} = await supabase.
             from("registrations")
             .select(`
@@ -98,21 +98,18 @@ function ResultPage(props: EventDetails) {
 
             formatted_data[i] = formatted_object;
         }
-
-        emails = email_arr
+        
 
         return formatted_data;
     }; 
 
     //Copies emails to clipboard
     function copyEmails() {
-        console.log('got called')
-        navigator.clipboard.writeText(emails.join(' '))
+        navigator.clipboard.writeText(emails!.join(' '))
     }
 
     //Adds an attendee to the backend
     async function addAttendee(netID: string) {
-        console.log('got called')
         const {data, error} = await supabase
         .from("profiles")
         .select("id")
@@ -122,34 +119,33 @@ function ResultPage(props: EventDetails) {
         if(!error) {
             let personID = data!.id;
 
+            //Runs into Row level security error here
             const res = await supabase
             .from("registrations")
-            .upsert({"event" : eventDetails!.eventID, "person": personID})
+            .insert({"event" : eventDetails!.eventID, "person": personID})
             .select();
 
             console.log(res);
 
 
             //refresh table after adding attendee
-            //setLoading(true);
+            setLoading(true);
         } else {
+            //TODO throw bigger error!
             console.log(error)
         }
     }
 
     //Removes an attendee given their UUID from this event
     async function removeAttendee(user_id: string) {
-        console.log("got called")
-        // const res = await supabase.
-        // from("registrations")
-        // .delete()
-        // .match({"event": event})
-        // .match({"person": user_id});
+        const res = await supabase.
+        from("registrations")
+        .delete()
+        .match({"event": eventDetails?.eventID})
+        .match({"person": user_id});
 
-        // //Updates table after removing person
-        // setLoading(true);
-        //refreshing table after adding attendee
-        //setLoading(true);
+        console.log(res);
+        setLoading(true);
     }
 
     if (loading) {
@@ -160,6 +156,7 @@ function ResultPage(props: EventDetails) {
                 //Get the registrations for that event
                 setRegistration(registrations)
                 //Stop loading
+                setEmails(email_arr)
                 setLoading(false)
             });
         })
@@ -170,24 +167,24 @@ function ResultPage(props: EventDetails) {
     return (
         <div key = "registration_results_page">
             <div key = "event_title">
-                <h1>{eventDetails!.eventName}: Event Results</h1>
+                <h1>{eventDetails!.eventName}: Registration Results</h1>
             </div>
             <div className="btn-group btn-group-vertical lg:btn-group-horizontal">
-                <button className="btn" onClick={() => copyEmails()}>Copy Emails</button>
+                <button className="btn" onClick={copyEmails}>Copy Emails</button>
                 <label htmlFor="add-modal" className="btn">Add Attendee</label>
                 <input type="checkbox" id="add-modal" className="modal-toggle" />
                 <div className="modal">
                 <div className="modal-box">
                     <h3 className="font-bold text-lg">Add attendee</h3>
                     <div className="form-control w-full max-w-xs">
-                    <input type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" onChange={(event) => netID = event.target.value}/>
+                    <input type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" onChange={(event) => setNetID(event.target.value)}/>
                     <label className="label">
                         <span className="label-text-alt">netID</span>
                     </label>
                     </div>
                     <div className="modal-action">
-                        <label htmlFor="add-modal" className="btn" onClick = {(e) => netID = ""}>Cancel</label>
-                        <label htmlFor="add-modal" className="btn" onClick={(e) => {addAttendee(netID), netID = ""}}>Add</label>
+                        <label htmlFor="add-modal" className="btn">Cancel</label>
+                        <label htmlFor="add-modal" className="btn btn-primary" onClick={() => {addAttendee(netID)}}>Add</label>
                     </div>
                 </div>
                 </div>
