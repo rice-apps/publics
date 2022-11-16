@@ -1,9 +1,5 @@
 import { supabase } from '../../utils/db'
-import { GetServerSideProps } from 'next'
-import { render } from 'react-dom';
 import { useEffect, useState } from 'react';
-import { createServerSupabaseClient} from '@supabase/auth-helpers-nextjs';
-
 /**
  * Simple type containing a friendly name for an event, and the UUID of the event
  */
