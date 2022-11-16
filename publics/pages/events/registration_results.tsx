@@ -136,6 +136,7 @@ function ResultPage() {
      * @param netID 
      */
     async function addAttendee(netID: string) {
+        //Get UUID of user by netID
         const {data, error} = await supabase
         .from("profiles")
         .select("id")
@@ -145,7 +146,8 @@ function ResultPage() {
         if(!error) {
             let personID = data!.id;
 
-            //Runs into Row level security error here
+            //ERROR: Runs into Row level security error here
+            //Insert person into registrations table for this event
             const res = await supabase
             .from("registrations")
             .insert({"event" : eventDetails!.eventID, "person": personID})
