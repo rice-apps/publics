@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import NextPage from "next";
 
-const Counter: NextPage = () => {
+const Counter: NextPage = (props) => {
+  const session = props.session?.data?.session;
   const { query } = useRouter() || { query: { slug: "" } };
 
   const [count, setCount] = useState(0);
@@ -46,7 +47,7 @@ const Counter: NextPage = () => {
   const fetchPosts = async () => {
     if (!query.slug) return;
 
-    const session = await supabase.auth.getSession();
+    // const session = await supabase.auth.getSession();
 
     const { data } = await supabase
       .from("counts")
@@ -62,7 +63,7 @@ const Counter: NextPage = () => {
     const { data: volunteer } = await supabase
       .from("volunteers")
       .select("id, event(slug)")
-      .eq("profile", session?.data?.session?.user?.id)
+      .eq("profile", session?.user?.id)
       .single();
 
     const { data: volunteers } = await supabase
