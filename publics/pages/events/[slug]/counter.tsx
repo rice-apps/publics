@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import NextPage from "next";
 
 const Counter: NextPage = (props) => {
-  const session = props.session?.data?.session;
+  const {session} = props;
   const { query } = useRouter() || { query: { slug: "" } };
 
   const [count, setCount] = useState(0);
@@ -46,8 +46,6 @@ const Counter: NextPage = (props) => {
 
   const fetchPosts = async () => {
     if (!query.slug) return;
-
-    // const session = await supabase.auth.getSession();
 
     const { data } = await supabase
       .from("counts")
