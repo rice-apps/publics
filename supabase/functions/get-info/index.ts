@@ -34,7 +34,21 @@ serve(async (req) => {
     })
   }
 
-  
+  const { data: college, error: getCollegeError } = await supabaseClient
+    .from("organizations")
+    .select('id')
+    .eq('name', json.results[0].college)
+    .single()
+
+  if (getCollegeError) {
+    return new Response(JSON.stringify({error: getCollegeError.message}), {
+      status: 500,
+      headers: {
+        "content-type": "application/json",
+      },
+    })
+  }
+    
   //add entry to supabase if not already there
   const { data, error } = await supabaseClient
     .from('profiles')
@@ -43,7 +57,7 @@ serve(async (req) => {
         id: id,
         first_name: json.results[0].name.split(" ")[0],
         last_name: json.results[0].name.split(" ")[1],
-        college: json.results[0].college,
+        college: college.id,
         netid: json.results[0].netid,
         can_create_event: false,
         },
