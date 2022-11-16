@@ -4,10 +4,12 @@ import { render } from 'react-dom';
 import { useEffect, useState } from 'react';
 import { createServerSupabaseClient} from '@supabase/auth-helpers-nextjs';
 
+//Simple type holding necessary details for an event
 type EventDetails = {
     eventName: string,
 }
 
+//Simple type holding values to be put into a row
 interface rowObject {
     person_id: string,
     created_at : string,
@@ -49,7 +51,6 @@ function ResultPage(props: EventDetails) {
         await getEvent();
         //Holds emails of registered people, used when copying to clipboard
         let email_arr = [];
-        console.log(event)
         const {data, error} = await supabase.
         from("registrations")
         .select(`
@@ -68,7 +69,7 @@ function ResultPage(props: EventDetails) {
         let formatted_data: rowObject[] = []
 
         if (error) {
-            //Throw bigger error
+            //TODO Throw bigger error
             console.log("GOT ERROR:")
             console.log(error)
             return formatted_data;
@@ -81,7 +82,6 @@ function ResultPage(props: EventDetails) {
                 return []
             }
             //TODO fix this, I don't understand typescript and for some reason it doesn't think that I can index the profiles object with the given keys
-            //ERROR Element implicitly has an 'any' type because expression of type '"created_at"' can't be used to index type 'Object'. Property 'created_at' does not exist on type 'Object'
             var formatted_object = {
                 "person_id" : current_object["person"],
                 "created_at" : new Date(current_object["created_at"]).toLocaleString(),
@@ -109,6 +109,8 @@ function ResultPage(props: EventDetails) {
 
     //Adds an attendee to the backend
     async function addAttendee(netID: string) {
+        //TODO figure out query to add attendee given only netID
+
         //refresh table after adding attendee
         setLoading(true);
     }
@@ -216,6 +218,7 @@ function ResultPage(props: EventDetails) {
 }
 
 //Used for testing purposes
+//TODO change this to ResultPage() and use the slug or some other mechanism to get the event
 function Page() {
     return (
         <div>
