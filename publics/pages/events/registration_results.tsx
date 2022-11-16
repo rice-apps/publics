@@ -7,6 +7,7 @@ import { createServerSupabaseClient} from '@supabase/auth-helpers-nextjs';
 //Simple type holding necessary details for an event
 type EventDetails = {
     eventName: string,
+    eventID: string,
 }
 
 //Simple type holding values to be put into a row
@@ -23,32 +24,33 @@ interface rowObject {
 
 function ResultPage(props: EventDetails) {
  
+    //Loading data from backend
     const [loading, setLoading] = useState(true)
-    const[registration, setRegistration] = useState<rowObject[]>([]);
-    let event = "";
+    const [registration, setRegistration] = useState<rowObject[]>([]);
+    const [eventDetails, setEventDetails] = useState<EventDetails>();
     let emails: string[] = [];
     //netID used in adding an attendee
     let netID = "";
 
     
     //Gets the public that the user accessing this page is an admin of
-    //TODO
-    async function getEvent() {
+    async function getEvent(): Promise<EventDetails> {
         //TODO populate this with data that uses the auth of the person using this site
 
         //Find the event that this person is an admit of and return it
         //still returns null
         //const {data, error} = await supabase.auth.getUser();
         //console.log(data)
-        const event_id = '239e8d30-f3ad-4a52-8834-7973324004f1';
-        event = event_id;
+        return {
+            eventName: "sid80s", 
+            eventID: '239e8d30-f3ad-4a52-8834-7973324004f1'
+        }
     };
 
 
     //Gets the set of registrations for the given event
     //Returns the an array of rowObject that is taken from data from the backend
-    async function getRegistrations(event: string) {
-        await getEvent();
+    async function getRegistrations(event_detail: EventDetails) {
         //Holds emails of registered people, used when copying to clipboard
         let email_arr = [];
         const {data, error} = await supabase.
@@ -64,7 +66,7 @@ function ResultPage(props: EventDetails) {
                     netid
                 )
             `)
-            //.eq('event', event)
+            .eq('event', event_detail.eventID)
         
         let formatted_data: rowObject[] = []
 
@@ -104,20 +106,40 @@ function ResultPage(props: EventDetails) {
 
     //Copies emails to clipboard
     function copyEmails() {
+        console.log('got called')
         navigator.clipboard.writeText(emails.join(' '))
     }
 
     //Adds an attendee to the backend
     async function addAttendee(netID: string) {
         console.log('got called')
-        //TODO figure out query to add attendee given only netID
+        const {data, error} = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("netid", netID)
+        .single();
 
-        //refresh table after adding attendee
-        //setLoading(true);
+        if(!error) {
+            let personID = data!.id;
+
+            const res = await supabase
+            .from("registrations")
+            .upsert({"event" : eventDetails!.eventID, "person": personID})
+            .select();
+
+            console.log(res);
+
+
+            //refresh table after adding attendee
+            //setLoading(true);
+        } else {
+            console.log(error)
+        }
     }
 
     //Removes an attendee given their UUID from this event
     async function removeAttendee(user_id: string) {
+        console.log("got called")
         // const res = await supabase.
         // from("registrations")
         // .delete()
@@ -131,27 +153,29 @@ function ResultPage(props: EventDetails) {
     }
 
     if (loading) {
-        getRegistrations(event).then((registrations) => {
-            setRegistration(registrations)
-            setLoading(false)
-            //setRegistrations(registrations)
-        });
+        getEvent().then((event_detail) => {
+            getRegistrations(event_detail).then((registrations) => {
+                //Get the event we are looking at
+                setEventDetails(event_detail)
+                //Get the registrations for that event
+                setRegistration(registrations)
+                //Stop loading
+                setLoading(false)
+            });
+        })
     }
-
-    //Getting registration table on first render
-    //update_registration_table();
 
     if (loading) return <div>Loading...</div>
 
     return (
         <div key = "registration_results_page">
             <div key = "event_title">
-                <h1>{props.eventName}: Event Results</h1>
+                <h1>{eventDetails!.eventName}: Event Results</h1>
             </div>
             <div className="btn-group btn-group-vertical lg:btn-group-horizontal">
-                <button className="btn" onClick={copyEmails()}>Copy Emails</button>
-                <label htmlFor="my-modal" className="btn">Add Attendee</label>
-                <input type="checkbox" id="my-modal" className="modal-toggle" />
+                <button className="btn" onClick={() => copyEmails()}>Copy Emails</button>
+                <label htmlFor="add-modal" className="btn">Add Attendee</label>
+                <input type="checkbox" id="add-modal" className="modal-toggle" />
                 <div className="modal">
                 <div className="modal-box">
                     <h3 className="font-bold text-lg">Add attendee</h3>
@@ -162,8 +186,8 @@ function ResultPage(props: EventDetails) {
                     </label>
                     </div>
                     <div className="modal-action">
-                        <label htmlFor="my-modal" className="btn">Cancel</label>
-                        <label htmlFor="my-modal" className="btn btn-primary" onClick={(addAttendee(netID))}>Add</label>
+                        <label htmlFor="add-modal" className="btn" onClick = {(e) => netID = ""}>Cancel</label>
+                        <label htmlFor="add-modal" className="btn" onClick={(e) => {addAttendee(netID), netID = ""}}>Add</label>
                     </div>
                 </div>
                 </div>
@@ -189,17 +213,17 @@ function ResultPage(props: EventDetails) {
                             return <tr key = {index}>
                             <th></th>
                             <td>
-                                <label htmlFor="my-modal" className="btn btn-square">
+                                <label htmlFor="remove-modal" className="btn btn-square">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
                                 </label>
-                                <input type="checkbox" id="my-modal" className="modal-toggle" />
+                                <input type="checkbox" id="remove-modal" className="modal-toggle" />
                                 <div className="modal">
                                 <div className="modal-box">
                                     <h3 className="font-bold text-lg">Are you sure you want to remove {row["first_name"] + " " + row["last_name"] + "?"}</h3>
 
                                     <div className="modal-action">
-                                        <label htmlFor="my-modal" className="btn">Cancel</label>
-                                        <label htmlFor="my-modal" className="btn btn-primary" onClick={removeAttendee(row["person_id"])}>Remove</label>
+                                        <label htmlFor="remove-modal" className="btn">Cancel</label>
+                                        <label htmlFor="remove-modal" className="btn btn-primary" onClick={() => removeAttendee(row["person_id"])}>Remove</label>
                                     </div>
                                 </div>
                                 </div>
@@ -221,14 +245,4 @@ function ResultPage(props: EventDetails) {
     );
 }
 
-//Used for testing purposes
-//TODO change this to ResultPage() and use the slug or some other mechanism to get the event
-function Page() {
-    return (
-        <div>
-            <ResultPage eventName={"Sid80s"}></ResultPage>
-        </div>
-    );
-}
-
-export default Page;
+export default ResultPage;
