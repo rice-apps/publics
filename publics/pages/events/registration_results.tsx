@@ -23,10 +23,10 @@ function ResultPage(props: EventDetails) {
  
     const [loading, setLoading] = useState(true)
     const [registrations, setRegistrations] = useState<rowObject[]>([]);
-    const [event, setEvent] = useState("");
+    let event = "";
     const [emails, setEmails] = useState<string[]>([]);
     //netID used in adding an attendee
-    const [netdID, setNetID] = useState("");
+    let netID = "";
 
     
     //Gets the public that the user accessing this page is an admin of
@@ -36,18 +36,20 @@ function ResultPage(props: EventDetails) {
 
         //Find the event that this person is an admit of and return it
         //still returns null
-        const {data, error} = await supabase.auth.getUser();
-        console.log(data)
+        //const {data, error} = await supabase.auth.getUser();
+        //console.log(data)
         const event_id = '239e8d30-f3ad-4a52-8834-7973324004f1';
-        setEvent(event_id)
+        event = event_id;
     };
 
 
     //Gets the set of registrations for the given event
     //Returns the an array of rowObject that is taken from data from the backend
     async function getRegistrations(event: string) {
+        await getEvent();
         //Holds emails of registered people, used when copying to clipboard
         let email_arr = [];
+        console.log(event)
         const {data, error} = await supabase.
         from("registrations")
         .select(`
@@ -67,6 +69,7 @@ function ResultPage(props: EventDetails) {
 
         if (error) {
             //Throw bigger error
+            console.log("GOT ERROR:")
             console.log(error)
             return formatted_data;
         }
@@ -105,37 +108,31 @@ function ResultPage(props: EventDetails) {
 
     //Adds an attendee to the backend
     async function addAttendee(netID: string) {
+        //refresh table after adding attendee
         setLoading(true);
-        update_registration_table();
     }
 
     //Removes an attendee given their UUID from this event
     async function removeAttendee(user_id: string) {
-        const res = await supabase.
-        from("registrations")
-        .delete()
-        .match({"event": event})
-        .match({"person": user_id});
+        // const res = await supabase.
+        // from("registrations")
+        // .delete()
+        // .match({"event": event})
+        // .match({"person": user_id});
 
-        //Updates table after removing person
+        // //Updates table after removing person
+        // setLoading(true);
+        //refreshing table after adding attendee
         setLoading(true);
-        update_registration_table();
-        console.log(res)
     }
 
-    //gets registration table data from the backend and adds it to the front end after reformatting it
-    async function update_registration_table() {
-        //Todo make this a one time call
-        await getEvent();
-
-        getRegistrations(event).then((registrations) => {
-            setLoading(false)
-            setRegistrations(registrations)
-        });
-    }
+    getRegistrations(event).then((registrations) => {
+        setLoading(false)
+        setRegistrations(registrations)
+    });
 
     //Getting registration table on first render
-    update_registration_table();
+    //update_registration_table();
 
     if (loading) return <div>Loading...</div>
 
@@ -152,14 +149,14 @@ function ResultPage(props: EventDetails) {
                 <div className="modal-box">
                     <h3 className="font-bold text-lg">Add attendee</h3>
                     <div className="form-control w-full max-w-xs">
-                    <input type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" onChange={(event) => setNetID(event.target.value)}/>
+                    <input type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" onChange={(event) => netID = event.target.value}/>
                     <label className="label">
                         <span className="label-text-alt">netID</span>
                     </label>
                     </div>
                     <div className="modal-action">
                         <label htmlFor="my-modal" className="btn">Cancel</label>
-                        <label htmlFor="my-modal" className="btn btn-primary">Add</label>
+                        <label htmlFor="my-modal" className="btn btn-primary" onClick={(addAttendee(netID))}>Add</label>
                     </div>
                 </div>
                 </div>
@@ -195,7 +192,7 @@ function ResultPage(props: EventDetails) {
 
                                     <div className="modal-action">
                                         <label htmlFor="my-modal" className="btn">Cancel</label>
-                                        <label htmlFor="my-modal" className="btn btn-primary">Remove</label>
+                                        <label htmlFor="my-modal" className="btn btn-primary" onClick={removeAttendee(row["person_id"])}>Remove</label>
                                     </div>
                                 </div>
                                 </div>
