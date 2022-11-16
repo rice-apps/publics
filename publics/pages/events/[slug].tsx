@@ -67,7 +67,7 @@ const details = (props: Props) => {
                         <img src="https://as2.ftcdn.net/v2/jpg/03/09/55/15/1000_F_309551534_hkPIgAAsyc5EQg0Ny2bUYh8ttkUWc8fA.jpg" className="object-cover min-w-[30%] max-w-[30%] min-h-sm rounded-lg shadow-2xl" />
                         <div className="flex flex-col space-y-4">
                             <h1 className="text-5xl font-bold">{event.name}</h1>
-                            <p className="text-xl">{weekday[event.event_datetime.getDay()] + ", " + month[event.event_datetime.getMonth()] + " " + event.event_datetime.getDate() + "th"} </p>
+                            <p className="text-xl">{weekday[event.event_datetime.getDay()] + ", " + month[event.event_datetime.getMonth()] + " " + event.event_datetime.getDate()} </p>
                             <span>
                                 <p className=""> <img className="rounded h-5 w-5 inline object-center" src={event.organization.photo} /> Hosted by {event.organization.name}</p>
                             </span>
