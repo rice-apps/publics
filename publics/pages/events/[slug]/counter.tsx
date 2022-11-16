@@ -1,9 +1,15 @@
 import { supabase } from "../../../utils/db";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import NextPage from "next";
 
-const Counter: NextPage = (props) => {
+//create a type for allVOlunteers
+type Volunteer = {
+  name: string,
+  id: string,
+  count: number
+};
+
+const Counter = (props) => {
   const {session} = props;
   const { query } = useRouter() || { query: { slug: "" } };
 
@@ -12,7 +18,7 @@ const Counter: NextPage = (props) => {
   const [loading, setLoading] = useState(true);
   const [event, setEvent] = useState("");
   const [volunteer, setVolunteer] = useState("");
-  const [allVolunteers, setAllVolunteers] = useState([]);
+  const [allVolunteers, setAllVolunteers] = useState<Volunteer[]>([]);
 
   useEffect(() => {
     fetchPosts();
@@ -68,6 +74,8 @@ const Counter: NextPage = (props) => {
       .from("volunteers")
       .select("id, profile(first_name), event(slug)");
 
+    if (!data || !eventData || !volunteer || !volunteers) return;
+
     const volunteerCountArray = volunteers.map((volunteer) => {
       return {
         name: volunteer.profile.first_name,
@@ -82,7 +90,7 @@ const Counter: NextPage = (props) => {
       };
     });
 
-    setVolunteer(volunteer?.id);
+    setVolunteer(volunteer.id);
     setAllVolunteers(volunteerCountArray);
     setEvent(eventData.id);
 
