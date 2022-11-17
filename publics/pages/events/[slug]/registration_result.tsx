@@ -233,7 +233,7 @@ function ResultPage(props) {
             <div key = "event_title">
                 <h1>{eventDetails!.eventName}: Registration Results</h1>
             </div>
-            <div className="btn-group btn-group-vertical lg:btn-group-horizontal">
+            <div>
                 <button className="btn" onClick={copyEmails}>Copy Emails</button>
                 <label htmlFor="add-modal" className="btn">Add Attendee</label>
                 <input type="checkbox" id="add-modal" className="modal-toggle" />
