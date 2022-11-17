@@ -59,11 +59,19 @@ function ResultPage(props) {
     const router = useRouter();
 
     let email_arr: string[] = [];
+<<<<<<< HEAD
+=======
+
+>>>>>>> 4d7322e (event now responds dynamically to slug)
     /**
      * Gets the event that this user is an admin of, if they are one
      * @returns Event Details corresponding to said event
      */
     async function getEvent(): Promise<EventDetails> {
+<<<<<<< HEAD
+=======
+        //Getting eventID from slug
+>>>>>>> 4d7322e (event now responds dynamically to slug)
         const {data, error} = await supabase
         .from("events")
         .select("id")
