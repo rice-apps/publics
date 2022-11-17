@@ -58,6 +58,7 @@ function ResultPage(props) {
     const session = props.session;
     const router = useRouter();
 
+    //Going to use a global array to store the emails as I need to call setEmails in the same scope that I call setLoading(false) or else we'll get a infinite re-render
     let email_arr: string[] = [];
 <<<<<<< HEAD
 =======
@@ -156,7 +157,7 @@ function ResultPage(props) {
 
     /**
      * Registers attendee to this event given an inputted netID
-     * @param netID 
+     * @param netID - you know what this is
      */
     async function addAttendee(netID: string) {
         //Get UUID of user by netID
@@ -221,8 +222,8 @@ function ResultPage(props) {
                 setEventDetails(event_detail)
                 //Get the registrations for that event
                 setRegistration(registrations)
-                //Stop loading
                 setEmails(email_arr)
+                //Stop loading!
                 setLoading(false)
             });
         })
