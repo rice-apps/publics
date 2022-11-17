@@ -9,7 +9,7 @@ type Props = {
 function Events(props: Props) {
     return (
         <div className="px-8 grid grid-cols-3 gap-4">
-            {props.eventList.map((event) => <EventCard event={event} />)}
+            {props.eventList.map((event) => <EventCard key={event.slug} event={event} />)}
         </div>
     )
 }
