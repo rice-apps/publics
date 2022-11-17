@@ -34,6 +34,12 @@ interface rowObject {
     college: string,
 }
 
+/**
+ * Used to reliably get slug and avoid first render problems
+ * Will probably be used later for loading other data
+ * @param context - default paramater for server side props
+ * @returns props holding the slug
+ */
 export async function getServerSideProps(context) {
     return {
       props: {params: context.params}
@@ -60,19 +66,12 @@ function ResultPage(props) {
 
     //Going to use a global array to store the emails as I need to call setEmails in the same scope that I call setLoading(false) or else we'll get a infinite re-render
     let email_arr: string[] = [];
-<<<<<<< HEAD
-=======
 
->>>>>>> 4d7322e (event now responds dynamically to slug)
     /**
      * Gets the event that this user is an admin of, if they are one
      * @returns Event Details corresponding to said event
      */
     async function getEvent(): Promise<EventDetails> {
-<<<<<<< HEAD
-=======
-        //Getting eventID from slug
->>>>>>> 4d7322e (event now responds dynamically to slug)
         const {data, error} = await supabase
         .from("events")
         .select("id")
@@ -106,7 +105,9 @@ function ResultPage(props) {
                     id,
                     first_name,
                     last_name,
-                    college,
+                    organizations (
+                        name
+                    ),
                     netid
                 )
             `)
@@ -116,31 +117,31 @@ function ResultPage(props) {
         let formatted_data: rowObject[] = []
 
         if (error) {
-            //TODO Throw bigger error
             console.log("GOT ERROR:")
             console.log(error)
             return formatted_data;
         }
         
         for(var i = 0; i < data.length; i++) {
-            var current_object = data[i];
-            var profiles = current_object["profiles"] as Object;
+            let current_object = data[i];
+            let profiles = current_object["profiles"] as Object;
+
             if (profiles == null) {
                 return []
             }
-            //TODO fix this, I don't understand typescript and for some reason it doesn't think that I can index the profiles object with the given keys
-            var formatted_object = {
+
+            let formatted_object = {
                 "person_id" : current_object["person"],
                 "created_at" : new Date(current_object["created_at"]).toLocaleString(),
-                "first_name" : Object.values(profiles)[1],
-                "last_name" : Object.values(profiles)[2],
-                "email" : Object.values(profiles)[4] + "@rice.edu",
-                "netid" :  Object.values(profiles)[4],
-                "college" : Object.values(profiles)[3],
+                "first_name" : profiles["first_name"],
+                "last_name" : profiles["last_name"],
+                "email" : profiles["netid"] + "@rice.edu",
+                "netid" :  profiles["netid"],
+                "college" : profiles["organizations"].name,
             }
 
             //Appending email to global email array
-            email_arr.push(Object.values(profiles)[4] + "@rice.edu");
+            email_arr.push(profiles["netid"] + "@rice.edu");
 
             formatted_data[i] = formatted_object;
         }
@@ -181,7 +182,6 @@ function ResultPage(props) {
 
             setLoading(true);
         } else {
-            //TODO throw bigger error!
             console.log(error)
         }
     }
@@ -192,22 +192,19 @@ function ResultPage(props) {
      */
     async function removeAttendee(user_id: string) {
         const res = await supabase.
-        from("registrations")
+        from('registrations')
         .delete()
-        .match({"event":  eventDetails?.eventID, "person" : user_id})
+        .eq('event', eventDetails?.eventID)
+        .eq('person', user_id)
+        .select();
 
-<<<<<<< HEAD
-        console.log(res);
-=======
         if (!res) {
             console.log("ERROR in removing attendee")
             console.log(res)
         }
-        console.log(eventDetails?.eventID)
-        console.log(user_id)
-        console.log("got result:")
+
+        console.log("got result from removeAttendee:")
         console.log(res)
->>>>>>> abc83ca (still working, reorganized file structure)
         setLoading(true);
     }
 
@@ -308,7 +305,5 @@ function ResultPage(props) {
         </div>
     );
 }
-
-
 
 export default ResultPage;
