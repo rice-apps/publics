@@ -79,7 +79,7 @@ function ResultPage(props) {
         .single();
 
         if (error) {
-            router.push("/")
+            router.push("/404")
         }
 
         return {
@@ -193,10 +193,20 @@ function ResultPage(props) {
         const res = await supabase.
         from("registrations")
         .delete()
-        .match({"event": eventDetails?.eventID})
-        .match({"person": user_id});
+        .match({"event":  eventDetails?.eventID, "person" : user_id})
 
+<<<<<<< HEAD
         console.log(res);
+=======
+        if (!res) {
+            console.log("ERROR in removing attendee")
+            console.log(res)
+        }
+        console.log(eventDetails?.eventID)
+        console.log(user_id)
+        console.log("got result:")
+        console.log(res)
+>>>>>>> abc83ca (still working, reorganized file structure)
         setLoading(true);
     }
 
@@ -266,17 +276,17 @@ function ResultPage(props) {
                             return <tr key = {index}>
                             <th></th>
                             <td>
-                                <label htmlFor="remove-modal" className="btn btn-square">
+                                <label htmlFor={index.toString()} className="btn btn-square">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
                                 </label>
-                                <input type="checkbox" id="remove-modal" className="modal-toggle" />
+                                <input type="checkbox" id={index.toString()} className="modal-toggle" />
                                 <div className="modal">
                                 <div className="modal-box">
                                     <h3 className="font-bold text-lg">Are you sure you want to remove {row["first_name"] + " " + row["last_name"] + "?"}</h3>
 
                                     <div className="modal-action">
-                                        <label htmlFor="remove-modal" className="btn">Cancel</label>
-                                        <label htmlFor="remove-modal" className="btn btn-primary" onClick={() => removeAttendee(row["person_id"])}>Remove</label>
+                                        <label htmlFor={index.toString()} className="btn">Cancel</label>
+                                        <label htmlFor={index.toString()} className="btn btn-primary" onClick={() => removeAttendee(row["person_id"])}>Remove</label>
                                     </div>
                                 </div>
                                 </div>
