@@ -62,21 +62,19 @@ function ResultPage(props) {
     const [netID, setNetID] = useState("");
     //array of emails presented within the registration table, used to copy emails to clipboard
     const [emails, setEmails] = useState<string[]>([]);
-    const [user, setUser] = useState<any>();
     const router = useRouter();
 
     //Going to use a global array to store the emails as we need to call setEmails in the same scope that we call setLoading(false) 
     //or else we'll get a infinite re-render (and a LOT of api calls!)
     let email_arr: string[] = [];
 
-    async function isAdminUser(event_detail: EventDetails): Promise<Boolean> {
+    async function isAdminUser(event_detail: EventDetails): Promise<boolean> {
             let {data, error} = await supabase
             .from("organizations_admins")
             .select("organization")
             .eq("profile", props.user.id);
 
             if(error || data === null) {
-                router.push("/404")
                 return false;
             }
     
@@ -85,7 +83,6 @@ function ResultPage(props) {
                     return true;
                 }
             }
-        router.push("/404")
         return false;
     }
         /**
@@ -236,17 +233,21 @@ function ResultPage(props) {
         //Each of these functions has error handling that will redirect to 404
         //I.e. if the event does not exist we will 404, if the user accessing this page isn't an admin user we will 404
         getEvent().then((event_detail) => {
-            isAdminUser(event_detail).then(() => {
-                getRegistrations(event_detail).then((registrations) => {
-                    //set the event we are looking at
-                    setEventDetails(event_detail)
-                    //set the registrations for that event
-                    setRegistration(registrations)
-                    //set email array
-                    setEmails(email_arr)
-                    //Stop loading!
-                    setLoading(false)
-                });
+            isAdminUser(event_detail).then((isAdminUser) => {
+                if (!isAdminUser) {
+                    router.push("/404")
+                } else {
+                        getRegistrations(event_detail).then((registrations) => {
+                        //set the event we are looking at
+                        setEventDetails(event_detail)
+                        //set the registrations for that event
+                        setRegistration(registrations)
+                        //set email array
+                        setEmails(email_arr)
+                        //Stop loading!
+                        setLoading(false)
+                    });
+                }
             })
         });
     }
