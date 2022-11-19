@@ -6,7 +6,7 @@ import React from 'react'
 
 export default function Create() {
   
-  // const router = useRouter()
+  const router = useRouter()
 
   const [name, setName] = useState(String)
   const [slug, setSlug] = useState(String)
@@ -76,12 +76,9 @@ export default function Create() {
       .single();
     if (error) {
       alert(error.message);
-    }
-    /*
     } else {
-      router.push(`/events/${slug}`);
+      router.push(slug);
     }
-    */
   }
 
   return (
