@@ -17,6 +17,7 @@ export default function Create() {
   const [description, setDescription] = useState(String)
 
   const [registration, setRegistration] = useState(Boolean)
+  const [collegeRegistration, setCollegeRegistration] = useState(Date)
   const [registrationDatetime, setRegistrationDatetime] = useState(Date)
   const [signupSize, setSignupSize] = useState(Number)
   const [waitlistSize, setWaitlistSize] = useState(Number)
@@ -63,6 +64,7 @@ export default function Create() {
     let insert2 = {};
     if (registration) {
       insert2 = {
+        college_registration_datetime: collegeRegistration,
         registration_datetime: registrationDatetime,
         signup_size: signupSize,
         waitlist_size: waitlistSize
@@ -168,6 +170,15 @@ export default function Create() {
             <div className={`${registration ? "" : "hidden"}`}>
               <div>
                 <h2 className = "text-lg leading-10 normal-case font-family: inter font-medium">Registration Details</h2>
+                <div className="mx-3 divider leading-[1px] h-[0.5px] w-[950px]"></div>
+              </div>
+              <div className={`sm:flex`}>
+              <div className="form-control w-full max-w-xs mr-2">
+                  <input value={collegeRegistration} onChange={(e) => setCollegeRegistration(e.target.value)} required type="datetime-local" className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700" />
+                  <label className="label">
+                    <span className="label-text-alt">Date registration opens for college members</span>
+                  </label>
+                </div>
               </div>
               <div className={`sm:flex`}>
                 <div className="form-control w-full max-w-xs mr-2">
