@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useSearchParams } from 'next/navigation';
 import { GetServerSideProps } from 'next'
+import { Session } from 'inspector';
 
 /**
  * Simple type containing a friendly name for an event, and the UUID of the event
@@ -12,12 +13,13 @@ type EventDetails = {
     eventName: string,
     //uuid of event
     eventID: string, //Using string as unsure what UUID type is in TS
+    organization: string, //Organization ID overseeing this event
 }
 
 /**
  * Simple interface containing values stored within a row in the table of registrations presented to the userp
  */
-interface rowObject {
+type rowObject =  {
     //uuid of person
     person_id: string,
     //date this registration was created
@@ -50,7 +52,6 @@ export async function getServerSideProps(context) {
  * Page holding registration results. Check figma for design source
  */
 function ResultPage(props) {
- 
     //is the data for this page loading still loading?
     const [loading, setLoading] = useState(true)
     //Array of registration entries formatted as an array of row objects
@@ -61,20 +62,40 @@ function ResultPage(props) {
     const [netID, setNetID] = useState("");
     //array of emails presented within the registration table, used to copy emails to clipboard
     const [emails, setEmails] = useState<string[]>([]);
-    const session = props.session;
+    const [user, setUser] = useState<any>();
     const router = useRouter();
 
-    //Going to use a global array to store the emails as I need to call setEmails in the same scope that I call setLoading(false) or else we'll get a infinite re-render
+    //Going to use a global array to store the emails as we need to call setEmails in the same scope that we call setLoading(false) 
+    //or else we'll get a infinite re-render (and a LOT of api calls!)
     let email_arr: string[] = [];
 
-    /**
+    async function isAdminUser(event_detail: EventDetails): Promise<Boolean> {
+            let {data, error} = await supabase
+            .from("organizations_admins")
+            .select("organization")
+            .eq("profile", props.user.id);
+
+            if(error || data === null) {
+                router.push("/404")
+                return false;
+            }
+    
+            for(let i = 0; i < data.length; i++) {
+                if(event_detail!.organization == data[i].organization) {
+                    return true;
+                }
+            }
+        router.push("/404")
+        return false;
+    }
+        /**
      * Gets the event that this user is an admin of, if they are one
      * @returns Event Details corresponding to said event
      */
     async function getEvent(): Promise<EventDetails> {
         const {data, error} = await supabase
         .from("events")
-        .select("id")
+        .select("id, organization")
         .eq("slug", props.params.slug)
         .single();
 
@@ -85,6 +106,7 @@ function ResultPage(props) {
         return {
             eventName: props.params.slug,  
             eventID: data?.id,
+            organization: data?.organization
         }
 
     };
@@ -119,6 +141,7 @@ function ResultPage(props) {
         if (error) {
             console.log("GOT ERROR:")
             console.log(error)
+            router.push("/404")
             return formatted_data;
         }
         
@@ -178,10 +201,8 @@ function ResultPage(props) {
             .insert({"event" : eventDetails!.eventID, "person": personID})
             .select();
 
-            console.log(res);
-
-            setLoading(true);
         } else {
+            console.log("Got error")
             console.log(error)
         }
     }
@@ -202,31 +223,35 @@ function ResultPage(props) {
             console.log("ERROR in removing attendee")
             console.log(res)
         }
+    }
 
-        console.log("got result from removeAttendee:")
-        console.log(res)
-        setLoading(true);
+    if(props.user === undefined) {
+        return (<div>Loading...</div>)
     }
 
     /**
      * Initial call that populates page
      */
-    if (loading) {
-        //Get the event, and then get registrations for that event. Set state once data is available.
+    if(loading) {
+        //Each of these functions has error handling that will redirect to 404
+        //I.e. if the event does not exist we will 404, if the user accessing this page isn't an admin user we will 404
         getEvent().then((event_detail) => {
-            getRegistrations(event_detail).then((registrations) => {
-                //Get the event we are looking at
-                setEventDetails(event_detail)
-                //Get the registrations for that event
-                setRegistration(registrations)
-                setEmails(email_arr)
-                //Stop loading!
-                setLoading(false)
-            });
-        })
+            isAdminUser(event_detail).then(() => {
+                getRegistrations(event_detail).then((registrations) => {
+                    //set the event we are looking at
+                    setEventDetails(event_detail)
+                    //set the registrations for that event
+                    setRegistration(registrations)
+                    //set email array
+                    setEmails(email_arr)
+                    //Stop loading!
+                    setLoading(false)
+                });
+            })
+        });
     }
 
-    if (loading) return <div>Loading...</div>
+    if(loading) return (<div>Loading...</div>)
 
     return (
         <div key = "registration_results_page">
@@ -235,7 +260,7 @@ function ResultPage(props) {
             </div>
             <div>
                 <button className="btn" onClick={copyEmails}>Copy Emails</button>
-                <label htmlFor="add-modal" className="btn">Add Attendee</label>
+                <label htmlFor="add-modal" className="btn btn-primary">Add Attendee</label>
                 <input type="checkbox" id="add-modal" className="modal-toggle" />
                 <div className="modal">
                 <div className="modal-box">
@@ -304,6 +329,7 @@ function ResultPage(props) {
             </div>
         </div>
     );
+
 }
 
 export default ResultPage;
