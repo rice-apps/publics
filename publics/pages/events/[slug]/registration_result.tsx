@@ -198,10 +198,14 @@ function ResultPage(props) {
             .insert({"event" : eventDetails!.eventID, "person": personID})
             .select();
 
+            //refresh page
+            setLoading(true);
+
         } else {
             console.log("Got error")
             console.log(error)
         }
+
     }
 
     /**
@@ -220,6 +224,9 @@ function ResultPage(props) {
             console.log("ERROR in removing attendee")
             console.log(res)
         }
+
+        //refresh page
+        setLoading(true);
     }
 
     if(props.user === undefined) {
