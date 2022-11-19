@@ -194,7 +194,7 @@ export default function Create() {
               </div>
             </div>
             <div>
-              <input type="submit" value="Submit" className="btn sm:float-right normal-case border-0 bg-[#AC1FB8] hover:bg-fuchsia-900 focus:outline-none focus:ring focus:ring-fuchsia-700" onClick={insert} />
+              <input type="button" value="Submit" className="btn sm:float-right normal-case border-0 bg-[#AC1FB8] hover:bg-fuchsia-900 focus:outline-none focus:ring focus:ring-fuchsia-700" onClick={insert} />
             </div>
           </div>
         </form>
