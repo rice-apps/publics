@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../utils/db'
 import { useRouter } from 'next/router'
 import React from 'react'
-import CSS from 'csstype';
 
 export default function Create() {
   
@@ -22,22 +21,24 @@ export default function Create() {
   const [signupSize, setSignupSize] = useState(Number)
   const [waitlistSize, setWaitlistSize] = useState(Number)
 
-  const [orgs, setOrgs] = useState([])
+  const [orgs, setOrgs] = useState(Array<any>)
 
   async function getOrgs() {
     const { data: { user } } = await supabase.auth.getUser()
     const { data: org, error } = await supabase
       .from('organizations_admins')
       .select('organization ( id, name )')
-      .eq('profile', user?.id)
+      .eq('profile', user?.id);
     if (error) {
       throw error
     }
     if (org) {
       setOrgs(org)
       if (org.length > 0) {
-        const name = org[0].organization.id
-        setHost(name)
+        const sub_org = org[0].organization
+        if (sub_org) {
+          setHost(sub_org.id)
+        }
       }
     } 
     
@@ -45,10 +46,6 @@ export default function Create() {
 
   useEffect(() => {
     getOrgs()
-    setRegistration(false)
-    setRegistrationDatetime(null)
-    setSignupSize(null)
-    setWaitlistSize(null)
   }, [])
 
   async function insert() {
@@ -63,17 +60,16 @@ export default function Create() {
       registration: registration,
     }
 
-   let insert2 = {};
-   if (registration) {
-    insert2 = {
-      registration_datetime: registrationDatetime,
-      signup_size: signupSize,
-      waitlist_size: waitlistSize
+    let insert2 = {};
+    if (registration) {
+      insert2 = {
+        registration_datetime: registrationDatetime,
+        signup_size: signupSize,
+        waitlist_size: waitlistSize
+      }
     }
-   }
 
    let insert = Object.assign({}, insert1, insert2);
-   console.log("insert is:", insert)
     const { error } = await supabase
       .from('events')
       .insert(insert)
