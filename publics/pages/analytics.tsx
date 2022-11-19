@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { supabase } from "../../../utils/db";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
@@ -159,4 +160,11 @@ return (
       {countsLineGraph}
   </div>
 );
+=======
+
+export default function Analytics() {
+  return (
+    <div></div>
+  );
+>>>>>>> d170e47 (Made a file for the analytics page)
 }
