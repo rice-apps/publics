@@ -8,7 +8,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             name,
             photo
         )`)
-        .eq("slug", context.params.slug)
+        .eq("slug", context.params?.slug)
         .single()
     if (error) {
         return {
@@ -62,7 +62,7 @@ const details = (props: Props) => {
         <div>
             <main>
                 <div className="hero min-h-[60vh] object-left-top">
-                    <div className="hero-content items-stretch lg:flex-row items-center min-w-[70vw] place-content-start space-x-8 max-w-[70vw]">
+                    <div className="hero-content lg:flex-row items-center min-w-[70vw] place-content-start space-x-8 max-w-[70vw]">
 
                         <img src="https://as2.ftcdn.net/v2/jpg/03/09/55/15/1000_F_309551534_hkPIgAAsyc5EQg0Ny2bUYh8ttkUWc8fA.jpg" className="object-cover min-w-[30%] max-w-[30%] min-h-sm rounded-lg shadow-2xl" />
                         <div className="flex flex-col space-y-4">

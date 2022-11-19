@@ -1,17 +1,17 @@
 import '../styles/global.css'
-import {useState, useEffect} from 'react'
+import { useState, useEffect } from 'react'
 import type { AppProps } from 'next/app'
 import { Session } from '@supabase/auth-helpers-react'
 import Layout from '../components/Layout'
 import { supabase } from '../utils/db';
 
-function MyApp({ 
-  Component, 
-  pageProps 
+function MyApp({
+	Component,
+	pageProps
 }: AppProps<{
-  initialSession : Session
+	initialSession: Session
 }>) {
-  const [session, setSession] = useState<Session | null>(null);
+	const [session, setSession] = useState<Session | null>(null);
 
 	useEffect(() => {
 		// for testing - log out the user.
@@ -42,10 +42,10 @@ function MyApp({
 	}, []);
 
 	return (
-    <Layout>
-        <Component {...pageProps} session={session} user={session?.user} />
-    </Layout>
-  )
+		<Layout>
+			<Component {...pageProps} session={session} user={session?.user} />
+		</Layout>
+	)
 }
 
 export default MyApp

@@ -1,7 +1,5 @@
 import { NextApiHandler } from 'next';
 import { createServerSupabaseClient} from '@supabase/auth-helpers-nextjs';
-import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'
-import { useEffect, useState } from 'react'
 
 const create: NextApiHandler = async (req, res) => {
     // Create authenticated Supabase Client

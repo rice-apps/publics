@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../utils/db'
 
-export default function Account({session }) {
-  const [loading, setLoading] = useState(true)
+export default function Account({ session }) {
   const [first_name, setFirst] = useState<string | null>(null)
   const [last_name, setLast] = useState<string | null>(null)
   const [netid, setNetid] = useState<string | null>(null)
@@ -26,7 +25,6 @@ export default function Account({session }) {
 
   async function getProfile() {
     try {
-      setLoading(true)
       const user = await getCurrentUser()
 
       let { data, error, status } = await supabase
@@ -45,14 +43,11 @@ export default function Account({session }) {
         setNetid(data.netid)
       }
     } catch (error) {
-      if (error instanceof Error)
-      {
+      if (error instanceof Error) {
         //alert(error.message)
         console.log(error.message);
       }
-      
-    } finally {
-      setLoading(false)
+
     }
   }
 

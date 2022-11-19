@@ -3,7 +3,7 @@ import Auth from '../components/Auth'
 import Account from '../components/Account'
 import { Session } from '@supabase/auth-helpers-react'
 
-export default function Home({session}: AppProps<{
+export default function Home({ session }: AppProps<{
   session: Session;
 }>) {
   return (
