@@ -107,7 +107,6 @@ export default function Edit() {
     }
 
     async function setData(data) {
-        console.log(data)
         setName(data.name)
         setSlug(data.slug)
         setEventDateTime(format_date(data.event_datetime))
