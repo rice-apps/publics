@@ -1,11 +1,9 @@
 import { supabase } from '../../../utils/db'
 import { GetServerSideProps } from 'next'
 import { useState, useEffect } from 'react'
+import Head from 'next/head'
 
-let slug;
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-    slug = context.params.slug    
+export const getServerSideProps: GetServerSideProps = async (context) => { 
     const { data, error } = await supabase
         .from("events")
         .select(`name, description, event_datetime, registration_datetime, registration, capacity, waitlist_size, organization (
@@ -54,45 +52,54 @@ type Props = {
     data: EventDetail
 }
 
+
 const details = (props: Props) => {
+
+    const [userAuthorized, setUserAuthorized] = useState(Boolean)
+
+    function parse_slug(path: string) {
+        var slash_idx = path.lastIndexOf("/")
+        return path.slice(slash_idx + 1)
+    }
+
     async function authorize(slug) {
         const { data: { user } } = await supabase.auth.getUser()
 
-        const { data: org, error: error2 } = await supabase
+        const { data: org, error: error1 } = await supabase
             .from('events')
             .select('organization ( id, name )')
             .eq('slug', slug);
+        
+        if (error1) {
+            throw error1
+        }
+
+        const { data: user_orgs, error: error2 } = await supabase
+            .from('organizations_admins')
+            .select('organization ( id, name )')
+            .eq('profile', user?.id);
         
         if (error2) {
             throw error2
         }
 
-        const { data: user_orgs, error: error1 } = await supabase
-            .from('organizations_admins')
-            .select('organization ( id, name )')
-            .eq('profile', user?.id);
-        
-        if (error1) {
-            throw error1
-        }
-        
-        console.log("org", org)
-        console.log("user_org", user_orgs)
+        let userAuthorized = false
 
-        var user_authorized = false
-
-        /*
         for (var i = 0; i < user_orgs.length; i++){
             if(user_orgs[i].organization?.id === org[0].organization?.id){
-                user_authorized = true
+                userAuthorized = true
             }
         }
-        */
-        //console.log(user_authorized)
+        
+        return userAuthorized
     }
 
     useEffect(() => {
-        authorize(slug)
+        let pathname = window.location.pathname
+        let slug = parse_slug(pathname)
+        Promise.resolve(authorize(slug)).then((value) => {
+            setUserAuthorized(value)
+        })
     }, [])
 
     const event = props.data
@@ -105,7 +112,12 @@ const details = (props: Props) => {
     event.event_datetime = new Date(event.event_datetime)
 
     return (
-        <div>
+        <div id="index">
+            <Head>
+                <title>Main event page</title>
+                <meta name="eventindex" content="Page for displaying info for event" />
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
             <main>
                 <div className="hero min-h-[60vh] object-left-top">
                     <div className="hero-content items-stretch lg:flex-row items-center min-w-[70vw] place-content-start space-x-8 max-w-[70vw]">
@@ -118,6 +130,9 @@ const details = (props: Props) => {
                                 <p className=""> <img className="rounded h-5 w-5 inline object-center" src={event.organization.photo} /> Hosted by {event.organization.name}</p>
                             </span>
                             <p className="">Description: {event.description}</p>
+                            {userAuthorized &&
+                                <button className="btn btn-primary">Edit event</button>
+                            }
 
                         </div>
                     </div>
