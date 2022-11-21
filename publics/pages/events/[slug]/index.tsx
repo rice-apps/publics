@@ -1,6 +1,7 @@
 import { supabase } from '../../../utils/db'
 import { GetServerSideProps } from 'next'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
 import Head from 'next/head'
 
 export const getServerSideProps: GetServerSideProps = async (context) => { 
@@ -55,7 +56,10 @@ type Props = {
 
 const details = (props: Props) => {
 
+    const router = useRouter()
+
     const [userAuthorized, setUserAuthorized] = useState(Boolean)
+    const [slug, setSlug] = useState(String)
 
     function parse_slug(path: string) {
         var slash_idx = path.lastIndexOf("/")
@@ -94,9 +98,14 @@ const details = (props: Props) => {
         return userAuthorized
     }
 
+    function pushToEdit() {
+        router.push(`${slug}/edit`)
+    }
+
     useEffect(() => {
         let pathname = window.location.pathname
         let slug = parse_slug(pathname)
+        setSlug(slug)
         Promise.resolve(authorize(slug)).then((value) => {
             setUserAuthorized(value)
         })
@@ -131,7 +140,7 @@ const details = (props: Props) => {
                             </span>
                             <p className="">Description: {event.description}</p>
                             {userAuthorized &&
-                                <button className="btn btn-primary">Edit event</button>
+                                <button className="btn btn-primary" onClick={pushToEdit}>Edit event</button>
                             }
 
                         </div>
@@ -140,7 +149,7 @@ const details = (props: Props) => {
                 <div className="divider"></div>
                 <div className="min-h-[15vh] flex-col sm:px-10 md:px-24">
                     <h2 className="mb-2">Register for Event</h2>
-                    <button className="btn btn-primary">Register</button>
+                    <button className="btn btn-primary" >Register</button>
                 </div>
             </main >
         </div >
