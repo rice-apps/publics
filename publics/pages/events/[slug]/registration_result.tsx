@@ -254,6 +254,7 @@ function ResultPage(props) {
     if(props.user === undefined) {
         return (<div>Loading...</div>)
     }
+
     /**
      * Initial call that populates page
      */
@@ -325,7 +326,6 @@ function ResultPage(props) {
                 <tbody>
                 {
                         registration.map((row, index) => {
-                            let checkbox_id: string = "checkbox" + index.toString();
                             let isChecked = row["picked_up_wristband"];
                             return <tr key = {index}>
                             <th></th>
