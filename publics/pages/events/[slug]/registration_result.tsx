@@ -34,6 +34,7 @@ type rowObject =  {
     netid : string,
     //residential college that that registered person is contained within
     college: string,
+    picked_up_wristband: boolean,
 }
 
 /**
@@ -120,6 +121,7 @@ function ResultPage(props) {
             .select(`
                 person,
                 created_at,
+                picked_up_wristband,
                 profiles (
                     id,
                     first_name,
@@ -158,6 +160,7 @@ function ResultPage(props) {
                 "email" : profiles["netid"] + "@rice.edu",
                 "netid" :  profiles["netid"],
                 "college" : profiles["organizations"].name,
+                "picked_up_wristband" : current_object["picked_up_wristband"]
             }
 
             //Appending email to global email array
@@ -229,10 +232,28 @@ function ResultPage(props) {
         setLoading(true);
     }
 
+    /**
+     * Updates backend on status of a registered person having picked up their wristband
+     * @param row - row object holding information so that we can uniquely find the correct registration in the database
+     */
+    async function updateWristband(row: rowObject) {
+        const {error} = await supabase.from("registrations")
+        .update({picked_up_wristband : !row["picked_up_wristband"]})
+        //Ensuring we only update the person who is registered for this event
+        .eq("event", eventDetails?.eventID)
+        .eq("person", row["person_id"]);
+
+        if(error) {
+            console.log(error)
+        } else {
+            //Reload page on correct updating of backend
+            setLoading(true)
+        }
+    }
+
     if(props.user === undefined) {
         return (<div>Loading...</div>)
     }
-
     /**
      * Initial call that populates page
      */
@@ -304,6 +325,8 @@ function ResultPage(props) {
                 <tbody>
                 {
                         registration.map((row, index) => {
+                            let checkbox_id: string = "checkbox" + index.toString();
+                            let isChecked = row["picked_up_wristband"];
                             return <tr key = {index}>
                             <th></th>
                             <td>
@@ -328,7 +351,7 @@ function ResultPage(props) {
                             <td>{row["email"]}</td>
                             <td>{row["netid"]}</td>
                             <td>{row["college"]}</td>
-                            <td><input type="checkbox" className="checkbox checkbox-primary" /></td>
+                            <td><input type="checkbox" className = "checkbox" checked = {isChecked} onChange = {(e) => updateWristband(row)}/></td>
                         </tr>
                         })
                 }
