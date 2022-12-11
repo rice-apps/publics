@@ -284,12 +284,12 @@ function ResultPage(props) {
     if(loading) return (<div>Loading...</div>)
 
     return (
-        <div key = "registration_results_page">
+        <div key = "registration_results_page" className="mx-auto mx-4 space-y-4">
             <div key = "event_title">
                 <h1>{eventDetails!.eventName}: Registration Results</h1>
             </div>
-            <div>
-                <button className="btn" onClick={copyEmails}>Copy Emails</button>
+            <div className="flex justify-end gap-4">
+                <button className="btn " onClick={copyEmails}>Copy Emails</button>
                 <label htmlFor="add-modal" className="btn btn-primary">Add Attendee</label>
                 <input type="checkbox" id="add-modal" className="modal-toggle" />
                 <div className="modal">
