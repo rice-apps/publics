@@ -310,7 +310,7 @@ function ResultPage(props) {
                 <h1>{eventDetails!.eventName}: Registration Results</h1>
             </div>
             <div className="flex justify-end gap-4">
-                <button className="btn " onClick={copyEmails}>Copy Emails</button>
+                <button className="btn btn-outline btn-primary" onClick={copyEmails}>Copy Emails</button>
                 <label htmlFor="add-modal" className="btn btn-primary">Add Attendee</label>
                 <input type="checkbox" id="add-modal" className="modal-toggle" />
                 <div className="modal">
