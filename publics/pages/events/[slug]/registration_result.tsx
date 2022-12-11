@@ -253,7 +253,7 @@ function ResultPage(props) {
         }
 
         //refresh page
-        setLoading(true);
+        setRegistration(registration.filter((v, i) => v.person_id !== user_id));
     }
 
     /**
@@ -323,7 +323,7 @@ function ResultPage(props) {
                     </label>
                     </div>
                     <div className="modal-action">
-                        <label htmlFor="add-modal" className="btn">Cancel</label>
+                        <label htmlFor="add-modal" className="btn btn-outline btn-primary">Cancel</label>
                         <label htmlFor="add-modal" className="btn btn-primary" onClick={() => {addAttendee(netID)}}>Add</label>
                     </div>
                 </div>
@@ -360,7 +360,7 @@ function ResultPage(props) {
                                     <h3 className="font-bold text-lg">Are you sure you want to remove {row["first_name"] + " " + row["last_name"] + "?"}</h3>
 
                                     <div className="modal-action">
-                                        <label htmlFor={index.toString()} className="btn">Cancel</label>
+                                        <label htmlFor={index.toString()} className="btn btn-outline btn-primary">Cancel</label>
                                         <label htmlFor={index.toString()} className="btn btn-primary" onClick={() => removeAttendee(row["person_id"])}>Remove</label>
                                     </div>
                                 </div>
