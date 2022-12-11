@@ -69,6 +69,30 @@ function ResultPage(props) {
     //or else we'll get a infinite re-render (and a LOT of api calls!)
     let email_arr: string[] = [];
 
+    useEffect(() => {
+        supabase
+          .channel(`registrations:${props.params.slug}`)
+          .on(
+            "postgres_changes",
+            { event: "UPDATE", schema: "public", table: "registrations" },
+            (payload) => {
+              setRegistration((prev) => {
+                let new_arr = prev.map((item) => {
+                  if (item.person_id == payload.new.person) {
+                    return {
+                      ...item,
+                      picked_up_wristband: payload.new.picked_up_wristband,
+                    };
+                  }
+                  return item;
+                });
+                return new_arr;
+              });
+            }
+          )
+          .subscribe();
+      }, []);
+
     async function isAdminUser(event_detail: EventDetails): Promise<boolean> {
             let {data, error} = await supabase
             .from("organizations_admins")
@@ -245,9 +269,6 @@ function ResultPage(props) {
 
         if(error) {
             console.log(error)
-        } else {
-            //Reload page on correct updating of backend
-            setLoading(true)
         }
     }
 
