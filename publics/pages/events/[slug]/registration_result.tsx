@@ -137,7 +137,7 @@ function ResultPage(props) {
      * Gets the event that this user is an admin of, if they are one
      * @returns Event Details corresponding to said event
      */
-    async function getEvent() {
+    async function getEvent(): Promise<EventDetails> {
         const {data, error} = await supabase
         .from("events")
         .select("id, organization")
