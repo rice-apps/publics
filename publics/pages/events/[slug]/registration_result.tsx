@@ -1,9 +1,6 @@
 import { supabase } from '../../../utils/db'
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { useSearchParams } from 'next/navigation';
-import { GetServerSideProps } from 'next'
-import { Session } from 'inspector';
 
 /**
  * Simple type containing a friendly name for an event, and the UUID of the event
@@ -65,10 +62,36 @@ function ResultPage(props) {
     const [emails, setEmails] = useState<string[]>([]);
     const router = useRouter();
 
-    //Going to use a global array to store the emails as we need to call setEmails in the same scope that we call setLoading(false) 
-    //or else we'll get a infinite re-render (and a LOT of api calls!)
-    let email_arr: string[] = [];
+     /**
+     * Initial call that populates page
+     */
+    async function getData() {
+        //Get event details
+        const event_detail = await getEvent();
+        //Get admin status
+        const admin_status = await isAdminUser(event_detail);
+        //If not admin, redirect to 404 page
+        if (!admin_status) {
+            router.push("/404");
+        }
+        //Get registrations for that event
+        const registrations = await getRegistrations(event_detail);
+        // //Set event details
+        setEventDetails(event_detail);
+        // //Set registrations
+        setRegistration(registrations);
+        //Stop loading
+        setLoading(false);
+    }
 
+    
+    useEffect(() => {
+        if (props.user) {
+          getData();
+        }
+        }, [props]);
+
+    // Setup realtime for updates to registration table
     useEffect(() => {
         supabase
           .channel(`registrations:${props.params.slug}`)
@@ -110,11 +133,11 @@ function ResultPage(props) {
             }
         return false;
     }
-        /**
+     /**
      * Gets the event that this user is an admin of, if they are one
      * @returns Event Details corresponding to said event
      */
-    async function getEvent(): Promise<EventDetails> {
+    async function getEvent() {
         const {data, error} = await supabase
         .from("events")
         .select("id, organization")
@@ -127,8 +150,8 @@ function ResultPage(props) {
 
         return {
             eventName: props.params.slug,  
-            eventID: data?.id,
-            organization: data?.organization
+            eventID: data!.id,
+            organization: data!.organization
         }
 
     };
@@ -178,7 +201,7 @@ function ResultPage(props) {
 
             let formatted_object = {
                 "person_id" : current_object["person"],
-                "created_at" : new Date(current_object["created_at"]).toLocaleString(),
+                "created_at" : new Date(current_object["created_at"]!).toLocaleString(),
                 "first_name" : profiles["first_name"],
                 "last_name" : profiles["last_name"],
                 "email" : profiles["netid"] + "@rice.edu",
@@ -188,7 +211,11 @@ function ResultPage(props) {
             }
 
             //Appending email to global email array
-            email_arr.push(profiles["netid"] + "@rice.edu");
+            setEmails(
+                (prev) => {
+                    return [...prev, profiles["netid"] + "@rice.edu"]
+                }
+            )
 
             formatted_data[i] = formatted_object;
         }
@@ -226,7 +253,7 @@ function ResultPage(props) {
             .select();
 
             //refresh page
-            setLoading(true);
+            setRegistration(await getRegistrations(eventDetails!));
 
         } else {
             console.log("Got error")
@@ -272,37 +299,9 @@ function ResultPage(props) {
         }
     }
 
-    if(props.user === undefined) {
+    if(props.user === undefined || loading) {
         return (<div>Loading...</div>)
     }
-
-    /**
-     * Initial call that populates page
-     */
-    if(loading) {
-        //Each of these functions has error handling that will redirect to 404
-        //I.e. if the event does not exist we will 404, if the user accessing this page isn't an admin user we will 404
-        getEvent().then((event_detail) => {
-            isAdminUser(event_detail).then((isAdminUser) => {
-                if (!isAdminUser) {
-                    router.push("/404")
-                } else {
-                        getRegistrations(event_detail).then((registrations) => {
-                        //set the event we are looking at
-                        setEventDetails(event_detail)
-                        //set the registrations for that event
-                        setRegistration(registrations)
-                        //set email array
-                        setEmails(email_arr)
-                        //Stop loading!
-                        setLoading(false)
-                    });
-                }
-            })
-        });
-    }
-
-    if(loading) return (<div>Loading...</div>)
 
     return (
         <div key = "registration_results_page" className="mx-auto mx-4 space-y-4">
