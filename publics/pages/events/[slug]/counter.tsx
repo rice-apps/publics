@@ -3,11 +3,16 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 
 //create a type for allVolunteers
-type Volunteer = {
+interface Volunteer {
   name: string;
   id: string;
   count: number;
 };
+
+interface Profile {
+  first_name: string;
+  // other properties
+}
 
 const Counter = (props) => {
   const { session } = props;
@@ -73,7 +78,7 @@ const Counter = (props) => {
       !volunteers ||
       volunteer.event.slug !== query.slug
     ) {
-      window.location.href = "/events/";
+      window.location.href = "/404/";
       return;
     }
 
