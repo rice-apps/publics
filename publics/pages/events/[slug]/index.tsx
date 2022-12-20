@@ -58,7 +58,7 @@ const details = (props: Props) => {
 
     const router = useRouter()
 
-    const [userAuthorized, setUserAuthorized] = useState(Boolean)
+    const [editAuthorized, setEditAuthorized] = useState(Boolean)
     const [slug, setSlug] = useState(String)
 
     function parse_slug(path: string) {
@@ -67,6 +67,16 @@ const details = (props: Props) => {
     }
 
     async function authorize(slug) {
+        const { data: session, error: error0 } = await supabase.auth.getSession()
+
+        if (error0) {
+            throw error0
+        }
+
+        if (session.session === null) {
+            return false
+        }
+        
         const { data: { user } } = await supabase.auth.getUser()
 
         const { data: org, error: error1 } = await supabase
@@ -107,7 +117,7 @@ const details = (props: Props) => {
         let slug = parse_slug(pathname)
         setSlug(slug)
         Promise.resolve(authorize(slug)).then((value) => {
-            setUserAuthorized(value)
+            setEditAuthorized(value)
         })
     }, [])
 
@@ -139,7 +149,7 @@ const details = (props: Props) => {
                                 <p className=""> <img className="rounded h-5 w-5 inline object-center" src={event.organization.photo} /> Hosted by {event.organization.name}</p>
                             </span>
                             <p className="">Description: {event.description}</p>
-                            {userAuthorized &&
+                            {editAuthorized &&
                                 <button className="btn btn-primary" onClick={pushToEdit}>Edit event</button>
                             }
 

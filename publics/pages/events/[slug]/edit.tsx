@@ -27,6 +27,16 @@ export default function Edit() {
     const [editAuthorized, setEditAuthorized] = useState(Boolean)
 
     async function authorize(slug: string) {
+        const { data: session, error: error0 } = await supabase.auth.getSession()
+
+        if (error0) {
+            throw error0
+        }
+
+        if (session.session === null) {
+            return false
+        }
+
         const { data: { user } } = await supabase.auth.getUser()
 
         const { data: org, error: error1 } = await supabase
@@ -59,6 +69,16 @@ export default function Edit() {
     }
 
     async function getOrgs() {
+        const { data: session, error: error0 } = await supabase.auth.getSession()
+
+        if (error0) {
+            throw error0
+        }
+
+        if (session.session === null) {
+            return
+        }
+
         const { data: { user } } = await supabase.auth.getUser()
         const { data: org, error } = await supabase
             .from('organizations_admins')
@@ -71,9 +91,7 @@ export default function Edit() {
             setOrgs(org)
             if (org.length > 0) {
                 const sub_org = org[0].organization
-                if (sub_org) {
-                setHost(sub_org.id)
-                }
+                setHost(sub_org?.id)
             }
         }    
     }
@@ -120,6 +138,11 @@ export default function Edit() {
             setRegistrationDatetime(format_date(data.registration_datetime))
             setSignupSize(data.signup_size)
             setWaitlistSize(data.waitlist_size)
+        } else {
+            setCollegeRegistration("purposely-nonformatted-date")
+            setRegistrationDatetime("purposely-nonformatted-date")
+            setSignupSize(0)
+            setWaitlistSize(0)
         }
     }
 
