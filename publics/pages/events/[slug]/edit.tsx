@@ -197,6 +197,32 @@ export default function Edit() {
         }
     }
 
+    if (!editAuthorized) {
+      return (
+        <div id="form">
+
+          <Head>
+            <title>Edit Event Form</title>
+            <meta name="eventedit" content="Form for editting existing event" />
+            <link rel="icon" href="/favicon.ico" />
+          </Head>
+
+          <main className = "h-screen bg-[#F5F5F5]">
+            <h1 className = "mx-3 text-2xl normal-case leading-[3rem] font-family: inter font-bold">
+              Edit an Event
+            </h1>
+            <div className='leading-[1rem]'>
+              <h2 className = "mx-3 text-lg leading-[2rem] normal-case font-family-inter font-medium">Event Details</h2>
+              <div className="mx-3 divider leading-[1px] h-[0.5px] w-[950px]"></div>
+            </div>
+            <div className="mx-3 mt-3">
+              <p className="text-lg normal-case font-family-inter font-medium">Loading...</p>
+            </div>
+          </main>
+        </div>
+      )
+    }
+
     return (
         <div id="form">
     
