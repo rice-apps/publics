@@ -54,7 +54,7 @@ type Props = {
 }
 
 
-const details = (props: Props) => {
+const Details = (props: Props) => {
 
     const router = useRouter()
 
@@ -166,4 +166,4 @@ const details = (props: Props) => {
     )
 }
 
-export default details
+export default Details
