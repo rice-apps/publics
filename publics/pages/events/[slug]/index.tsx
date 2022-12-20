@@ -1,15 +1,20 @@
 import { supabase } from '../../../utils/db'
 import { GetServerSideProps } from 'next'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
+import Head from 'next/head'
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getServerSideProps: GetServerSideProps = async (context) => { 
     const { data, error } = await supabase
         .from("events")
         .select(`name, description, event_datetime, registration_datetime, registration, capacity, waitlist_size, organization (
             name,
             photo
         )`)
-        .eq("slug", context.params.slug)
+        .eq("slug", context.params?.slug)
         .single()
+        
+
     if (error) {
         return {
             notFound: true
@@ -48,7 +53,74 @@ type Props = {
     data: EventDetail
 }
 
+
 const details = (props: Props) => {
+
+    const router = useRouter()
+
+    const [editAuthorized, setEditAuthorized] = useState(Boolean)
+    const [slug, setSlug] = useState(String)
+
+    function parse_slug(path: string) {
+        var slash_idx = path.lastIndexOf("/")
+        return path.slice(slash_idx + 1)
+    }
+
+    async function authorize(slug) {
+        const { data: session, error: error0 } = await supabase.auth.getSession()
+
+        if (error0) {
+            throw error0
+        }
+
+        if (session.session === null) {
+            return false
+        }
+        
+        const { data: { user } } = await supabase.auth.getUser()
+
+        const { data: org, error: error1 } = await supabase
+            .from('events')
+            .select('organization ( id, name )')
+            .eq('slug', slug);
+        
+        if (error1) {
+            throw error1
+        }
+
+        const { data: user_orgs, error: error2 } = await supabase
+            .from('organizations_admins')
+            .select('organization ( id, name )')
+            .eq('profile', user?.id);
+        
+        if (error2) {
+            throw error2
+        }
+
+        let userAuthorized = false
+
+        for (var i = 0; i < user_orgs.length; i++){
+            if(user_orgs[i].organization?.id === org[0].organization?.id){
+                userAuthorized = true
+            }
+        }
+        
+        return userAuthorized
+    }
+
+    function pushToEdit() {
+        router.push(`${slug}/edit`)
+    }
+
+    useEffect(() => {
+        let pathname = window.location.pathname
+        let slug = parse_slug(pathname)
+        setSlug(slug)
+        Promise.resolve(authorize(slug)).then((value) => {
+            setEditAuthorized(value)
+        })
+    }, [])
+
     const event = props.data
 
     // process datetimes
@@ -59,7 +131,12 @@ const details = (props: Props) => {
     event.event_datetime = new Date(event.event_datetime)
 
     return (
-        <div>
+        <div id="index">
+            <Head>
+                <title>Main event page</title>
+                <meta name="eventindex" content="Page for displaying info for event" />
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
             <main>
                 <div className="hero min-h-[60vh] object-left-top">
                     <div className="hero-content items-stretch lg:flex-row items-center min-w-[70vw] place-content-start space-x-8 max-w-[70vw]">
@@ -72,6 +149,9 @@ const details = (props: Props) => {
                                 <p className=""> <img className="rounded h-5 w-5 inline object-center" src={event.organization.photo} /> Hosted by {event.organization.name}</p>
                             </span>
                             <p className="">Description: {event.description}</p>
+                            {editAuthorized &&
+                                <button className="btn btn-primary" onClick={pushToEdit}>Edit event</button>
+                            }
 
                         </div>
                     </div>
@@ -79,7 +159,7 @@ const details = (props: Props) => {
                 <div className="divider"></div>
                 <div className="min-h-[15vh] flex-col sm:px-10 md:px-24">
                     <h2 className="mb-2">Register for Event</h2>
-                    <button className="btn btn-primary">Register</button>
+                    <button className="btn btn-primary" >Register</button>
                 </div>
             </main >
         </div >
