@@ -31,7 +31,10 @@ type rowObject =  {
     netid : string,
     //residential college that that registered person is contained within
     college: string,
+    //Has this person picked up the wristband
     picked_up_wristband: boolean,
+    //Is this person on the waitlist?
+    waitlist: boolean,
 }
 
 /**
@@ -105,6 +108,7 @@ function ResultPage(props) {
                     return {
                       ...item,
                       picked_up_wristband: payload.new.picked_up_wristband,
+                      waitlist: payload.new.waitlist,
                     };
                   }
                   return item;
@@ -177,7 +181,8 @@ function ResultPage(props) {
                         name
                     ),
                     netid
-                )
+                ),
+                waitlist
             `)
             .eq('event', event_detail.eventID)
         
@@ -207,7 +212,8 @@ function ResultPage(props) {
                 "email" : profiles["netid"] + "@rice.edu",
                 "netid" :  profiles["netid"],
                 "college" : profiles["organizations"].name,
-                "picked_up_wristband" : current_object["picked_up_wristband"]
+                "picked_up_wristband" : current_object["picked_up_wristband"],
+                "waitlist" : current_object["waitlist"]
             }
 
             //Appending email to global email array
@@ -299,6 +305,18 @@ function ResultPage(props) {
         }
     }
 
+    async function updateWaitlist(row: rowObject) {
+        const {error} = await supabase.from("registrations")
+        .update({waitlist : !row["waitlist"]})
+        //Ensuring we only update the person who is registered for this event
+        .eq("event", eventDetails?.eventID)
+        .eq("person", row["person_id"]);
+
+        if(error) {
+            console.log(error)
+        }
+    }
+
     if(props.user === undefined || loading) {
         return (<div>Loading...</div>)
     }
@@ -341,12 +359,14 @@ function ResultPage(props) {
                     <th>NetID</th> 
                     <th>Residential College</th>
                     <th>Wristband?</th>
+                    <th>Waitlist?</th>
                 </tr>
                 </thead> 
                 <tbody>
                 {
                         registration.map((row, index) => {
                             let isChecked = row["picked_up_wristband"];
+                            let isWaitlist = row["waitlist"];
                             return <tr key = {index}>
                             <th></th>
                             <td>
@@ -372,6 +392,7 @@ function ResultPage(props) {
                             <td>{row["netid"]}</td>
                             <td>{row["college"]}</td>
                             <td><input type="checkbox" className = "checkbox" checked = {isChecked} onChange = {(e) => updateWristband(row)}/></td>
+                            <td><input type="checkbox" className = "checkbox" checked = {isWaitlist} onChange = {(e) => updateWaitlist(row)}/></td>
                         </tr>
                         })
                 }
