@@ -24,6 +24,34 @@ export default function Create() {
 
   const [orgs, setOrgs] = useState(Array<any>)
 
+  const [createAuthorized, setCreateAuthorized] = useState(Boolean)
+
+  async function authorize() {
+    const { data: session, error: error0 } = await supabase.auth.getSession()
+
+    if (error0) {
+        throw error0
+    }
+
+    if (session.session === null) {
+        return false
+    }
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    const { data: user_orgs, error: error1 } = await supabase
+        .from('organizations_admins')
+        .select('organization ( id, name )')
+        .eq('profile', user?.id);
+    
+    if (error1) {
+        throw error1
+    }
+
+    return user_orgs.length > 0
+
+  }
+
   async function getOrgs() {
     const { data: { user } } = await supabase.auth.getUser()
     const { data: org, error } = await supabase
@@ -46,6 +74,14 @@ export default function Create() {
   }
 
   useEffect(() => {
+    Promise.resolve(authorize()).then((value) => {
+      if (!value) {
+          router.push('/events')
+      }
+      setCreateAuthorized(value)
+    }).catch(e => {
+      router.push('/events')
+    })
     getOrgs()
   }, [])
 
@@ -81,6 +117,32 @@ export default function Create() {
     } else {
       router.push(slug);
     }
+  }
+
+  if (!createAuthorized) {
+    return (
+      <div id="form">
+
+        <Head>
+          <title>Create Event Form</title>
+          <meta name="eventcreate" content="Form for creating new event" />
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+
+        <main className = "h-screen bg-[#F5F5F5]">
+          <h1 className = "mx-3 text-2xl normal-case leading-[3rem] font-family: inter font-bold">
+            Create an Event
+          </h1>
+          <div className='leading-[1rem]'>
+            <h2 className = "mx-3 text-lg leading-[2rem] normal-case font-family-inter font-medium">Event Details</h2>
+            <div className="mx-3 divider leading-[1px] h-[0.5px] w-[950px]"></div>
+          </div>
+          <div className="mx-3 mt-3">
+            <p className="text-lg normal-case font-family-inter font-medium">Loading...</p>
+          </div>
+        </main>
+      </div>
+    )
   }
 
   return (
