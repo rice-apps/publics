@@ -337,8 +337,7 @@ function ResultPage(props) {
                 <h1>{eventDetails!.eventName}: Registration Results</h1>
             </div>
             <div className="flex justify-end gap-4">
-                <button className="btn btn-outline btn-primary" onClick={copyEmails}>Copy Emails</button>
-                <div className="dropdown">
+            <div className="dropdown">
                     <label tabIndex={0} className="btn m-1">Filter Options</label>
                         <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
                         <div className="AllCheckbox">
@@ -361,6 +360,7 @@ function ResultPage(props) {
                             </div>
                         </ul>
                 </div>
+                <button className="btn btn-outline btn-primary" onClick={copyEmails}>Copy Emails</button>
                 <label htmlFor="add-modal" className="btn btn-primary">Add Attendee</label>
                 <input type="checkbox" id="add-modal" className="modal-toggle" />
                 <div className="modal">
