@@ -10,10 +10,9 @@ type Props = {
 };
 
 interface Registration {
-    event: ListEvent;
-    waitlist: boolean;
+  event: ListEvent;
+  waitlist: boolean;
 }
-
 
 function Events(props) {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
@@ -21,9 +20,9 @@ function Events(props) {
   const [hosting, setHosting] = useState<string[]>([]);
 
   const [openTab, setOpenTab] = useState(1);
-  const [tab1Class, setTab1Class] = useState('tab tab-active');
-    const [tab2Class, setTab2Class] = useState('tab');
-    const [tab3Class, setTab3Class] = useState('tab');
+  const [tab1Class, setTab1Class] = useState("tab tab-active");
+  const [tab2Class, setTab2Class] = useState("tab");
+  const [tab3Class, setTab3Class] = useState("tab");
 
   useEffect(() => {
     if (!props.user) return;
@@ -35,7 +34,9 @@ function Events(props) {
   const getRegistrations = async () => {
     const { data, count, error } = await supabase
       .from("registrations")
-      .select(`person!inner(id), event(*, organization (name, photo, id)), waitlist`)
+      .select(
+        `person!inner(id), event(*, organization (name, photo, id)), waitlist`
+      )
       .eq("person.id", props.user.id);
 
     if (error) {
@@ -43,14 +44,14 @@ function Events(props) {
     }
 
     let reg: Registration[] = data.map((reg) => {
-        return {
-            event: reg.event,
-            waitlist: reg.waitlist
-        }
+      return {
+        event: reg.event,
+        waitlist: reg.waitlist,
+      };
     });
 
     setRegistrations(reg);
-}
+  };
 
   const getVolunteerStatus = async () => {
     const { data, error } = await supabase
@@ -82,83 +83,90 @@ function Events(props) {
 
   function handleClick(tab) {
     if (tab === 1) {
-        setOpenTab(1);
-        setTab1Class('tab tab-active');
-        setTab2Class('tab');
-        setTab3Class('tab');
+      setOpenTab(1);
+      setTab1Class("tab tab-active");
+      setTab2Class("tab");
+      setTab3Class("tab");
     } else if (tab === 2) {
-        setOpenTab(2);
-        setTab1Class('tab');
-        setTab2Class('tab tab-active');
-        setTab3Class('tab');
+      setOpenTab(2);
+      setTab1Class("tab");
+      setTab2Class("tab tab-active");
+      setTab3Class("tab");
     } else {
-        setOpenTab(3);
-        setTab1Class('tab');
-        setTab2Class('tab');
-        setTab3Class('tab tab-active');
+      setOpenTab(3);
+      setTab1Class("tab");
+      setTab2Class("tab");
+      setTab3Class("tab tab-active");
     }
-}
+  }
 
   return (
     <div className="mb-5">
-        <div className="tabs tabs-boxed">
-                <a className={tab1Class} onClick={() => handleClick(1)}>My Events</a>
-                <a className={tab2Class} onClick={() => handleClick(2)}>Volunteering</a>
-                <a className={tab3Class} onClick={() => handleClick(3)}>Hosting</a>
-        </div>
-      {hosting.length > 0 && (
-        <div className={openTab === 3 ? "block" : "hidden"}>
-          <div className="divider">Hosting</div>
+      <div className="tabs tabs-boxed">
+        <a className={tab1Class} onClick={() => handleClick(1)}>
+          My Events
+        </a>
+        <a className={tab2Class} onClick={() => handleClick(2)}>
+          Volunteering
+        </a>
+        <a className={tab3Class} onClick={() => handleClick(3)}>
+          Hosting
+        </a>
+      </div>
+      <div className={openTab === 1 ? "block" : "hidden"}>
+        <div className="divider">My Events</div>
+        {registrations.length > 0 ? (
           <div className="flex flex-col gap-4 px-8">
-            {props.eventList
-              .filter((event) => hosting.includes(event.id))
-              .map((event) => (
-                <LargeEventCard
-                  event={event}
-                  registration_status={"Waitlisted"}
-                  key={event.slug}
-                  type="hosting"
-                />
-              ))}
+            {registrations.map((reg) => (
+              <LargeEventCard
+                event={reg.event}
+                registration_status={
+                  reg.waitlist ? "Waitlisted" : "Succesfully Registered!"
+                }
+                key={reg.event.slug}
+                type="my-events"
+              />
+            ))}
           </div>
-        </div>
-      )}
-      {volunteering.length > 0 && (
-        <div className={openTab === 2 ? "block" : "hidden"}>
-          <div className="divider">Volunteering</div>
+        ) : (
+          <div className="px-8">
+            You are not currently registered for any events.
+          </div>
+        )}
+      </div>
+      <div className={openTab === 2 ? "block" : "hidden"}>
+        <div className="divider">Volunteering</div>
+        {volunteering.length > 0 ? (
           <div className="flex flex-col gap-4 px-8">
             {props.eventList
               .filter((event) => volunteering.includes(event.id))
               .map((event) => (
                 <LargeEventCard
                   event={event}
-                  registration_status={"Waitlisted"}
                   key={event.slug}
                   type="volunteering"
                 />
               ))}
           </div>
-        </div>
-      )}
-      <div className={openTab === 1 ? "block" : "hidden"}>
-      <div className="divider">My Events</div>
-      {registrations.length > 0 ? (
-        <div className="flex flex-col gap-4 px-8">
-          {registrations.map((reg) => (
-            <LargeEventCard
-                event={reg.event}
-                registration_status={reg.waitlist ? "Waitlisted" : "Succesfully Registered!"}
-                key={reg.event.slug}
-                type="my-events"
-            />
-            ))}
-        </div>
-      ) : (
-        <div className="px-8">
-          You are not currently registered for any events.
-        </div>
-      )}
+        ) : (
+          <div className="px-8">You are not volunteering for any events.</div>
+        )}
       </div>
+      <div className={openTab === 3 ? "block" : "hidden"}>
+        <div className="divider">Hosting</div>
+        {hosting.length > 0 ? (
+          <div className="flex flex-col gap-4 px-8">
+            {props.eventList
+              .filter((event) => hosting.includes(event.id))
+              .map((event) => (
+                <LargeEventCard event={event} key={event.slug} type="hosting" />
+              ))}
+          </div>
+        ) : (
+          <div className="px-8">You are not hosting any events.</div>
+        )}
+      </div>
+
       <div className="divider">Upcoming Events</div>
       <div className="px-8 grid grid-cols-1 md:grid-cols-3 gap-4">
         {props.eventList.map((event) => (
