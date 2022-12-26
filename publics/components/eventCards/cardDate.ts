@@ -11,7 +11,6 @@ export function eventCardDate(datetime: string, registration: boolean) {
 
     const date = dt.toLocaleDateString('en-us', { weekday: "long", month: "long", day: "numeric" });
     const time = dt.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
-    //console.log(date.slice(date.length-2, date.length-1))
     const ordinalday = getOrdinal(date.slice(date.length - 2))
 
     if (registration) {
