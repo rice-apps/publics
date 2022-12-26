@@ -343,7 +343,7 @@ function ResultPage(props) {
                         <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
                         <div className="AllCheckbox">
                                 <label className="label cursor-pointer">
-                                    <span className="label-text">All</span> 
+                                    <span className="label-text">Show All</span> 
                                     <input type="checkbox" checked = {filterByAll} onClick={() => {setFilterByAll(!filterByAll);}} className="checkbox" />
                                 </label>
                             </div>
