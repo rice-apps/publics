@@ -20,14 +20,12 @@ const LargeEventCard = (props) => {
           )
         } else if (props.type === 'volunteering') {
           return (
-            //add 2 buttons, one for checking in and one for going to capacity counter page
             <div className="card-actions justify-end">
               <button className="btn btn-primary">Check In</button>
               <button className="btn btn-primary btn-outline">Capacity Counter</button>
             </div>
           )
         } else {
-          //return button for event details and seeing volunteers
           return (
             <div className="card-actions justify-end">
               <button className="btn btn-primary">Event Details</button>
