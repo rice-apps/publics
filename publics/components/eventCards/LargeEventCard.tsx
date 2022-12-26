@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { registrationOpen } from "../../utils/registration";
 import { ListEvent } from "../../utils/types";
 import { eventCardDate } from "./cardDate";
@@ -8,27 +9,34 @@ type Props = {
   type: string;
 };
 const LargeEventCard = (props) => {
+  const link = "/events/" + props.event.slug;
   const setButtons = () => {
     if (props.type === "hosting") {
       return (
-        <div className="card-actions justify-end">
-          <button className="btn btn-primary">Event Details</button>
+        <div className="card-actions sm:justify-end">
+          <button className="btn btn-primary">
+            <Link href={link}>Event Details</Link>
+          </button>
           <button className="btn btn-primary btn-outline">Volunteers</button>
         </div>
       );
     } else if (props.type === "volunteering") {
       return (
-        <div className="card-actions justify-end">
+        <div className="card-actions sm:justify-end">
           <button className="btn btn-primary">Check In</button>
           <button className="btn btn-primary btn-outline">
-            Capacity Counter
+            <Link href={`/events/${props.event.slug}/counter`}>
+              Capacity Counter
+            </Link>
           </button>
         </div>
       );
     } else {
       return (
-        <div className="card-actions justify-end">
-          <button className="btn btn-primary">Event Details</button>
+        <div className="card-actions sm:justify-end">
+          <button className="btn btn-primary">
+            <Link href={link}>Event Details</Link>
+          </button>
         </div>
       );
     }
