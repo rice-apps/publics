@@ -73,6 +73,7 @@ function ResultPage(props) {
         //If not admin, redirect to 404 page
         if (!admin_status) {
             router.push("/404");
+            return
         }
         //Get registrations for that event
         const registrations = await getRegistrations(event_detail);
