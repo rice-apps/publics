@@ -13,11 +13,12 @@ module.exports = {
     themes: [
       {
         'publics': {
+          "color-scheme": "light",
           'primary': '#AC1FB8',
           'secondary': '#E9498C',
           'accent': '#D9D9D9',
           'neutral': '#AC1FB8',
-          'base-100': '#F5F5F5',
+          'base-100': '#FFFFFF',
           'info': '#4AA8BF',
           'success': '#81328F',
           'warning': '#EF8234',
