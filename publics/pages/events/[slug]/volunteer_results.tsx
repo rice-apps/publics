@@ -67,8 +67,8 @@ function VolunteerPage(props) {
     const [netID, setNetID] = useState("");
     //boolean values that we use to filter registrations by when displaying them to the screen
     const [filterByAll, setFilterByAll] = useState(true); //starts as true as we want to start by initially showing the admin the entire set of registered users
-    const [filterByWristband, setFilterByWristband] = useState(false);
-    const [filterByWaitlist, setFilterByWaitlist] = useState(false);
+    const [filterByCheckedIn, setFilterByCheckedIn] = useState(false);
+    const [filterByCounter, setFilterByCounter] = useState(false);
 
     const router = useRouter();
 
@@ -301,12 +301,11 @@ function VolunteerPage(props) {
         if(!error) {
             let personID = data!.id;
 
-            //TODO
-            // //Insert person into registrations table for this event
-            // const res = await supabase
-            // .from("registrations")
-            // .insert({"event" : eventDetails!.eventID, "person": personID})
-            // .select();
+            //Insert person into registrations table for this event
+            const res = await supabase
+            .from("volunteers")
+            .insert({"event" : eventDetails!.eventID, "profile": personID})
+            .select();
 
             //refresh page
             setRegistration(await getRegistrations(eventDetails!));
@@ -413,24 +412,24 @@ function VolunteerPage(props) {
                             </div>
                         <div className="WristbandCheckbox">
                             <label className="label cursor-pointer">
-                                <span className="label-text">Wristband</span> 
-                                <input type="checkbox" checked = {filterByWristband} onClick={() => {setFilterByWristband(!filterByWristband);}} className="checkbox" />
+                                <span className="label-text">Checked In?</span> 
+                                <input type="checkbox" checked = {filterByCheckedIn} onClick={() => {setFilterByCheckedIn(!filterByCheckedIn);}} className="checkbox" />
                             </label>
                             </div>
                             <div className="WaitlistCheckbox">
                                 <label className="label cursor-pointer">
-                                    <span className="label-text">Waitlist</span> 
-                                    <input type="checkbox" checked = {filterByWaitlist} onClick={() => {setFilterByWaitlist(!filterByWaitlist);}} className="checkbox" />
+                                    <span className="label-text">Counter?</span> 
+                                    <input type="checkbox" checked = {filterByCounter} onClick={() => {setFilterByCounter(!filterByCounter);}} className="checkbox" />
                                 </label>
                             </div>
                         </ul>
                 </div>
                 <button className="btn btn-outline btn-primary" onClick={copyEmails}>Copy Emails</button>
-                <label htmlFor="add-modal" className="btn btn-primary">Add Attendee</label>
+                <label htmlFor="add-modal" className="btn btn-primary">Add Volunteer</label>
                 <input type="checkbox" id="add-modal" className="modal-toggle" />
                 <div className="modal">
                 <div className="modal-box">
-                    <h3 className="font-bold text-lg">Add attendee</h3>
+                    <h3 className="font-bold text-lg">Add Volunteer</h3>
                     <div className="form-control w-full max-w-xs">
                     <input type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" onChange={(event) => setNetID(event.target.value)}/>
                     <label className="label">
