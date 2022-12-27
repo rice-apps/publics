@@ -243,6 +243,7 @@ function ResultPage(props) {
             }
         }).forEach(row => emails.push(row.email));
 
+        //Writing to clipboard
         navigator.clipboard.writeText(emails!.join(' '))
     }
 
