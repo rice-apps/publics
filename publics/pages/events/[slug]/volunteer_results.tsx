@@ -184,6 +184,7 @@ function VolunteerPage(props) {
             from("volunteers")
             .select(`
                 profile,
+                created_at,
                 checked_in,
                 start_shift,
                 end_shift,
@@ -225,13 +226,13 @@ function VolunteerPage(props) {
                 "email" : profiles["netid"] + "@rice.edu",
                 "netid" :  profiles["netid"],
                 "college" : profiles["organizations"].name,
-                "start_time" : current_object["start_shift"],
-                "end_time" : current_object["end_shift"],
+                "start_time" : new Date(current_object["start_shift"]!).toLocaleString(),
+                "end_time" : new Date(current_object["end_shift"]!).toLocaleString(),
                 "checked_in" : current_object["checked_in"],
                 "is_counter" : current_object["is_counter"], 
             }
 
-            console.log(formatted_object)
+            console.log(data[i])
             formatted_data[i] = formatted_object;
         }
         
@@ -449,7 +450,6 @@ function VolunteerPage(props) {
                 <tr>
                     <th></th> 
                     <th>Remove?</th>
-                    <th>Date and Time</th> 
                     <th>First Name</th> 
                     <th>Last Name</th> 
                     <th>Email Address</th> 
@@ -490,7 +490,6 @@ function VolunteerPage(props) {
                                 </div>
                                 </div>
                             </td>
-                            <td>{row["created_at"]}</td>
                             <td>{row["first_name"]}</td>
                             <td>{row["last_name"]}</td>
                             <td>{row["email"]}</td>
