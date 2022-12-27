@@ -96,13 +96,6 @@ export default function Edit() {
         }    
     }
 
-    function parse_slug(path: string) {
-        var slash_idx_1 = path.lastIndexOf("/")
-        var edit_removed = path.slice(0, slash_idx_1)
-        var slash_idx_2 = edit_removed.lastIndexOf("/")
-        return edit_removed.slice(slash_idx_2 + 1)
-    }
-
     function format_date(date: string) {
         if (date === null) {
             return "purposely-nonformatted-date"
@@ -147,9 +140,11 @@ export default function Edit() {
     }
 
     useEffect(() => {
+        let slug = router.query.slug
+        if (!slug || typeof slug !== 'string') {
+            return
+        }
         getOrgs()
-        let pathname = window.location.pathname
-        let slug = parse_slug(pathname)
         setOrigSlug(slug)
         Promise.resolve(authorize(slug)).then((value) => {
             if (!value) {
@@ -160,7 +155,7 @@ export default function Edit() {
         Promise.resolve(getData(slug)).then((value) => {
             setData(value)
         })
-    }, [])
+    }, [router])
 
     async function update() {
         if (!editAuthorized) {
@@ -234,7 +229,7 @@ export default function Edit() {
     
           <main className = "h-screen bg-[#F5F5F5]">
             <h1 className = "mx-3 text-2xl normal-case leading-[3rem] font-family: inter font-bold">
-              Edit an Event
+              Edit {name}
             </h1>
             <div className='leading-[1rem]'>
               <h2 className = "mx-3 text-lg leading-[2rem] normal-case font-family-inter font-medium">Event Details</h2>
@@ -294,7 +289,7 @@ export default function Edit() {
                     </label>
                   </div>
                   <div>
-                    <button className="btn normal-case border-0 bg-gray-400 hover:bg-fuchsia-700">
+                    <button className="btn normal-case">
                       Upload Cover Photo
                     </button>
                   </div>
@@ -303,7 +298,7 @@ export default function Edit() {
                   <div className="form-control">
                     <label className="label cursor-pointer">
                       <span className="label-text mr-2">Allow registration?</span>
-                      <input checked={registration} onChange={(e) => setRegistration(e.target.checked)} type="checkbox" className= "h-5 w-5 accent-fuchsia-700 border-fuchsia-100 dark:focus:ring-fuchsia-700 focus:ring-2 dark:bg-fuchsia-100 dark:border-fuchsia-900 checked:dark:bg-fuchsia-100" />
+                      <input checked={registration} onChange={(e) => setRegistration(e.target.checked)} type="checkbox" className= "h-5 w-5 accent-primary" />
                     </label>
                   </div>
                 </div>
@@ -342,7 +337,7 @@ export default function Edit() {
                   </div>
                 </div>
                 <div>
-                  <input type="button" value="Update" className="btn sm:float-right normal-case border-0 bg-[#AC1FB8] hover:bg-fuchsia-900 focus:outline-none focus:ring focus:ring-fuchsia-700" onClick={update} />
+                  <input type="button" value="Update" className="btn sm:float-right normal-case border-0 focus:outline-none focus:ring" onClick={update} />
                 </div>
               </div>
             </form>
