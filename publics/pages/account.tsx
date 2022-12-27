@@ -7,7 +7,7 @@ export default function Home({session}: AppProps<{
   session: Session;
 }>) {
   return (
-    <div className="container">
+    <div>
       {!session ? (
         <Auth />
       ) : (

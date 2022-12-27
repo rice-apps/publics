@@ -32,7 +32,7 @@ export default function Auth() {
     <div className="hero min-h-screen bg-base-200">
       <div className="hero-content text-center">
         <div className="max-w-md">
-          <img src="https://placeimg.com/500/250/arch" className="max-w-sm rounded-lg shadow-2xl" />
+          <img src="https://placeimg.com/500/250/arch" className="mb-8 rounded-lg shadow-2xl" />
           <h1 className="text-5xl font-bold">Publics</h1>
           <p className="py-6">Sentence description for publics application.</p>
           <button
