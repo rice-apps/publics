@@ -43,6 +43,10 @@ function Events(props) {
       throw error;
     }
 
+    if (data.length < 1) {
+      return;
+    }
+
     let reg: Registration[] = data.map((reg) => {
       return {
         event: reg.event,
@@ -58,8 +62,13 @@ function Events(props) {
       .from("volunteers")
       .select(`profile!inner(id), event(id)`)
       .eq("profile.id", props.user.id);
+
     if (error) {
       throw error;
+    }
+
+    if (data.length < 1) {
+      return;
     }
 
     setVolunteering(data.map((v) => v.event!.id));
@@ -72,6 +81,10 @@ function Events(props) {
       .eq("profile.id", props.user.id);
     if (error) {
       throw error;
+    }
+
+    if (data.length < 1) {
+      return;
     }
 
     // get events with oragnization id from data

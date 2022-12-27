@@ -15,7 +15,7 @@ const LargeEventCard = (props) => {
       return (
         <div className="card-actions sm:justify-end">
           <button className="btn btn-primary">
-            <Link href={link}>Event Details</Link>
+            <Link href={`${link}/registration_result`}>Registration Results</Link>
           </button>
           <button className="btn btn-primary btn-outline">Volunteers</button>
         </div>
@@ -25,7 +25,7 @@ const LargeEventCard = (props) => {
         <div className="card-actions sm:justify-end">
           <button className="btn btn-primary">Check In</button>
           <button className="btn btn-primary btn-outline">
-            <Link href={`/events/${props.event.slug}/counter`}>
+            <Link href={`${link}/counter`}>
               Capacity Counter
             </Link>
           </button>
@@ -47,7 +47,10 @@ const LargeEventCard = (props) => {
         <img src="https://placeimg.com/400/400/arch" alt="Album" />
       </figure>
       <div className="card-body">
+        <div className="flex justify-between">
         <h2 className="card-title">{props.event.name}</h2>
+        {props.type === "hosting" && <Link className="text-primary" href={`${link}/edit`}>Edit</Link>}
+        </div>
         <p>{`${eventCardDate(props.event.event_datetime, false)}`} </p>
         <p className="font-medium flex items-center">
           <img
