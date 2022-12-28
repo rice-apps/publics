@@ -464,10 +464,9 @@ function VolunteerPage(props) {
                 {
                         //Add simple filter for row entries
                         registration.filter(row => {
-                            // if(filterByAll || (row.picked_up_wristband == filterByWristband && row.waitlist == filterByWaitlist)) {
-                            //     return row;
-                            // }
-                            return row
+                            if(filterByAll || (row.checked_in == filterByCheckedIn && row.is_counter == filterByCounter)) {
+                                return row;
+                            }
                         }).map((row, index) => {
                             let checkedIn = row["checked_in"];
                             let isCounter = row["is_counter"];
