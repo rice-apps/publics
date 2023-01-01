@@ -9,14 +9,10 @@ interface Volunteer {
   count: number;
 };
 
-interface Profile {
-  first_name: string;
-  // other properties
-}
-
 const Counter = (props) => {
   const { session } = props;
-  const { query } = useRouter() || { query: { slug: "" } };
+  const router = useRouter() || { query: { slug: "" } };
+  const query = router.query;
   const [count, setCount] = useState(0);
   const [myCount, setMyCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -69,22 +65,22 @@ const Counter = (props) => {
       .single();
     const { data: volunteers } = await supabase
       .from("volunteers")
-      .select("id, profile(first_name), event(slug)");
+      .select("id, profile(first_name), event!inner(*)")
+      .eq("event.slug", query.slug);
 
     if (
       !data ||
       !eventData ||
       !volunteer ||
-      !volunteers ||
-      volunteer.event.slug !== query.slug
+      !volunteers
     ) {
-      window.location.href = "/404/";
+      router.push("/404");
       return;
     }
 
     const volunteerCountArray = volunteers.map((volunteer) => {
       return {
-        name: volunteer.profile.first_name,
+        name: volunteer.profile!["first_name"],
         id: volunteer.id,
         count:
           data.filter(
