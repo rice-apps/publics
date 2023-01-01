@@ -52,9 +52,15 @@ const Counter = (props) => {
       )
       .subscribe();
   }, []);
-  
+
   const fetchPosts = async () => {
     if (!query.slug) return;
+
+    if (!session) {
+      router.push("/account")
+      return
+    }
+
     const { data } = await supabase
       .from("counts")
       .select("*, event!inner(*), volunteer(id, profile(first_name))")
@@ -73,11 +79,6 @@ const Counter = (props) => {
       .from("volunteers")
       .select("id, profile(first_name), event!inner(slug)")
       .eq("event.slug", query.slug);
-
-    if (!session) {
-      router.push("/account")
-      return
-    }
 
     if (
       !data ||
