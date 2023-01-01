@@ -31,7 +31,10 @@ type rowObject =  {
     netid : string,
     //residential college that that registered person is contained within
     college: string,
+    //Has this person picked up the wristband
     picked_up_wristband: boolean,
+    //Is this person on the waitlist?
+    waitlist: boolean,
 }
 
 /**
@@ -58,8 +61,11 @@ function ResultPage(props) {
     const [eventDetails, setEventDetails] = useState<EventDetails>();
     //netID of user to add to registration table, used with the add attendee button
     const [netID, setNetID] = useState("");
-    //array of emails presented within the registration table, used to copy emails to clipboard
-    const [emails, setEmails] = useState<string[]>([]);
+    //boolean values that we use to filter registrations by when displaying them to the screen
+    const [filterByAll, setFilterByAll] = useState(true); //starts as true as we want to start by initially showing the admin the entire set of registered users
+    const [filterByWristband, setFilterByWristband] = useState(false);
+    const [filterByWaitlist, setFilterByWaitlist] = useState(false);
+
     const router = useRouter();
 
      /**
@@ -77,6 +83,7 @@ function ResultPage(props) {
         }
         //Get registrations for that event
         const registrations = await getRegistrations(event_detail);
+    
         // //Set event details
         setEventDetails(event_detail);
         // //Set registrations
@@ -106,6 +113,7 @@ function ResultPage(props) {
                     return {
                       ...item,
                       picked_up_wristband: payload.new.picked_up_wristband,
+                      waitlist: payload.new.waitlist,
                     };
                   }
                   return item;
@@ -117,6 +125,11 @@ function ResultPage(props) {
           .subscribe();
       }, []);
 
+    /**
+     * Checks if the user trying to look at this page is an admin of the associated event (and thus has the permission to look at this page)
+     * @param event_detail : event details of this page
+     * @returns true if the user looking at this page is an admin, false otherwise
+     */
     async function isAdminUser(event_detail: EventDetails): Promise<boolean> {
             let {data, error} = await supabase
             .from("organizations_admins")
@@ -178,7 +191,8 @@ function ResultPage(props) {
                         name
                     ),
                     netid
-                )
+                ),
+                waitlist
             `)
             .eq('event', event_detail.eventID)
         
@@ -208,15 +222,9 @@ function ResultPage(props) {
                 "email" : profiles["netid"] + "@rice.edu",
                 "netid" :  profiles["netid"],
                 "college" : profiles["organizations"].name,
-                "picked_up_wristband" : current_object["picked_up_wristband"]
+                "picked_up_wristband" : current_object["picked_up_wristband"],
+                "waitlist" : current_object["waitlist"]
             }
-
-            //Appending email to global email array
-            setEmails(
-                (prev) => {
-                    return [...prev, profiles["netid"] + "@rice.edu"]
-                }
-            )
 
             formatted_data[i] = formatted_object;
         }
@@ -228,6 +236,15 @@ function ResultPage(props) {
      * Copies set of emails to clipboard
      */
     function copyEmails() {
+        let emails: string[] = [];
+        //Filtering by what we currently are showing to the screen
+        registration.filter(row => {
+            if(filterByAll || (row.picked_up_wristband == filterByWristband && row.waitlist == filterByWaitlist)) {
+                return row;
+            }
+        }).forEach(row => emails.push(row.email));
+
+        //Writing to clipboard
         navigator.clipboard.writeText(emails!.join(' '))
     }
 
@@ -300,6 +317,18 @@ function ResultPage(props) {
         }
     }
 
+    async function updateWaitlist(row: rowObject) {
+        const {error} = await supabase.from("registrations")
+        .update({waitlist : !row["waitlist"]})
+        //Ensuring we only update the person who is registered for this event
+        .eq("event", eventDetails?.eventID)
+        .eq("person", row["person_id"]);
+
+        if(error) {
+            console.log(error)
+        }
+    }
+
     if(props.user === undefined || loading) {
         return (<div>Loading...</div>)
     }
@@ -310,6 +339,29 @@ function ResultPage(props) {
                 <h1>{eventDetails!.eventName}: Registration Results</h1>
             </div>
             <div className="flex justify-end gap-4">
+            <div className="dropdown">
+                    <label tabIndex={0} className="btn m-1">Filter Options</label>
+                        <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+                        <div className="AllCheckbox">
+                                <label className="label cursor-pointer">
+                                    <span className="label-text">Show All</span> 
+                                    <input type="checkbox" checked = {filterByAll} onClick={() => {setFilterByAll(!filterByAll);}} className="checkbox" />
+                                </label>
+                            </div>
+                        <div className="WristbandCheckbox">
+                            <label className="label cursor-pointer">
+                                <span className="label-text">Wristband</span> 
+                                <input type="checkbox" checked = {filterByWristband} onClick={() => {setFilterByWristband(!filterByWristband);}} className="checkbox" />
+                            </label>
+                            </div>
+                            <div className="WaitlistCheckbox">
+                                <label className="label cursor-pointer">
+                                    <span className="label-text">Waitlist</span> 
+                                    <input type="checkbox" checked = {filterByWaitlist} onClick={() => {setFilterByWaitlist(!filterByWaitlist);}} className="checkbox" />
+                                </label>
+                            </div>
+                        </ul>
+                </div>
                 <button className="btn btn-outline btn-primary" onClick={copyEmails}>Copy Emails</button>
                 <label htmlFor="add-modal" className="btn btn-primary">Add Attendee</label>
                 <input type="checkbox" id="add-modal" className="modal-toggle" />
@@ -342,12 +394,19 @@ function ResultPage(props) {
                     <th>NetID</th> 
                     <th>Residential College</th>
                     <th>Wristband?</th>
+                    <th>Waitlist?</th>
                 </tr>
                 </thead> 
                 <tbody>
                 {
-                        registration.map((row, index) => {
+                        //Add simple filter for row entries
+                        registration.filter(row => {
+                            if(filterByAll || (row.picked_up_wristband == filterByWristband && row.waitlist == filterByWaitlist)) {
+                                return row;
+                            }
+                        }).map((row, index) => {
                             let isChecked = row["picked_up_wristband"];
+                            let isWaitlist = row["waitlist"];
                             return <tr key = {index}>
                             <th></th>
                             <td>
@@ -373,6 +432,7 @@ function ResultPage(props) {
                             <td>{row["netid"]}</td>
                             <td>{row["college"]}</td>
                             <td><input type="checkbox" className = "checkbox" checked = {isChecked} onChange = {(e) => updateWristband(row)}/></td>
+                            <td><input type="checkbox" className = "checkbox" checked = {isWaitlist} onChange = {(e) => updateWaitlist(row)}/></td>
                         </tr>
                         })
                 }
