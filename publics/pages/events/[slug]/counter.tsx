@@ -74,6 +74,7 @@ const Counter = (props) => {
       !volunteer ||
       !volunteers
     ) {
+      console.log(data)
       router.push("/404");
       return;
     }
