@@ -20,8 +20,11 @@ const Counter = (props) => {
   const [volunteer, setVolunteer] = useState("");
   const [allVolunteers, setAllVolunteers] = useState<Volunteer[]>([]);
   useEffect(() => {
+    if (!session) {
+      return
+    }
     fetchPosts();
-  }, [query]);
+  }, [query, session]);
   useEffect(() => {
     supabase
       .channel(`count:${query.slug}`)
