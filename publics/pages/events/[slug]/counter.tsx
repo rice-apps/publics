@@ -9,23 +9,24 @@ interface Volunteer {
   count: number;
 };
 
-interface Profile {
-  first_name: string;
-  // other properties
-}
-
 const Counter = (props) => {
   const { session } = props;
-  const { query } = useRouter() || { query: { slug: "" } };
+  const router = useRouter() || { query: { slug: "" } };
+  const query = router.query
   const [count, setCount] = useState(0);
   const [myCount, setMyCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [event, setEvent] = useState("");
   const [volunteer, setVolunteer] = useState("");
   const [allVolunteers, setAllVolunteers] = useState<Volunteer[]>([]);
+
   useEffect(() => {
+    if (!props) {
+      return
+    }
     fetchPosts();
-  }, [query]);
+  }, [query, props]);
+
   useEffect(() => {
     supabase
       .channel(`count:${query.slug}`)
@@ -51,6 +52,7 @@ const Counter = (props) => {
       )
       .subscribe();
   }, []);
+  
   const fetchPosts = async () => {
     if (!query.slug) return;
     const { data } = await supabase
@@ -69,7 +71,13 @@ const Counter = (props) => {
       .single();
     const { data: volunteers } = await supabase
       .from("volunteers")
-      .select("id, profile(first_name), event(slug)");
+      .select("id, profile(first_name), event!inner(slug)")
+      .eq("event.slug", query.slug);
+
+    if (!session) {
+      router.push("/account")
+      return
+    }
 
     if (
       !data ||
@@ -78,7 +86,7 @@ const Counter = (props) => {
       !volunteers ||
       volunteer.event.slug !== query.slug
     ) {
-      window.location.href = "/404/";
+      router.push("/404")
       return;
     }
 
