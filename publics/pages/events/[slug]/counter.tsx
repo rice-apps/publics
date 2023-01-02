@@ -1,33 +1,91 @@
-import { supabase } from "../../../utils/db";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import { SupabaseClient, createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 
-//create a type for allVolunteers
 interface Volunteer {
   name: string;
   id: string;
   count: number;
 };
 
+const fetchCounts = async (supabase: SupabaseClient, slug: string, userId: string) => {
+
+  const { data } = await supabase
+    .from("counts")
+    .select("*, event!inner(*), volunteer(id, profile(first_name))")
+    .eq("event.slug", slug);
+  const { data: eventData } = await supabase
+    .from("events")
+    .select("id")
+    .eq("slug", slug)
+    .single();
+  const { data: volunteer } = await supabase
+    .from("volunteers")
+    .select("id, event(slug)")
+    .eq("profile", userId)
+    .single();
+  const { data: volunteers } = await supabase
+    .from("volunteers")
+    .select("id, profile(first_name), event!inner(slug)")
+    .eq("event.slug", slug);
+
+  if (
+    !data ||
+    !eventData ||
+    !volunteer ||
+    !volunteers ||
+    !volunteer.event ||
+    volunteer.event["slug"] !== slug
+  ) {
+    return {authorized: false}
+  }
+
+  const volunteerCountArray = volunteers.map((volunteer) => {
+    return {
+      name: volunteer.profile!["first_name"],
+      id: volunteer.id,
+      count:
+        data.filter(
+          (count) => count.volunteer.id === volunteer.id && count.inout
+        ).length -
+        data.filter(
+          (count) => count.volunteer.id === volunteer.id && !count.inout
+        ).length,
+    };
+  });
+
+  return {
+    authorized: true,
+    volunteer: volunteer.id,
+    event: eventData.id,
+    volunteers: volunteerCountArray,
+    count: data.filter((row) => row.inout).length - data.filter((row) => !row.inout).length,
+    myCount: data.filter((row) => row.volunteer.id === volunteer?.id && row.inout).length - data.filter((row) => row.volunteer.id === volunteer?.id && !row.inout).length
+  }
+};
+
 const Counter = (props) => {
-  const { session } = props;
+  const supabase = useSupabaseClient();
   const router = useRouter() || { query: { slug: "" } };
   const query = router.query
   const [count, setCount] = useState(0);
   const [myCount, setMyCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [event, setEvent] = useState("");
-  const [volunteer, setVolunteer] = useState("");
   const [allVolunteers, setAllVolunteers] = useState<Volunteer[]>([]);
 
   useEffect(() => {
     if (!props) {
-      return
+      return;
     }
-    fetchPosts();
-  }, [query, props]);
+    setCount(props.count);
+    setMyCount(props.myCount);
+    setAllVolunteers(props.volunteers);
+  }, [props]);
 
   useEffect(() => {
+    if (!supabase || !query.slug) {
+      return;
+    }
     supabase
       .channel(`count:${query.slug}`)
       .on(
@@ -51,89 +109,23 @@ const Counter = (props) => {
         }
       )
       .subscribe();
+
+    return () => {
+      supabase.channel(`count:${query.slug}`).unsubscribe();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const fetchPosts = async () => {
-    if (!query.slug) return;
-
-    if (!session) {
-      router.push("/account")
-      return
-    }
-
-    const { data } = await supabase
-      .from("counts")
-      .select("*, event!inner(*), volunteer(id, profile(first_name))")
-      .eq("event.slug", query.slug);
-    const { data: eventData } = await supabase
-      .from("events")
-      .select("id")
-      .eq("slug", query.slug)
-      .single();
-    const { data: volunteer } = await supabase
-      .from("volunteers")
-      .select("id, event(slug)")
-      .eq("profile", session?.user?.id)
-      .single();
-    const { data: volunteers } = await supabase
-      .from("volunteers")
-      .select("id, profile(first_name), event!inner(slug)")
-      .eq("event.slug", query.slug);
-
-    if (
-      !data ||
-      !eventData ||
-      !volunteer ||
-      !volunteers ||
-      volunteer.event.slug !== query.slug
-    ) {
-      router.push("/404")
-      return;
-    }
-
-    const volunteerCountArray = volunteers.map((volunteer) => {
-      return {
-        name: volunteer.profile.first_name,
-        id: volunteer.id,
-        count:
-          data.filter(
-            (count) => count.volunteer.id === volunteer.id && count.inout
-          ).length -
-          data.filter(
-            (count) => count.volunteer.id === volunteer.id && !count.inout
-          ).length,
-      };
-    });
-    setVolunteer(volunteer.id);
-    setAllVolunteers(volunteerCountArray);
-    setEvent(eventData.id);
-    if (data.length > 0) {
-      setCount(
-        data.filter((row) => row.inout).length -
-          data.filter((row) => !row.inout).length
-      );
-      setMyCount(
-        data.filter((row) => row.volunteer.id === volunteer?.id && row.inout)
-          .length -
-          data.filter((row) => row.volunteer.id === volunteer?.id && !row.inout)
-            .length
-      );
-    }
-
-    setLoading(false);
-  };
 
   const updateCount = async (inout) => {
     await supabase.from("counts").insert([
       {
         inout: inout,
-        volunteer: volunteer,
-        event: event,
+        volunteer: props.volunteer,
+        event: props.event,
       },
     ]);
     setMyCount((count) => count + (inout ? 1 : -1));
   };
-  if (loading) return <div className="flex flex-col h-screen">Loading ...</div>;
   return (
     <div className="flex flex-col h-screen">
       <div className="flex flex-row justify-center">
@@ -201,4 +193,53 @@ const Counter = (props) => {
     </div>
   );
 };
+
+export const getServerSideProps = async (ctx) => {
+  // Create authenticated Supabase Client
+  const supabase = createServerSupabaseClient(ctx)
+  // Check if we have a session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+
+  if (!session) {
+    //navigate to account page
+    return {
+      redirect : {
+        destination: `http://${ctx.req.headers.host}/account`,
+        permanent: false,
+    }
+  }
+}
+
+  const { authorized, volunteer, event, volunteers, count, myCount } = await fetchCounts(
+    supabase,
+    ctx.query.slug,
+    session.user.id,
+  );
+
+  if (!authorized) {
+    return {
+      redirect : {
+        destination: `http://${ctx.req.headers.host}/404`,
+        permanent: false,
+    }
+  }
+}
+    
+
+  return {
+    props: {
+      initialSession: session,
+      volunteer: volunteer,
+      event: event,
+      volunteers: volunteers,
+      count: count,
+      myCount: myCount,
+
+    },
+  }
+}
+
 export default Counter;

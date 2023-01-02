@@ -1,38 +1,24 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '../utils/db'
+import { useSupabaseClient } from "@supabase/auth-helpers-react"
+import { useRouter } from 'next/router'
+import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
 
 export default function Account({session }) {
   const [loading, setLoading] = useState(true)
   const [first_name, setFirst] = useState<string | null>(null)
   const [last_name, setLast] = useState<string | null>(null)
   const [netid, setNetid] = useState<string | null>(null)
-
-  async function getCurrentUser() {
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.getSession()
-
-    if (error) {
-      throw error
-    }
-
-    if (!session?.user) {
-      throw new Error('User not logged in')
-    }
-
-    return session.user
-  }
+  const supabaseClient = useSupabaseClient();
+  const router = useRouter();
 
   async function getProfile() {
     try {
       setLoading(true)
-      const user = await getCurrentUser()
 
-      let { data, error, status } = await supabase
+      let { data, error, status } = await supabaseClient
         .from('profiles')
         .select(`first_name, last_name, netid`)
-        .eq('id', user.id)
+        .eq('id', session.user.id)
         .single()
 
       if (error && status !== 406) {
@@ -79,7 +65,10 @@ export default function Account({session }) {
         <div>
           <button
             className="btn btn-error"
-            onClick={() => supabase.auth.signOut()}
+            onClick={async () => {
+              await supabaseClient.auth.signOut();
+              router.push('/account')
+          }}
           >
             Sign Out
           </button>
