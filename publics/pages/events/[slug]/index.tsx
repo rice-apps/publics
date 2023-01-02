@@ -149,7 +149,7 @@ const Details = (props: Props) => {
               {props.authorized && (
                 <button
                   className="btn btn-primary"
-                  onClick={() => router.push("/edit")}
+                  onClick={() => router.push(`${router.asPath}/edit`)}
                 >
                   Edit event
                 </button>
