@@ -1,10 +1,42 @@
 import Head from 'next/head'
 import { useState, useEffect } from 'react'
-import { supabase } from '../../utils/db'
 import { useRouter } from 'next/router'
 import React from 'react'
+import { SupabaseClient, createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
+import { useSupabaseClient } from '@supabase/auth-helpers-react'
 
-export default function Create() {
+async function authorize(supabase: SupabaseClient, userId: string) {
+
+  const { data, error } = await supabase
+      .from('organizations_admins')
+      .select('organization ( id, name )')
+      .eq('profile', userId);
+  
+  if (error) {
+      throw error
+  }
+
+  return data.length > 0
+
+}
+
+async function getOrgs(supabase: SupabaseClient, userId: string) {
+  const { data: orgs, error } = await supabase
+    .from('organizations_admins')
+    .select('organization ( id, name )')
+    .eq('profile', userId);
+  if (error) {
+    throw error
+  }
+  if (!orgs) {
+    return []
+  } 
+
+  return orgs
+  
+}
+
+export default function Create(props) {
   
   const router = useRouter()
 
@@ -22,68 +54,7 @@ export default function Create() {
   const [signupSize, setSignupSize] = useState(Number)
   const [waitlistSize, setWaitlistSize] = useState(Number)
 
-  const [orgs, setOrgs] = useState(Array<any>)
-
-  const [createAuthorized, setCreateAuthorized] = useState(Boolean)
-
-  async function authorize() {
-    const { data: session, error: error0 } = await supabase.auth.getSession()
-
-    if (error0) {
-        throw error0
-    }
-
-    if (session.session === null) {
-        return false
-    }
-
-    const { data: { user } } = await supabase.auth.getUser()
-
-    const { data: user_orgs, error: error1 } = await supabase
-        .from('organizations_admins')
-        .select('organization ( id, name )')
-        .eq('profile', user?.id);
-    
-    if (error1) {
-        throw error1
-    }
-
-    return user_orgs.length > 0
-
-  }
-
-  async function getOrgs() {
-    const { data: { user } } = await supabase.auth.getUser()
-    const { data: org, error } = await supabase
-      .from('organizations_admins')
-      .select('organization ( id, name )')
-      .eq('profile', user?.id);
-    if (error) {
-      throw error
-    }
-    if (org) {
-      setOrgs(org)
-      if (org.length > 0) {
-        const sub_org = org[0].organization
-        if (sub_org) {
-          setHost(sub_org.id)
-        }
-      }
-    } 
-    
-  }
-
-  useEffect(() => {
-    Promise.resolve(authorize()).then((value) => {
-      if (!value) {
-          router.push('/events')
-      }
-      setCreateAuthorized(value)
-    }).catch(e => {
-      router.push('/events')
-    })
-    getOrgs()
-  }, [])
+  const supabase = useSupabaseClient()
 
   async function insert() {
     let insert1 = {
@@ -117,32 +88,6 @@ export default function Create() {
     } else {
       router.push(slug);
     }
-  }
-
-  if (!createAuthorized) {
-    return (
-      <div id="form">
-
-        <Head>
-          <title>Create Event Form</title>
-          <meta name="eventcreate" content="Form for creating new event" />
-          <link rel="icon" href="/favicon.ico" />
-        </Head>
-
-        <main className = "h-screen bg-[#F5F5F5]">
-          <h1 className = "mx-3 text-2xl normal-case leading-[3rem] font-family: inter font-bold">
-            Create an Event
-          </h1>
-          <div className='leading-[1rem]'>
-            <h2 className = "mx-3 text-lg leading-[2rem] normal-case font-family-inter font-medium">Event Details</h2>
-            <div className="mx-3 divider leading-[1px] h-[0.5px] w-[950px]"></div>
-          </div>
-          <div className="mx-3 mt-3">
-            <p className="text-lg normal-case font-family-inter font-medium">Loading...</p>
-          </div>
-        </main>
-      </div>
-    )
   }
 
   return (
@@ -187,7 +132,7 @@ export default function Create() {
             <div className="sm:flex">
               <div className="form-control w-full max-w-xs mr-2">
                 <select className="select select-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700" onChange={(e) => {setHost(e.target.value)}}>
-                  {orgs.length > 0 ? orgs.map(org => (
+                  {props.orgs.length > 0 ? props.orgs.map(org => (
                     <option key={org.organization.id} value={org.organization.id}>{org.organization.name}</option>
                   )) : <option disabled key="null">You are not a part of any organizations</option>}
                 </select>
@@ -271,4 +216,35 @@ export default function Create() {
       </main>
     </div>
   )
+}
+
+export async function getServerSideProps(ctx) {
+  const supabase = createServerSupabaseClient(ctx)
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  if (!session)
+    return {
+      redirect: {
+        destination: `http://${ctx.req.headers.host}/account`,
+        permanent: false,
+      },
+    }
+
+  const authorized = await authorize(supabase, session.user.id)
+  if (!authorized)
+    return {
+      redirect: {
+        destination: `http://${ctx.req.headers.host}/404`,
+        permanent: false,
+      },
+    }
+
+  const orgs = await getOrgs(supabase, session.user.id)
+
+
+  let props = { orgs  };
+
+  return { props }; // will be passed to the page component as props
 }

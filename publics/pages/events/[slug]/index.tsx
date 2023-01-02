@@ -1,17 +1,30 @@
-import { supabase } from '../../../utils/db'
-import { GetServerSideProps } from 'next'
-import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
+import { SupabaseClient, createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
+export async function getServerSideProps(ctx) { 
+    const supabase = createServerSupabaseClient(ctx)
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
 
-export const getServerSideProps: GetServerSideProps = async (context) => { 
+    if (!session) {
+        return {
+            redirect: {
+                destination: `http://${ctx.req.headers.host}/account`,
+                permanent: false,
+            }
+        }
+    }
+
+    const authorized = await authorize(supabase, ctx.params.slug, session.user.id);
+    
     const { data, error } = await supabase
         .from("events")
         .select(`name, description, event_datetime, registration_datetime, registration, capacity, waitlist_size, organization (
             name,
             photo
         )`)
-        .eq("slug", context.params?.slug)
+        .eq("slug", ctx.params?.slug)
         .single()
         
 
@@ -29,7 +42,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     return {
-        props: { data },
+        props: { data, authorized },
     }
 }
 
@@ -51,75 +64,36 @@ type OrganizationDetail = {
 
 type Props = {
     data: EventDetail
+    authorized: boolean
+}
+
+async function authorize(supabase: SupabaseClient, slug: string, userId: string) {
+
+    const { data: org, error: eventsError } = await supabase
+        .from('events')
+        .select('organization ( id, name )')
+        .eq('slug', slug);
+    
+    if (eventsError) {
+        throw eventsError
+    }
+
+    const { data: user_orgs, error: adminError } = await supabase
+        .from('organizations_admins')
+        .select('organization ( id, name )')
+        .eq('profile', userId);
+    
+    if (adminError) {
+        throw adminError
+    }
+
+    return user_orgs && user_orgs.some(user_org => user_org.organization!["id"] === org[0].organization!["id"]);
 }
 
 
 const Details = (props: Props) => {
 
     const router = useRouter()
-
-    const [editAuthorized, setEditAuthorized] = useState(Boolean)
-    const [slug, setSlug] = useState(String)
-
-    function parse_slug(path: string) {
-        var slash_idx = path.lastIndexOf("/")
-        return path.slice(slash_idx + 1)
-    }
-
-    async function authorize(slug) {
-        const { data: session, error: error0 } = await supabase.auth.getSession()
-
-        if (error0) {
-            throw error0
-        }
-
-        if (session.session === null) {
-            return false
-        }
-        
-        const { data: { user } } = await supabase.auth.getUser()
-
-        const { data: org, error: error1 } = await supabase
-            .from('events')
-            .select('organization ( id, name )')
-            .eq('slug', slug);
-        
-        if (error1) {
-            throw error1
-        }
-
-        const { data: user_orgs, error: error2 } = await supabase
-            .from('organizations_admins')
-            .select('organization ( id, name )')
-            .eq('profile', user?.id);
-        
-        if (error2) {
-            throw error2
-        }
-
-        let userAuthorized = false
-
-        for (var i = 0; i < user_orgs.length; i++){
-            if(user_orgs[i].organization?.id === org[0].organization?.id){
-                userAuthorized = true
-            }
-        }
-        
-        return userAuthorized
-    }
-
-    function pushToEdit() {
-        router.push(`${slug}/edit`)
-    }
-
-    useEffect(() => {
-        let pathname = window.location.pathname
-        let slug = parse_slug(pathname)
-        setSlug(slug)
-        Promise.resolve(authorize(slug)).then((value) => {
-            setEditAuthorized(value)
-        })
-    }, [])
 
     const event = props.data
 
@@ -145,11 +119,12 @@ const Details = (props: Props) => {
                             <h1 className="text-5xl font-bold">{event.name}</h1>
                             <p className="text-xl">{weekday[event.event_datetime.getDay()] + ", " + month[event.event_datetime.getMonth()] + " " + event.event_datetime.getDate()} </p>
                             <span>
-                                <p className=""> <img className="rounded h-5 w-5 inline object-center" src={event.organization.photo} /> Hosted by {event.organization.name}</p>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <p className=""> <img className="rounded h-5 w-5 inline object-center" src={event.organization.photo} alt="Organization"/> Hosted by {event.organization.name}</p>
                             </span>
                             <p className="">Description: {event.description}</p>
-                            {editAuthorized &&
-                                <button className="btn btn-primary" onClick={pushToEdit}>Edit event</button>
+                            {props.authorized &&
+                                <button className="btn btn-primary" onClick={() => router.push("/edit")}>Edit event</button>
                             }
 
                         </div>
