@@ -1,16 +1,23 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { SupabaseClient, createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
+import {
+  SupabaseClient,
+  createBrowserSupabaseClient,
+  createServerSupabaseClient,
+} from "@supabase/auth-helpers-nextjs";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 
 interface Volunteer {
   name: string;
   id: string;
   count: number;
-};
+}
 
-const fetchCounts = async (supabase: SupabaseClient, slug: string, userId: string) => {
-
+const fetchCounts = async (
+  supabase: SupabaseClient,
+  slug: string,
+  userId: string
+) => {
   const { data } = await supabase
     .from("counts")
     .select("*, event!inner(*), volunteer(id, profile(first_name))")
@@ -38,7 +45,7 @@ const fetchCounts = async (supabase: SupabaseClient, slug: string, userId: strin
     !volunteer.event ||
     volunteer.event["slug"] !== slug
   ) {
-    return {authorized: false}
+    return { authorized: false };
   }
 
   const volunteerCountArray = volunteers.map((volunteer) => {
@@ -60,15 +67,21 @@ const fetchCounts = async (supabase: SupabaseClient, slug: string, userId: strin
     volunteer: volunteer.id,
     event: eventData.id,
     volunteers: volunteerCountArray,
-    count: data.filter((row) => row.inout).length - data.filter((row) => !row.inout).length,
-    myCount: data.filter((row) => row.volunteer.id === volunteer?.id && row.inout).length - data.filter((row) => row.volunteer.id === volunteer?.id && !row.inout).length
-  }
+    count:
+      data.filter((row) => row.inout).length -
+      data.filter((row) => !row.inout).length,
+    myCount:
+      data.filter((row) => row.volunteer.id === volunteer?.id && row.inout)
+        .length -
+      data.filter((row) => row.volunteer.id === volunteer?.id && !row.inout)
+        .length,
+  };
 };
 
 const Counter = (props) => {
   const supabase = useSupabaseClient();
   const router = useRouter() || { query: { slug: "" } };
-  const query = router.query
+  const query = router.query;
   const [count, setCount] = useState(0);
   const [myCount, setMyCount] = useState(0);
   const [allVolunteers, setAllVolunteers] = useState<Volunteer[]>([]);
@@ -83,37 +96,34 @@ const Counter = (props) => {
   }, [props]);
 
   useEffect(() => {
-    if (!supabase || !query.slug) {
-      return;
-    }
-    supabase
-      .channel(`count:${query.slug}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "counts" },
-        (payload: any) => {
-          //set count and my count
-          setCount((count) => count + (payload.new.inout ? 1 : -1));
-          //update count in allVolunteers
-          setAllVolunteers((volunteers) => {
-            return volunteers.map((volunteer) => {
-              if (volunteer.id === payload.new.volunteer) {
-                return {
-                  ...volunteer,
-                  count: volunteer.count + (payload.new.inout ? 1 : -1),
-                };
-              }
-              return volunteer;
-            });
+    const channel = supabase.channel(`count:${query.slug}`);
+
+    channel.on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "counts" },
+      (payload: any) => {
+        //set count and my count
+        setCount((count) => count + (payload.new.inout ? 1 : -1));
+        //update count in allVolunteers
+        setAllVolunteers((volunteers) => {
+          return volunteers.map((volunteer) => {
+            if (volunteer.id === payload.new.volunteer) {
+              return {
+                ...volunteer,
+                count: volunteer.count + (payload.new.inout ? 1 : -1),
+              };
+            }
+            return volunteer;
           });
-        }
-      )
-      .subscribe();
+        });
+      }
+    );
+    channel.subscribe();
 
     return () => {
-      supabase.channel(`count:${query.slug}`).unsubscribe();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const updateCount = async (inout) => {
@@ -196,38 +206,33 @@ const Counter = (props) => {
 
 export const getServerSideProps = async (ctx) => {
   // Create authenticated Supabase Client
-  const supabase = createServerSupabaseClient(ctx)
+  const supabase = createServerSupabaseClient(ctx);
   // Check if we have a session
   const {
     data: { session },
-  } = await supabase.auth.getSession()
-
+  } = await supabase.auth.getSession();
 
   if (!session) {
     //navigate to account page
     return {
-      redirect : {
+      redirect: {
         destination: `http://${ctx.req.headers.host}/account`,
         permanent: false,
-    }
+      },
+    };
   }
-}
 
-  const { authorized, volunteer, event, volunteers, count, myCount } = await fetchCounts(
-    supabase,
-    ctx.query.slug,
-    session.user.id,
-  );
+  const { authorized, volunteer, event, volunteers, count, myCount } =
+    await fetchCounts(supabase, ctx.query.slug, session.user.id);
 
   if (!authorized) {
     return {
-      redirect : {
+      redirect: {
         destination: `http://${ctx.req.headers.host}/404`,
         permanent: false,
-    }
+      },
+    };
   }
-}
-    
 
   return {
     props: {
@@ -237,9 +242,8 @@ export const getServerSideProps = async (ctx) => {
       volunteers: volunteers,
       count: count,
       myCount: myCount,
-
     },
-  }
-}
+  };
+};
 
 export default Counter;

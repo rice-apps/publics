@@ -59,12 +59,9 @@ async function isAdminUser(
     return false;
   }
 
-  for (let i = 0; i < data.length; i++) {
-    if (event_detail!.organization == data[i].organization) {
-      return true;
-    }
-  }
-  return false;
+  return data.some(
+    (event) => event.organization === event_detail!.organization
+  );
 }
 /**
  * Gets the event that this user is an admin of, if they are one

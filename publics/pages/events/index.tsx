@@ -1,9 +1,9 @@
-import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
+import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect, useState } from "react";
 import EventCard from "../../components/eventCards/EventCard";
 import type { ListEvent } from "../../utils/types";
 import LargeEventCard from "../../components/eventCards/LargeEventCard";
-import { SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseClient } from "@supabase/supabase-js";
 
 type Props = {
   events: ListEvent[];
@@ -18,7 +18,7 @@ interface Registration {
 }
 
 const getEvents = async (supabase: SupabaseClient) => {
-    const { data, error } = await supabase
+  const { data, error } = await supabase
     .from("events")
     .select(`*, organization (name, photo, id)`);
   // .gt('event_datetime', new Date().toISOString())
@@ -27,73 +27,76 @@ const getEvents = async (supabase: SupabaseClient) => {
   }
 
   return data;
-}
+};
 
 const getRegistrations = async (supabase: SupabaseClient, userId: string) => {
-    const { data, count, error } = await supabase
-      .from("registrations")
-      .select(
-        `person!inner(id), event(*, organization (name, photo, id)), waitlist`
-      )
-      .eq("person.id", userId);
+  const { data, count, error } = await supabase
+    .from("registrations")
+    .select(
+      `person!inner(id), event(*, organization (name, photo, id)), waitlist`
+    )
+    .eq("person.id", userId);
 
-    if (error) {
-      throw error;
-    }
+  if (error) {
+    throw error;
+  }
 
-    if (data.length < 1) {
-      return [];
-    }
+  if (data.length < 1) {
+    return [];
+  }
 
-    let reg: Registration[] = data.map((reg) => {
-      return {
-        event: reg.event,
-        waitlist: reg.waitlist,
-      };
-    });
+  let reg: Registration[] = data.map((reg) => {
+    return {
+      event: reg.event,
+      waitlist: reg.waitlist,
+    };
+  });
 
-    return reg;
-  };
+  return reg;
+};
 
-  const getVolunteerStatus = async (supabase: SupabaseClient, userId: string) => {
-    const { data, error } = await supabase
-      .from("volunteers")
-      .select(`profile!inner(id), event(id)`)
-      .eq("profile.id", userId);
+const getVolunteerStatus = async (supabase: SupabaseClient, userId: string) => {
+  const { data, error } = await supabase
+    .from("volunteers")
+    .select(`profile!inner(id), event(id)`)
+    .eq("profile.id", userId);
 
-    if (error) {
-      throw error;
-    }
+  if (error) {
+    throw error;
+  }
 
-    if (data.length < 1) {
-      return [];
-    }
+  if (data.length < 1) {
+    return [];
+  }
 
-    return data.map((vol) => vol.event!["id"]);
-  };
+  return data.map((vol) => vol.event!["id"]);
+};
 
-  const getHostedEvents = async (supabase: SupabaseClient, userId: string, events: ListEvent[]) => {
-    const { data, error } = await supabase
-      .from("organizations_admins")
-      .select(`organization(id), profile!inner(id)`)
-      .eq("profile.id", userId);
-    if (error) {
-      throw error;
-    }
+const getHostedEvents = async (
+  supabase: SupabaseClient,
+  userId: string,
+  events: ListEvent[]
+) => {
+  const { data, error } = await supabase
+    .from("organizations_admins")
+    .select(`organization(id), profile!inner(id)`)
+    .eq("profile.id", userId);
+  if (error) {
+    throw error;
+  }
 
-    if (data.length < 1) {
-      return [];
-    }
+  if (data.length < 1) {
+    return [];
+  }
 
-    // get events with oragnization id from data
-    const hostedEvents = events.filter((event) =>
-      data.map((org) => org.organization!["id"]).includes(event.organization!.id)
-    );
-    return hostedEvents.map((event) => event.id);
-  };
+  // get events with oragnization id from data
+  const hostedEvents = events.filter((event) =>
+    data.map((org) => org.organization!["id"]).includes(event.organization!.id)
+  );
+  return hostedEvents.map((event) => event.id);
+};
 
 function Events(props: Props) {
-
   const [openTab, setOpenTab] = useState(1);
   const [tab1Class, setTab1Class] = useState("tab tab-active");
   const [tab2Class, setTab2Class] = useState("tab");
@@ -118,20 +121,20 @@ function Events(props: Props) {
       setTab1Class("tab");
       setTab2Class("tab");
       setTab3Class("tab tab-active");
-        setTab4Class("tab");
+      setTab4Class("tab");
     } else {
-        setOpenTab(4);
-        setTab1Class("tab");
-        setTab2Class("tab");
-        setTab3Class("tab");
-        setTab4Class("tab tab-active");
-      }
+      setOpenTab(4);
+      setTab1Class("tab");
+      setTab2Class("tab");
+      setTab3Class("tab");
+      setTab4Class("tab tab-active");
+    }
   }
 
   return (
     <div className="mb-5">
       <div className="tabs tabs-boxed">
-      <a className={tab1Class} onClick={() => handleClick(1)}>
+        <a className={tab1Class} onClick={() => handleClick(1)}>
           Upcoming Events
         </a>
         <a className={tab2Class} onClick={() => handleClick(2)}>
@@ -147,15 +150,13 @@ function Events(props: Props) {
       <div className={openTab === 1 ? "block" : "hidden"}>
         <div className="divider">Upcoming Events</div>
         {props.events.length > 0 ? (
-               <div className="px-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-               {props.events.map((event) => (
-                 <EventCard key={event.slug} event={event} />
-               ))}
-             </div>
-        ) : (
-          <div className="px-8">
-            There are currently no upcoming events.
+          <div className="px-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+            {props.events.map((event) => (
+              <EventCard key={event.slug} event={event} />
+            ))}
           </div>
+        ) : (
+          <div className="px-8">There are currently no upcoming events.</div>
         )}
       </div>
       <div className={openTab === 2 ? "block" : "hidden"}>
@@ -217,10 +218,10 @@ function Events(props: Props) {
 
 // This gets called on every request
 export async function getServerSideProps(ctx) {
-  const supabase = createServerSupabaseClient(ctx)
+  const supabase = createServerSupabaseClient(ctx);
   const {
     data: { session },
-  } = await supabase.auth.getSession()
+  } = await supabase.auth.getSession();
 
   if (!session)
     return {
@@ -228,14 +229,14 @@ export async function getServerSideProps(ctx) {
         destination: `http://${ctx.req.headers.host}/account`,
         permanent: false,
       },
-    }
+    };
 
-    const events = await getEvents(supabase);
-    const registrations = await getRegistrations(supabase, session.user.id);
-    const volunteering = await getVolunteerStatus(supabase, session.user.id);
-    const hosting = await getHostedEvents(supabase, session.user.id, events);
+  const events = await getEvents(supabase);
+  const registrations = await getRegistrations(supabase, session.user.id);
+  const volunteering = await getVolunteerStatus(supabase, session.user.id);
+  const hosting = await getHostedEvents(supabase, session.user.id, events);
 
-  let props: Props = { events, hosting, registrations, volunteering  };
+  let props: Props = { events, hosting, registrations, volunteering };
 
   return { props }; // will be passed to the page component as props
 }
