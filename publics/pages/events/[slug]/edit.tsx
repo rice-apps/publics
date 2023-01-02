@@ -130,15 +130,15 @@ export default function Edit(props) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="h-screen bg-[#F5F5F5]">
+      <main className="bg-[#F5F5F5s]">
         <h1 className="mx-3 text-2xl normal-case leading-[3rem] font-family: inter font-bold">
           Edit {name}
         </h1>
-        <div className="leading-[1rem]">
+        <div>
           <h2 className="mx-3 text-lg leading-[2rem] normal-case font-family-inter font-medium">
             Event Details
           </h2>
-          <div className="mx-3 divider leading-[1px] h-[0.5px] w-[950px]"></div>
+          <div className="mx-3 divider leading-[1px]"></div>
         </div>
         <form>
           <div className="p-2">
@@ -267,7 +267,7 @@ export default function Edit(props) {
                 <h2 className="text-lg leading-10 normal-case font-family: inter font-medium">
                   Registration Details
                 </h2>
-                <div className="mx-3 divider leading-[1px] h-[0.5px] w-[950px]"></div>
+                <div className="mx-3 divider leading-[1px]"></div>
               </div>
               <div className={`sm:flex`}>
                 <div className="form-control w-full max-w-xs mr-2">
