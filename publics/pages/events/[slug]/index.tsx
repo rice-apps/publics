@@ -118,12 +118,10 @@ const Details = (props: Props) => {
       </Head>
       <main>
         <div className="hero min-h-[60vh] object-left-top">
-          <div className="hero-content items-stretch lg:flex-row items-center min-w-[70vw] place-content-start space-x-8 max-w-[70vw]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
+          <div className="hero-content items-stretch flex-col md:flex-row min-w-[70vw]">
             <img
               src="https://as2.ftcdn.net/v2/jpg/03/09/55/15/1000_F_309551534_hkPIgAAsyc5EQg0Ny2bUYh8ttkUWc8fA.jpg"
-              className="object-cover min-w-[30%] max-w-[30%] min-h-sm rounded-lg shadow-2xl"
-              alt={"Cover Image"}
+              className="object-cover min-w-[30%] sm:max-w-[30%] min-h-sm rounded-lg shadow-2xl"
             />
             <div className="flex flex-col space-y-4">
               <h1 className="text-5xl font-bold">{event.name}</h1>
@@ -158,7 +156,7 @@ const Details = (props: Props) => {
           </div>
         </div>
         <div className="divider"></div>
-        <div className="min-h-[15vh] flex-col sm:px-10 md:px-24">
+        <div className="flex-col ml-4 sm:ml-8 md:ml-24">
           <h2 className="mb-2">Register for Event</h2>
           <button className="btn btn-primary">Register</button>
         </div>
