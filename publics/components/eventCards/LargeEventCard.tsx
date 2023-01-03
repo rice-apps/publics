@@ -61,7 +61,7 @@ const LargeEventCard = (props: Props) => {
         <p>{`${eventCardDate(props.event.event_datetime, false)}`} </p>
         <p className="font-medium flex items-center">
           <img
-            className="avatar w-8 rounded-full ring ring-primary ring-offset-base-100 mr-2"
+            className="avatar w-8 bg-opacity-0 mr-2"
             src={props.event.organization.photo}
             alt={props.event.organization.name}
           />
