@@ -11,6 +11,7 @@ type EventDetails = {
     //uuid of event
     eventID: string, //Using string as unsure what UUID type is in TS
     organization: string, //Organization ID overseeing this event
+    event_date: string
 }
 
 /**
@@ -105,18 +106,19 @@ function VolunteerPage(props) {
     // Setup realtime for updates to registration table
     useEffect(() => {
         supabase
-          .channel(`registrations:${props.params.slug}`)
+          .channel(`volunteers:${props.params.slug}`)
           .on(
             "postgres_changes",
-            { event: "UPDATE", schema: "public", table: "registrations" },
+            { event: "UPDATE", schema: "public", table: "volunteers"},
             (payload) => {
+               //TODO
               setRegistration((prev) => {
                 let new_arr = prev.map((item) => {
-                  if (item.person_id == payload.new.person) {
+                  if (item.person_id == payload.new.profile) {
                     return {
                       ...item,
-                      picked_up_wristband: payload.new.picked_up_wristband,
-                      waitlist: payload.new.waitlist,
+                      checked_in: payload.new.checked_in,
+                      is_counter: payload.new.is_counter,
                     };
                   }
                   return item;
@@ -157,7 +159,7 @@ function VolunteerPage(props) {
     async function getEvent(): Promise<EventDetails> {
         const {data, error} = await supabase
         .from("events")
-        .select("id, organization")
+        .select("id, organization, event_datetime")
         .eq("slug", props.params.slug)
         .single();
 
@@ -168,7 +170,8 @@ function VolunteerPage(props) {
         return {
             eventName: props.params.slug,  
             eventID: data!.id,
-            organization: data!.organization
+            organization: data!.organization,
+            event_date : data!.event_datetime,
         }
 
     };
@@ -232,7 +235,6 @@ function VolunteerPage(props) {
                 "is_counter" : current_object["is_counter"], 
             }
 
-            console.log(data[i])
             formatted_data[i] = formatted_object;
         }
         
@@ -246,7 +248,7 @@ function VolunteerPage(props) {
         let emails: string[] = [];
         //Filtering by what we currently are showing to the screen
         registration.filter(row => {
-            if(filterByAll || (row.picked_up_wristband == filterByWristband && row.waitlist == filterByWaitlist)) {
+            if(filterByAll || (row.checked_in == filterByCheckedIn && row.is_counter == filterByCounter)) {
                 return row;
             }
         }).forEach(row => emails.push(row.email));
@@ -269,7 +271,6 @@ function VolunteerPage(props) {
         if(!error) {
             let personID = data!.id;
 
-            //ERROR: Runs into Row level security error here
             //Insert person into registrations table for this event
             const res = await supabase
             .from("registrations")
@@ -435,6 +436,9 @@ function VolunteerPage(props) {
                     <label className="label">
                         <span className="label-text-alt">netID</span>
                     </label>
+
+                    
+                    
                     </div>
                     <div className="modal-action">
                         <label htmlFor="add-modal" className="btn btn-outline btn-primary">Cancel</label>
