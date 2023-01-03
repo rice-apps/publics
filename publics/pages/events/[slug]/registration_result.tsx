@@ -1,6 +1,7 @@
 import { supabase } from '../../../utils/db'
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+//import ErrorMsg from './ErrorMsg';
 
 /**
  * Simple type containing a friendly name for an event, and the UUID of the event
@@ -60,6 +61,9 @@ function ResultPage(props) {
     const [netID, setNetID] = useState("");
     //array of emails presented within the registration table, used to copy emails to clipboard
     const [emails, setEmails] = useState<string[]>([]);
+
+    const [rError, setError] = useState(false);
+
     const router = useRouter();
 
      /**
@@ -242,6 +246,7 @@ function ResultPage(props) {
         .select("id")
         .eq("netid", netID)
         .single();
+        console.log(supabase.auth);
 
         if(!error) {
             let personID = data!.id;
@@ -268,6 +273,8 @@ function ResultPage(props) {
         } else {
             console.log("Got error")
             console.log(error)
+            setError(true)
+            /*
             return(
                 <div className="alert alert-error shadow-lg">
                     <div>
@@ -275,7 +282,7 @@ function ResultPage(props) {
                         <span>Error! User already added or does not exist.</span>
                     </div>
                 </div>
-            )
+            )*/
         }
 
     }
@@ -295,24 +302,8 @@ function ResultPage(props) {
         if (!res) {
             console.log("ERROR in removing attendee")
             console.log(res)
-            return(
-                <div className="alert alert-error shadow-lg">
-                    <div>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <span>Error! User not in database.</span>
-                    </div>
-                </div>
-            )
-        }
-        else{
-            return(
-                <div className="alert alert-success shadow-lg">
-                    <div>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <span>User successfully removed!</span>
-                    </div>
-                </div>
-            )
+            setError(true)
+
         }
 
         //refresh page
@@ -360,6 +351,14 @@ function ResultPage(props) {
                     <div className="modal-action">
                         <label htmlFor="add-modal" className="btn btn-outline btn-primary">Cancel</label>
                         <label htmlFor="add-modal" className="btn btn-primary" onClick={() => {addAttendee(netID)}}>Add</label>
+                        <div className={rError ? "block" : "hidden"}>
+                            <div className="alert alert-error shadow-lg">
+                                <div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    <span>Error! User already added or does not exist.</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 </div>
