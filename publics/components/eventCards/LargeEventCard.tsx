@@ -5,18 +5,20 @@ import { eventCardDate } from "./cardDate";
 
 type Props = {
   event: ListEvent;
-  registration_status: string | null;
+  registration_status?: string;
   type: string;
 };
-const LargeEventCard = (props) => {
+
+const LargeEventCard = (props: Props) => {
   const link = "/events/" + props.event.slug;
   const setButtons = () => {
     if (props.type === "hosting") {
       return (
         <div className="card-actions sm:justify-end">
-          <button className="btn btn-primary">
-            <Link href={`${link}/registration_result`}>Registration Results</Link>
-          </button>
+          <Link href={`${link}/registration_result`}>
+            <button className="btn btn-primary">Registration Results</button>
+          </Link>
+
           <button className="btn btn-primary btn-outline">Volunteers</button>
         </div>
       );
@@ -24,19 +26,20 @@ const LargeEventCard = (props) => {
       return (
         <div className="card-actions sm:justify-end">
           <button className="btn btn-primary">Check In</button>
-          <button className="btn btn-primary btn-outline">
-            <Link href={`${link}/counter`}>
+
+          <Link href={`${link}/counter`}>
+            <button className="btn btn-primary btn-outline">
               Capacity Counter
-            </Link>
-          </button>
+            </button>
+          </Link>
         </div>
       );
     } else {
       return (
         <div className="card-actions sm:justify-end">
-          <button className="btn btn-primary">
-            <Link href={link}>Event Details</Link>
-          </button>
+          <Link href={link}>
+            <button className="btn btn-primary">Event Details</button>
+          </Link>
         </div>
       );
     }
@@ -48,8 +51,12 @@ const LargeEventCard = (props) => {
       </figure>
       <div className="card-body">
         <div className="flex justify-between">
-        <h2 className="card-title">{props.event.name}</h2>
-        {props.type === "hosting" && <Link className="text-primary" href={`${link}/edit`}>Edit</Link>}
+          <h2 className="card-title">{props.event.name}</h2>
+          {props.type === "hosting" && (
+            <Link className="text-primary" href={`${link}/edit`}>
+              Edit
+            </Link>
+          )}
         </div>
         <p>{`${eventCardDate(props.event.event_datetime, false)}`} </p>
         <p className="font-medium flex items-center">
