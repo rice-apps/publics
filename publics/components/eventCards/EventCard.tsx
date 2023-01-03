@@ -32,9 +32,9 @@ export default function EventCard(props: Props) {
               )}`}
         </p>
         <div className="card-actions justify-end">
-          <button className="btn btn-primary">
-            <Link href={`/events/${props.event.slug}`}>Event Details</Link>
-          </button>
+          <Link href={`/events/${props.event.slug}`} passHref>
+            <button className="btn btn-primary">Event Details</button>
+          </Link>
         </div>
       </div>
     </div>
