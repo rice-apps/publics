@@ -140,7 +140,7 @@ export default function Edit(props) {
           </h2>
           <div className="mx-3 divider leading-[1px]"></div>
         </div>
-        <form>
+        <form onSubmit={update}>
           <div className="p-2">
             <div className="sm:flex">
               <div className="form-control w-full max-w-xs mr-2">
@@ -274,7 +274,7 @@ export default function Edit(props) {
                   <input
                     value={collegeRegistration}
                     onChange={(e) => setCollegeRegistration(e.target.value)}
-                    required
+                    required={registration}
                     type="datetime-local"
                     className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
                   />
@@ -290,7 +290,7 @@ export default function Edit(props) {
                   <input
                     value={registrationDatetime}
                     onChange={(e) => setRegistrationDatetime(e.target.value)}
-                    required
+                    required={registration}
                     type="datetime-local"
                     className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
                   />
@@ -304,7 +304,7 @@ export default function Edit(props) {
                   <input
                     value={signupSize}
                     onChange={(e) => setSignupSize(e.target.valueAsNumber)}
-                    required
+                    required={registration}
                     type="number"
                     className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
                   />
@@ -316,7 +316,7 @@ export default function Edit(props) {
                   <input
                     value={waitlistSize}
                     onChange={(e) => setWaitlistSize(e.target.valueAsNumber)}
-                    required
+                    required={registration}
                     type="number"
                     className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
                   />
@@ -328,10 +328,9 @@ export default function Edit(props) {
             </div>
             <div>
               <input
-                type="button"
+                type="submit"
                 value="Update"
                 className="btn sm:float-right normal-case border-0 focus:outline-none focus:ring"
-                onClick={update}
               />
             </div>
           </div>

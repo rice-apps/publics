@@ -42,7 +42,7 @@ export default function Create(props) {
   const [name, setName] = useState(String);
   const [slug, setSlug] = useState(String);
   const [eventDateTime, setEventDateTime] = useState(Date);
-  const [host, setHost] = useState(String);
+  const [host, setHost] = useState<String>(props.orgs[0].organization.id);
   const [location, setLocation] = useState(String);
   const [capacity, setCapacity] = useState(Number);
   const [description, setDescription] = useState(String);
@@ -104,7 +104,7 @@ export default function Create(props) {
           </h2>
           <div className="mx-3 divider leading-[1px] h-[0.5px] w-[950px]"></div>
         </div>
-        <form>
+        <form onSubmit={insert}>
           <div className="p-2">
             <div className="sm:flex">
               <div className="form-control w-full max-w-xs mr-2">
@@ -190,6 +190,15 @@ export default function Create(props) {
                   value={capacity}
                   onChange={(e) => setCapacity(e.target.valueAsNumber)}
                   type="number"
+                  onInput={(e) => {
+                    if (e.target.value < 1) {
+                      console.log("here")
+                      e.target.setCustomValidity('The capacity must be greater than 0.');
+                    }  else {
+                      // input is fine -- reset the error message
+                      e.target.setCustomValidity('');
+                    }
+                  }}
                   required
                   className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
                 />
@@ -240,7 +249,7 @@ export default function Create(props) {
                   <input
                     value={collegeRegistration}
                     onChange={(e) => setCollegeRegistration(e.target.value)}
-                    required
+                    required={registration}
                     type="datetime-local"
                     className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
                   />
@@ -256,7 +265,7 @@ export default function Create(props) {
                   <input
                     value={registrationDatetime}
                     onChange={(e) => setRegistrationDatetime(e.target.value)}
-                    required
+                    required={registration}
                     type="datetime-local"
                     className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
                   />
@@ -270,7 +279,7 @@ export default function Create(props) {
                   <input
                     value={signupSize}
                     onChange={(e) => setSignupSize(e.target.valueAsNumber)}
-                    required
+                    required={registration}
                     type="number"
                     className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
                   />
@@ -282,7 +291,7 @@ export default function Create(props) {
                   <input
                     value={waitlistSize}
                     onChange={(e) => setWaitlistSize(e.target.valueAsNumber)}
-                    required
+                    required={registration}
                     type="number"
                     className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
                   />
@@ -294,10 +303,9 @@ export default function Create(props) {
             </div>
             <div>
               <input
-                type="button"
+                type="submit"
                 value="Submit"
                 className="btn sm:float-right normal-case border-0 bg-[#AC1FB8] hover:bg-fuchsia-900 focus:outline-none focus:ring focus:ring-fuchsia-700"
-                onClick={insert}
               />
             </div>
           </div>
