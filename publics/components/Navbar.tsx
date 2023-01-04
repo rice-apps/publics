@@ -9,6 +9,7 @@ export default function Navbar() {
     const themes: string[] = ["publics", "light", "dark", "cupcake", "bumblebee", "emerald", "corporate", "synthwave", "retro", "cyberpunk", "valentine", "halloween", "garden", "forest", "aqua", "lofi", "pastel", "fantasy", "wireframe", "black", "luxury", "dracula", "cmyk", "autumn", "business", "acid", "lemonade", "night", "coffee", "winter"];
 
     const navbar_content = (<><li><Link href="/events">Events</Link></li>
+    <li><Link href="mailto:awj3@rice.edu">Contact</Link></li>
         <li tabIndex={0}>
             <a className="justify-between">
                 Parent

@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { supabase } from '../utils/db'
+import { useSupabaseClient } from "@supabase/auth-helpers-react"
 
 export default function Auth() {
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState('')
+  const supabaseClient = useSupabaseClient();
 
   const getURL = () => {
     let url =
@@ -18,7 +19,7 @@ export default function Auth() {
   };
 
   const handleLogin = async () => {
-    const res = await supabase.auth.signInWithOAuth({
+    const res = await supabaseClient.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: getURL()
