@@ -1,4 +1,4 @@
-import { supabase } from '../../../utils/db'
+import { supabase } from '../../../../utils/db'
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
@@ -11,7 +11,7 @@ type EventDetails = {
     //uuid of event
     eventID: string, //Using string as unsure what UUID type is in TS
     organization: string, //Organization ID overseeing this event
-    event_date: string
+    event_date: string, //date that the event takes place
 }
 
 /**
@@ -40,6 +40,7 @@ type volunteerRowObject =  {
     checked_in : boolean,
     //is this volunteer a counter(?)
     is_counter : boolean,
+    
 }
 
 /**
@@ -67,10 +68,10 @@ function VolunteerPage(props) {
     //netID of user to add to registration table, used with the add attendee button
     const [netID, setNetID] = useState("");
     //boolean values that we use to filter registrations by when displaying them to the screen
+    const [shift, setShift] = useState<String>("");
     const [filterByAll, setFilterByAll] = useState(true); //starts as true as we want to start by initially showing the admin the entire set of registered users
     const [filterByCheckedIn, setFilterByCheckedIn] = useState(false);
     const [filterByCounter, setFilterByCounter] = useState(false);
-
     const router = useRouter();
 
      /**
@@ -87,11 +88,15 @@ function VolunteerPage(props) {
         }
         //Get registrations for that event
         const registrations = await getRegistrations(event_detail);
+
+        const shift_id = await getShift(event_detail);
     
         // //Set event details
         setEventDetails(event_detail);
         // //Set registrations
         setRegistration(registrations);
+        // set shift id
+        setShift(shift_id);
         //Stop loading
         setLoading(false);
     }
@@ -173,8 +178,26 @@ function VolunteerPage(props) {
             organization: data!.organization,
             event_date : data!.event_datetime,
         }
-
     };
+
+    /**
+     * Gets the shift info for this page
+     * @returns the shift id for this page
+     */
+    async function getShift(event_detail: EventDetails): Promise<String> {
+        const {data, error} = await supabase
+        .from("shifts")
+        .select("id")
+        .eq('event', event_detail!.eventID)
+        .eq('slug', props.params.shift)
+        .single();
+
+        if (error) {
+            console.log("Could not find shift")
+        }
+
+        return data?.id;
+    }
 
     /**
      * Gets registrations from backend for appropriate event and reformats them into an array of row objects
@@ -183,14 +206,13 @@ function VolunteerPage(props) {
      */
     async function getRegistrations(event_detail: EventDetails): Promise<volunteerRowObject[]> {
         //Gets raw backend data corresponding to our event
+        //uses a inner join on the shifts table to get the relevant shift info 
         const {data, error} = await supabase.
             from("volunteers")
             .select(`
                 profile,
                 created_at,
                 checked_in,
-                start_shift,
-                end_shift,
                 is_counter,
                 profiles (
                     id,
@@ -200,9 +222,16 @@ function VolunteerPage(props) {
                         name
                     ),
                     netid
+                ),
+                shifts!inner (
+                    start,
+                    end,
+                    id,
+                    slug
                 )
-            `)
+            `,)
             .eq('event', event_detail.eventID)
+            .eq('shifts.slug', props.params.shift);
         
         //Holds data reformatted as array of rowobjects
         let formatted_data: volunteerRowObject[] = []
@@ -210,13 +239,14 @@ function VolunteerPage(props) {
         if (error) {
             console.log("GOT ERROR:")
             console.log(error)
-            router.push("/404")
+            //router.push("/404")
             return formatted_data;
         }
         
         for(var i = 0; i < data.length; i++) {
             let current_object = data[i];
             let profiles = current_object["profiles"] as Object;
+            let shifts = current_object["shifts"] as Object;
             if (profiles == null) {
                 return []
             }
@@ -229,8 +259,8 @@ function VolunteerPage(props) {
                 "email" : profiles["netid"] + "@rice.edu",
                 "netid" :  profiles["netid"],
                 "college" : profiles["organizations"].name,
-                "start_time" : new Date(current_object["start_shift"]!).toLocaleString(),
-                "end_time" : new Date(current_object["end_shift"]!).toLocaleString(),
+                "start_time" : new Date(shifts["start"]).toLocaleString(),
+                "end_time" : new Date(shifts["end"]).toLocaleString(),
                 "checked_in" : current_object["checked_in"],
                 "is_counter" : current_object["is_counter"], 
             }
@@ -305,9 +335,12 @@ function VolunteerPage(props) {
             //Insert person into registrations table for this event
             const res = await supabase
             .from("volunteers")
-            .insert({"event" : eventDetails!.eventID, "profile": personID})
+            .insert({"event" : eventDetails!.eventID, "profile": personID, "shift" : shift})
             .select();
 
+            console.log(eventDetails!.eventID)
+            console.log(personID)
+            console.log(res)
             //refresh page
             setRegistration(await getRegistrations(eventDetails!));
 
@@ -323,50 +356,22 @@ function VolunteerPage(props) {
      * @param user_id 
      */
     async function removeAttendee(user_id: string) {
-        //TODO
-        // const res = await supabase.
-        // from('registrations')
-        // .delete()
-        // .eq('event', eventDetails?.eventID)
-        // .eq('person', user_id)
-        // .select();
+        const res = await supabase.
+        from('volunteers')
+        .delete()
+        .eq('event', eventDetails?.eventID)
+        .eq('profile', user_id)
+        .select();
 
-        // if (!res) {
-        //     console.log("ERROR in removing attendee")
-        //     console.log(res)
-        // }
-
-        // //refresh page
-        // setRegistration(registration.filter((v, i) => v.person_id !== user_id));
-    }
-
-    /**
-     * Updates backend on status of a registered person having picked up their wristband
-     * @param row - row object holding information so that we can uniquely find the correct registration in the database
-     */
-    async function updateWristband(row: rowObject) {
-        const {error} = await supabase.from("registrations")
-        .update({picked_up_wristband : !row["picked_up_wristband"]})
-        //Ensuring we only update the person who is registered for this event
-        .eq("event", eventDetails?.eventID)
-        .eq("person", row["person_id"]);
-
-        if(error) {
-            console.log(error)
+        if (!res) {
+            console.log("ERROR in removing attendee")
+            console.log(res)
         }
+
+        //refresh page
+        setRegistration(registration.filter((v, i) => v.person_id !== user_id));
     }
 
-    async function updateWaitlist(row: rowObject) {
-        const {error} = await supabase.from("registrations")
-        .update({waitlist : !row["waitlist"]})
-        //Ensuring we only update the person who is registered for this event
-        .eq("event", eventDetails?.eventID)
-        .eq("person", row["person_id"]);
-
-        if(error) {
-            console.log(error)
-        }
-    }
 
     async function updateCheckedInStatus(row: volunteerRowObject) {
         const {error} = await supabase.from("volunteers")
@@ -399,7 +404,7 @@ function VolunteerPage(props) {
     return (
         <div key = "registration_results_page" className="mx-auto mx-4 space-y-4">
             <div key = "event_title">
-                <h1>{eventDetails!.eventName}: Volunteers</h1>
+                <h1>Shift: {props.params.shift}</h1>
             </div>
             <div className="flex justify-end gap-4">
             <div className="dropdown">
