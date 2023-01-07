@@ -9,7 +9,7 @@ type Props = {
 
 export default function EventCard(props: Props) {
   return (
-    <div className="card w-full bg-base-100 shadow-xl hover:shadow-md  transform hover:-translate-y-1 transition-transform border-r border-b border-l border-gray-400 lg:border-t lg:border-gray-400">
+    <div className="card w-full bg-base-100 shadow-xl hover:shadow-md transform hover:-translate-y-1 transition-transform ">
       <div className="card-body">
         <h2 className="card-title">{props.event.name}</h2>
         <p>{`${eventCardDate(props.event.event_datetime, false)}`} </p>
