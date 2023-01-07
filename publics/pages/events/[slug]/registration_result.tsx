@@ -331,11 +331,12 @@ function ResultPage(props) {
       const { data: regData } = await supabase
         .from("registrations")
         .insert({ event: eventDetails!.eventID, person: personID })
-        .select()
-        .single();
+        .select();
+      
+      const { from, to} = getPagination(page, 50);
 
       //refresh page
-      setRegistration([...registration, regData]);
+      setRegistration(await getRegistrations(supabase, eventDetails, search, from, to));
     } else {
       console.log("Got error");
       console.log(error);
@@ -397,8 +398,7 @@ function ResultPage(props) {
     return (
       (filterByAll ||
         (row.picked_up_wristband == filterByWristband &&
-          row.waitlist == filterByWaitlist)) &&
-      row.netid.toLowerCase()
+          row.waitlist == filterByWaitlist))
     );
   });
 
