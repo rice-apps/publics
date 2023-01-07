@@ -4,7 +4,7 @@ import {
   SupabaseClient,
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs";
-
+import { getPagination } from "../../../utils/registration";
 /**
  * Simple type containing a friendly name for an event, and the UUID of the event
  */
@@ -73,7 +73,7 @@ async function getEvent(
 ): Promise<EventDetails> {
   const { data, error } = await supabase
     .from("events")
-    .select("id, organization")
+    .select("id, name, organization")
     .eq("slug", slug)
     .single();
 
@@ -86,7 +86,7 @@ async function getEvent(
   }
 
   return {
-    eventName: slug,
+    eventName: data.name,
     eventID: data.id,
     organization: data.organization,
   };
@@ -99,7 +99,10 @@ async function getEvent(
  */
 async function getRegistrations(
   supabase: SupabaseClient,
-  event_detail: EventDetails
+  event_detail: EventDetails,
+  search: string = "",
+  from: number = 0,
+  to: number = 50
 ): Promise<rowObject[]> {
   //Gets raw backend data corresponding to our event
   const { data, error } = await supabase
@@ -109,7 +112,7 @@ async function getRegistrations(
         person,
         created_at,
         picked_up_wristband,
-        profiles (
+        profiles!inner(
             id,
             first_name,
             last_name,
@@ -121,7 +124,9 @@ async function getRegistrations(
         waitlist
     `
     )
-    .eq("event", event_detail.eventID);
+    .eq("event", event_detail.eventID)
+    .like("profiles.netid", `%${search}%`)
+    .range(from, to);
 
   //Holds data reformatted as array of rowobjects
   let formatted_data: rowObject[] = [];
@@ -182,6 +187,14 @@ export const getServerSideProps = async (ctx) => {
 
   //Get event details
   const event_detail = await getEvent(supabase, ctx.params.slug);
+  if (event_detail.eventName === "Error") {
+    return {
+      redirect: {
+        destination: `http://${ctx.req.headers.host}/events/${ctx.params.slug}`,
+        permanent: false,
+      },
+    };
+  }
   //Get admin status
   const admin_status = await isAdminUser(
     supabase,
@@ -198,7 +211,15 @@ export const getServerSideProps = async (ctx) => {
     };
   }
   //Get registrations for that event
-  const registrations = await getRegistrations(supabase, event_detail);
+  const page = +ctx.query.page || 0;
+  const { from, to } = getPagination(page, 50);
+  const registrations = await getRegistrations(
+    supabase,
+    event_detail,
+    "",
+    from,
+    to
+  );
 
   return {
     props: {
@@ -207,6 +228,7 @@ export const getServerSideProps = async (ctx) => {
       params: ctx.params,
       registrations,
       event_detail,
+      page: page,
     },
   };
 };
@@ -228,10 +250,14 @@ function ResultPage(props) {
   const [filterByAll, setFilterByAll] = useState(true); //starts as true as we want to start by initially showing the admin the entire set of registered users
   const [filterByWristband, setFilterByWristband] = useState(false);
   const [filterByWaitlist, setFilterByWaitlist] = useState(false);
+  //Search bar value
+  const [search, setSearch] = useState("");
+  // Pagination
+  const [page, setPage] = useState(props.page);
 
   // Setup realtime for updates to registration table
   useEffect(() => {
-    supabase
+    const channel = supabase
       .channel(`registrations:${props.params.slug}`)
       .on(
         "postgres_changes",
@@ -253,8 +279,15 @@ function ResultPage(props) {
         }
       )
       .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    window.history.pushState(null, "", `?page=${page}`);
+  }, [page]);
 
   /**
    * Copies set of emails to clipboard
@@ -295,13 +328,14 @@ function ResultPage(props) {
 
       //ERROR: Runs into Row level security error here
       //Insert person into registrations table for this event
-      const res = await supabase
+      const { data: regData } = await supabase
         .from("registrations")
         .insert({ event: eventDetails!.eventID, person: personID })
-        .select();
+        .select()
+        .single();
 
       //refresh page
-      setRegistration(await getRegistrations(supabase, eventDetails!));
+      setRegistration([...registration, regData]);
     } else {
       console.log("Got error");
       console.log(error);
@@ -359,98 +393,188 @@ function ResultPage(props) {
     }
   }
 
+  const registrationFilter = registration.filter((row) => {
+    return (
+      (filterByAll ||
+        (row.picked_up_wristband == filterByWristband &&
+          row.waitlist == filterByWaitlist)) &&
+      row.netid.toLowerCase()
+    );
+  });
+
+  async function handleSearch() {
+    setRegistration(await getRegistrations(supabase, eventDetails, search));
+  }
+
+  function handleKeyPress(event) {
+    if (event.key === "Enter") {
+      handleSearch();
+    }
+  }
+
+  async function handlePageIncrement() {
+    setPage(page + 1);
+    const { from, to } = getPagination(page + 1, 50);
+    setRegistration(
+      await getRegistrations(supabase, eventDetails, search, from, to)
+    );
+  }
+
+  async function handlePageDeincrement() {
+    setPage(page - 1);
+    const { from, to } = getPagination(page - 1, 50);
+    setRegistration(
+      await getRegistrations(supabase, eventDetails, search, from, to)
+    );
+  }
+
   return (
     <div key="registration_results_page" className="mx-auto mx-4 space-y-4">
       <div key="event_title">
         <h1>{eventDetails!.eventName}: Registration Results</h1>
       </div>
-      <div className="flex justify-end gap-4">
-        <div className="dropdown">
-          <label tabIndex={0} className="btn m-1">
-            Filter Options
-          </label>
-          <ul
-            tabIndex={0}
-            className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
-          >
-            <div className="AllCheckbox">
-              <label className="label cursor-pointer">
-                <span className="label-text">Show All</span>
-                <input
-                  type="checkbox"
-                  checked={filterByAll}
-                  onClick={() => {
-                    setFilterByAll(!filterByAll);
-                  }}
-                  className="checkbox"
-                />
-              </label>
-            </div>
-            <div className="WristbandCheckbox">
-              <label className="label cursor-pointer">
-                <span className="label-text">Wristband</span>
-                <input
-                  type="checkbox"
-                  checked={filterByWristband}
-                  onClick={() => {
-                    setFilterByWristband(!filterByWristband);
-                  }}
-                  className="checkbox"
-                />
-              </label>
-            </div>
-            <div className="WaitlistCheckbox">
-              <label className="label cursor-pointer">
-                <span className="label-text">Waitlist</span>
-                <input
-                  type="checkbox"
-                  checked={filterByWaitlist}
-                  onClick={() => {
-                    setFilterByWaitlist(!filterByWaitlist);
-                  }}
-                  className="checkbox"
-                />
-              </label>
-            </div>
-          </ul>
-        </div>
-        <button className="btn btn-outline btn-primary" onClick={copyEmails}>
-          Copy Emails
-        </button>
-        <label htmlFor="add-modal" className="btn btn-primary">
-          Add Attendee
-        </label>
-        <input type="checkbox" id="add-modal" className="modal-toggle" />
-        <div className="modal">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg">Add attendee</h3>
-            <div className="form-control w-full max-w-xs">
+
+      <div className="flex justify-between gap-4">
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <svg
+              aria-hidden="true"
+              className="w-5 h-5 text-gray-500 dark:text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              ></path>
+            </svg>
+          </div>
+          {/* <input
+            type="text"
+            className="block w-full p-4 pl-10 input input-bordered w-full max-w-xs text-sm"
+            placeholder="Search NetIDs"
+            onChange={(e) => setSearch(e.target.value)}
+          /> */}
+          <div className="form-control">
+            <div className="input-group">
               <input
                 type="text"
-                placeholder="Type here"
-                className="input input-bordered w-full max-w-xs"
-                onChange={(event) => setNetID(event.target.value)}
+                placeholder="Search…"
+                className="input input-bordered"
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={handleKeyPress}
               />
-              <label className="label">
-                <span className="label-text-alt">netID</span>
-              </label>
+              <button className="btn btn-square" onClick={handleSearch}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </button>
             </div>
-            <div className="modal-action">
-              <label
-                htmlFor="add-modal"
-                className="btn btn-outline btn-primary"
-              >
-                Cancel
-              </label>
-              <label
-                htmlFor="add-modal"
-                className="btn btn-primary"
-                onClick={() => {
-                  addAttendee(netID);
-                }}
-              >
-                Add
-              </label>
+          </div>
+        </div>
+        <div className="flex justify-end gap-4">
+          <div className="dropdown">
+            <label tabIndex={0} className="btn">
+              Filter Options
+            </label>
+            <ul
+              tabIndex={0}
+              className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
+            >
+              <div className="AllCheckbox">
+                <label className="label cursor-pointer">
+                  <span className="label-text">Show All</span>
+                  <input
+                    type="checkbox"
+                    defaultChecked={filterByAll}
+                    onClick={() => {
+                      setFilterByAll(!filterByAll);
+                    }}
+                    className="checkbox"
+                  />
+                </label>
+              </div>
+              <div className="WristbandCheckbox">
+                <label className="label cursor-pointer">
+                  <span className="label-text">Wristband</span>
+                  <input
+                    type="checkbox"
+                    defaultChecked={filterByWristband}
+                    onClick={() => {
+                      setFilterByWristband(!filterByWristband);
+                    }}
+                    className="checkbox"
+                  />
+                </label>
+              </div>
+              <div className="WaitlistCheckbox">
+                <label className="label cursor-pointer">
+                  <span className="label-text">Waitlist</span>
+                  <input
+                    type="checkbox"
+                    defaultChecked={filterByWaitlist}
+                    onClick={() => {
+                      setFilterByWaitlist(!filterByWaitlist);
+                    }}
+                    className="checkbox"
+                  />
+                </label>
+              </div>
+            </ul>
+          </div>
+          <button className="btn btn-outline btn-primary" onClick={copyEmails}>
+            Copy Emails
+          </button>
+          <label htmlFor="add-modal" className="btn btn-primary">
+            Add Attendee
+          </label>
+          <input type="checkbox" id="add-modal" className="modal-toggle" />
+          <div className="modal">
+            <div className="modal-box">
+              <h3 className="font-bold text-lg">Add attendee</h3>
+              <div className="form-control w-full max-w-xs">
+                <input
+                  type="text"
+                  placeholder="Type here"
+                  className="input input-bordered w-full max-w-xs"
+                  onChange={(event) => setNetID(event.target.value)}
+                />
+                <label className="label">
+                  <span className="label-text-alt">netID</span>
+                </label>
+              </div>
+              <div className="modal-action">
+                <label
+                  htmlFor="add-modal"
+                  className="btn btn-outline btn-primary"
+                >
+                  Cancel
+                </label>
+                <label
+                  htmlFor="add-modal"
+                  className="btn btn-primary"
+                  onClick={() => {
+                    addAttendee(netID);
+                  }}
+                >
+                  Add
+                </label>
+              </div>
             </div>
           </div>
         </div>
@@ -474,100 +598,107 @@ function ResultPage(props) {
           <tbody>
             {
               //Add simple filter for row entries
-              registration
-                .filter((row) => {
-                  if (
-                    filterByAll ||
-                    (row.picked_up_wristband == filterByWristband &&
-                      row.waitlist == filterByWaitlist)
-                  ) {
-                    return row;
-                  }
-                })
-                .map((row, index) => {
-                  let isChecked = row["picked_up_wristband"];
-                  let isWaitlist = row["waitlist"];
-                  return (
-                    <tr key={index}>
-                      <th></th>
-                      <td>
-                        <label
-                          htmlFor={index.toString()}
-                          className="btn btn-square"
+              registrationFilter.map((row, index) => {
+                let isChecked = row["picked_up_wristband"];
+                let isWaitlist = row["waitlist"];
+                return (
+                  <tr key={index}>
+                    <th></th>
+                    <td>
+                      <label
+                        htmlFor={index.toString()}
+                        className="btn btn-square"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-6 w-6"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-6 w-6"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
-                        </label>
-                        <input
-                          type="checkbox"
-                          id={index.toString()}
-                          className="modal-toggle"
-                        />
-                        <div className="modal">
-                          <div className="modal-box">
-                            <h3 className="font-bold text-lg">
-                              Are you sure you want to remove{" "}
-                              {row["first_name"] + " " + row["last_name"] + "?"}
-                            </h3>
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </label>
+                      <input
+                        type="checkbox"
+                        id={index.toString()}
+                        className="modal-toggle"
+                      />
+                      <div className="modal">
+                        <div className="modal-box">
+                          <h3 className="font-bold text-lg">
+                            Are you sure you want to remove{" "}
+                            {row["first_name"] + " " + row["last_name"] + "?"}
+                          </h3>
 
-                            <div className="modal-action">
-                              <label
-                                htmlFor={index.toString()}
-                                className="btn btn-outline btn-primary"
-                              >
-                                Cancel
-                              </label>
-                              <label
-                                htmlFor={index.toString()}
-                                className="btn btn-primary"
-                                onClick={() => removeAttendee(row["person_id"])}
-                              >
-                                Remove
-                              </label>
-                            </div>
+                          <div className="modal-action">
+                            <label
+                              htmlFor={index.toString()}
+                              className="btn btn-outline btn-primary"
+                            >
+                              Cancel
+                            </label>
+                            <label
+                              htmlFor={index.toString()}
+                              className="btn btn-primary"
+                              onClick={() => removeAttendee(row["person_id"])}
+                            >
+                              Remove
+                            </label>
                           </div>
                         </div>
-                      </td>
-                      <td>{row["created_at"]}</td>
-                      <td>{row["first_name"]}</td>
-                      <td>{row["last_name"]}</td>
-                      <td>{row["email"]}</td>
-                      <td>{row["netid"]}</td>
-                      <td>{row["college"]}</td>
-                      <td>
-                        <input
-                          type="checkbox"
-                          className="checkbox"
-                          checked={isChecked}
-                          onChange={(e) => updateWristband(row)}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="checkbox"
-                          className="checkbox"
-                          checked={isWaitlist}
-                          onChange={(e) => updateWaitlist(row)}
-                        />
-                      </td>
-                    </tr>
-                  );
-                })
+                      </div>
+                    </td>
+                    <td>{row["created_at"]}</td>
+                    <td>{row["first_name"]}</td>
+                    <td>{row["last_name"]}</td>
+                    <td>{row["email"]}</td>
+                    <td>{row["netid"]}</td>
+                    <td>{row["college"]}</td>
+                    <td>
+                      <input
+                        type="checkbox"
+                        className="checkbox"
+                        checked={isChecked}
+                        onChange={(e) => updateWristband(row)}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="checkbox"
+                        className="checkbox"
+                        checked={isWaitlist}
+                        onChange={(e) => updateWaitlist(row)}
+                      />
+                    </td>
+                  </tr>
+                );
+              })
             }
           </tbody>
         </table>
+
+        {/* center following div */}
+        <div className="flex justify-center mt-4">
+          <div className="btn-group">
+            <button className="btn" onClick={handlePageDeincrement}>
+              «
+            </button>
+            <button className="btn">Page {page}</button>
+            <button className="btn" onClick={handlePageIncrement}>
+              »
+            </button>
+          </div>
+        </div>
+        {/* display number of rows of the table */}
+        <div className="text-center mt-4">
+          <span className="text">{registrationFilter.length} Attendee(s)</span>
+        </div>
       </div>
     </div>
   );
