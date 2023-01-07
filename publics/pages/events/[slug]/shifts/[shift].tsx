@@ -317,7 +317,7 @@ function VolunteerPage(props) {
 
     }
 
-        /**
+    /**
      * Registers attendee to this event given an inputted netID
      * @param netID - you know what this is
      */
@@ -328,6 +328,9 @@ function VolunteerPage(props) {
         .select("id")
         .eq("netid", netID)
         .single();
+
+        //TODO create new shift using start and end values
+        //TODO add new person based on that shift
 
         if(!error) {
             let personID = data!.id;
@@ -404,7 +407,7 @@ function VolunteerPage(props) {
     return (
         <div key = "registration_results_page" className="mx-auto mx-4 space-y-4">
             <div key = "event_title">
-                <h1>Shift: {props.params.shift}</h1>
+                <h1>Shifts for {props.params.shift}</h1>
             </div>
             <div className="flex justify-end gap-4">
             <div className="dropdown">
