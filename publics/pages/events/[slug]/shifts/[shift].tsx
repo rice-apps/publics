@@ -90,7 +90,6 @@ function VolunteerPage(props) {
         const registrations = await getRegistrations(event_detail);
 
         const shift_id = await getShift(event_detail);
-
         // //Set event details
         setEventDetails(event_detail);
         // //Set registrations
@@ -181,6 +180,25 @@ function VolunteerPage(props) {
     };
 
     /**
+     * Gets the shift info for this page
+     * @returns the shift id for this page
+     */
+    async function getShift(event_detail: EventDetails): Promise<String> {
+        const {data, error} = await supabase
+        .from("shifts")
+        .select("id")
+        .eq('event', event_detail!.eventID)
+        .eq('slug', props.params.shift)
+        .single();
+
+        if (error) {
+            console.log("Could not find shift")
+        }
+
+        return data?.id;
+    }
+
+    /**
      * Gets registrations from backend for appropriate event and reformats them into an array of row objects
      * @param event_detail - information for the event we want to get information for
      * @returns Array of row objects based on registration table on backend
@@ -267,22 +285,6 @@ function VolunteerPage(props) {
         navigator.clipboard.writeText(emails!.join(' '))
     }
 
-    async function getShift(event_detail: EventDetails): Promise<String> {
-        const {data, error} = await supabase
-        .from("shifts")
-        .select("id")
-        .eq("event", event_detail.eventID)
-        .eq("slug", props.params.shift)
-        .single();
-
-        if (error) {
-            console.log("ERROR");
-            router.push("/404");
-        }
-
-        return data?.id;
-    }
-
     /**
      * Registers attendee to this event given an inputted netID
      * @param netID - you know what this is
@@ -326,7 +328,6 @@ function VolunteerPage(props) {
         .eq("netid", netID)
         .single();
 
-
         if(!error) {
             let personID = data!.id;
 
@@ -348,7 +349,6 @@ function VolunteerPage(props) {
         }
 
     }
-
 
     /**
      * Unregisters attendee from this event. Updates backend and refreshes page
