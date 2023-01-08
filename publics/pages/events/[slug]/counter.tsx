@@ -138,7 +138,7 @@ const Counter = (props) => {
   };
   return (
     <div className="flex flex-col h-screen">
-      <div className="flex flex-row justify-center">
+      <div className="flex flex-row justify-center mt-8">
         <h1>{myCount}</h1>
         <h1 className="text-primary">/{count}</h1>
       </div>
