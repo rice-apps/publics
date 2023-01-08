@@ -48,6 +48,25 @@ export default function Navbar() {
     </li>
   );
 
+  const [accountSpan, setAccountSpan] = useState(
+    <svg
+      width="50px"
+      height="50px"
+      viewBox="0 0 16 16"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="#000000"
+    >
+      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+      <g id="SVGRepo_iconCarrier">
+        {" "}
+        <path
+          d="m 8 1 c -1.65625 0 -3 1.34375 -3 3 s 1.34375 3 3 3 s 3 -1.34375 3 -3 s -1.34375 -3 -3 -3 z m -1.5 7 c -2.492188 0 -4.5 2.007812 -4.5 4.5 v 0.5 c 0 1.109375 0.890625 2 2 2 h 8 c 1.109375 0 2 -0.890625 2 -2 v -0.5 c 0 -2.492188 -2.007812 -4.5 -4.5 -4.5 z m 0 0"
+          fill="#fafafa"
+        ></path>{" "}
+      </g>
+    </svg>
+  );
+
   const navbar_content = (
     <>
       <li>
@@ -61,19 +80,45 @@ export default function Navbar() {
 
   const supabase = useSupabaseClient();
 
-  let session = getSession(supabase).then((session) => {
+  const session = getSession(supabase).then((session) => {
     if (session) {
+      console.log(session);
+      let initials = session.user.user_metadata.full_name
+        .split(" ")
+        .map((name) => name[0])
+        .join("");
       setAccountContent(
         <li>
           <Link href="/account">Account</Link>
         </li>
       );
+      setAccountSpan(
+        <span className="text-xl text-primary-content">{initials}</span>
+      );
     } else {
-        setAccountContent(
-            <li>
-            <Link href="/account">Login</Link>
-            </li>
-        );
+      setAccountContent(
+        <li>
+          <Link href="/account">Login</Link>
+        </li>
+      );
+      setAccountSpan(
+        <svg
+          width="50px"
+          height="50px"
+          viewBox="0 0 16 16"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="#000000"
+        >
+          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+          <g id="SVGRepo_iconCarrier">
+            {" "}
+            <path
+              d="m 8 1 c -1.65625 0 -3 1.34375 -3 3 s 1.34375 3 3 3 s 3 -1.34375 3 -3 s -1.34375 -3 -3 -3 z m -1.5 7 c -2.492188 0 -4.5 2.007812 -4.5 4.5 v 0.5 c 0 1.109375 0.890625 2 2 2 h 8 c 1.109375 0 2 -0.890625 2 -2 v -0.5 c 0 -2.492188 -2.007812 -4.5 -4.5 -4.5 z m 0 0"
+              fill="#fafafa"
+            ></path>{" "}
+          </g>
+        </svg>
+      );
     }
   });
 
@@ -114,9 +159,9 @@ export default function Navbar() {
       <div className="navbar-end">
         <div className="dropdown dropdown-end">
           <label tabIndex={0} className="m-1">
-            <div className="avatar hover:scale-110 hover:drop-shadow-lg transition-all">
-              <div className="w-16 rounded-full mr-2">
-                <img src="https://placeimg.com/192/192/animals" />
+            <div className="avatar placeholder hover:scale-110 hover:drop-shadow-lg transition-all">
+              <div className="w-16 bg-primary rounded-full mr-2">
+                {accountSpan}
               </div>
             </div>
           </label>
