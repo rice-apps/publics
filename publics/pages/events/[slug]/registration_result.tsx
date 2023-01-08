@@ -447,7 +447,7 @@ function ResultPage(props) {
             <div className="input-group">
               <input
                 type="text"
-                placeholder="Search…"
+                placeholder="Search NetIDs…"
                 className="input input-bordered"
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={handleKeyPress}
