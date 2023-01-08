@@ -67,6 +67,8 @@ function VolunteerPage(props) {
     const [eventDetails, setEventDetails] = useState<EventDetails>();
     //netID of user to add to registration table, used with the add attendee button
     const [netID, setNetID] = useState("");
+    //shift id taken from the shift slug
+    const [shift, setShift] = useState<String>("");
     const [filterByAll, setFilterByAll] = useState(true); //starts as true as we want to start by initially showing the admin the entire set of registered users
     const [filterByCheckedIn, setFilterByCheckedIn] = useState(false);
     const [filterByCounter, setFilterByCounter] = useState(false);
@@ -87,11 +89,14 @@ function VolunteerPage(props) {
         //Get registrations for that event
         const registrations = await getRegistrations(event_detail);
 
+        const shift_id = await getShift(event_detail);
+
         // //Set event details
         setEventDetails(event_detail);
         // //Set registrations
         setRegistration(registrations);
         // set shift id
+        setShift(shift_id);
         //Stop loading
         setLoading(false);
     }
@@ -262,6 +267,22 @@ function VolunteerPage(props) {
         navigator.clipboard.writeText(emails!.join(' '))
     }
 
+    async function getShift(event_detail: EventDetails): Promise<String> {
+        const {data, error} = await supabase
+        .from("shifts")
+        .select("id")
+        .eq("event", event_detail.eventID)
+        .eq("slug", props.params.shift)
+        .single();
+
+        if (error) {
+            console.log("ERROR");
+            router.push("/404");
+        }
+
+        return data?.id;
+    }
+
     /**
      * Registers attendee to this event given an inputted netID
      * @param netID - you know what this is
@@ -312,7 +333,7 @@ function VolunteerPage(props) {
             //Insert person into registrations table for this event
             const res = await supabase
             .from("volunteers")
-            .insert({"event" : eventDetails!.eventID, "profile": personID})
+            .insert({"event" : eventDetails!.eventID, "profile": personID, "shift" : shift})
             .select();
 
             console.log(eventDetails!.eventID)
@@ -327,6 +348,7 @@ function VolunteerPage(props) {
         }
 
     }
+
 
     /**
      * Unregisters attendee from this event. Updates backend and refreshes page
@@ -381,7 +403,7 @@ function VolunteerPage(props) {
     return (
         <div key = "registration_results_page" className="mx-auto mx-4 space-y-4">
             <div key = "event_title">
-                <h1>Shifts for {props.params.shift}</h1>
+                <h1>Volunteers for {props.params.shift}</h1>
             </div>
             <div className="flex justify-end gap-4">
             <div className="dropdown">
