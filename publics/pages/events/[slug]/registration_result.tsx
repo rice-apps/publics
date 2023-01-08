@@ -100,9 +100,7 @@ async function getEvent(
 async function getRegistrations(
   supabase: SupabaseClient,
   event_detail: EventDetails,
-  search: string = "",
-  from: number = 0,
-  to: number = 50
+  search: string = ""
 ): Promise<rowObject[]> {
   //Gets raw backend data corresponding to our event
   const { data, error } = await supabase
@@ -125,8 +123,7 @@ async function getRegistrations(
     `
     )
     .eq("event", event_detail.eventID)
-    .like("profiles.netid", `%${search}%`)
-    .range(from, to);
+    .like("profiles.netid", `%${search}%`);
 
   //Holds data reformatted as array of rowobjects
   let formatted_data: rowObject[] = [];
@@ -212,14 +209,7 @@ export const getServerSideProps = async (ctx) => {
   }
   //Get registrations for that event
   const page = +ctx.query.page || 0;
-  const { from, to } = getPagination(page, 50);
-  const registrations = await getRegistrations(
-    supabase,
-    event_detail,
-    "",
-    from,
-    to
-  );
+  const registrations = await getRegistrations(supabase, event_detail);
 
   return {
     props: {
@@ -254,6 +244,7 @@ function ResultPage(props) {
   const [search, setSearch] = useState("");
   // Pagination
   const [page, setPage] = useState(props.page);
+  const { from, to } = getPagination(page, 50);
 
   // Setup realtime for updates to registration table
   useEffect(() => {
@@ -295,17 +286,7 @@ function ResultPage(props) {
   function copyEmails() {
     let emails: string[] = [];
     //Filtering by what we currently are showing to the screen
-    registration
-      .filter((row) => {
-        if (
-          filterByAll ||
-          (row.picked_up_wristband == filterByWristband &&
-            row.waitlist == filterByWaitlist)
-        ) {
-          return row;
-        }
-      })
-      .forEach((row) => emails.push(row.email));
+    filterRegistrations().forEach((row) => emails.push(row.email));
 
     //Writing to clipboard
     navigator.clipboard.writeText(emails!.join(" "));
@@ -332,11 +313,9 @@ function ResultPage(props) {
         .from("registrations")
         .insert({ event: eventDetails!.eventID, person: personID })
         .select();
-      
-      const { from, to} = getPagination(page, 50);
 
       //refresh page
-      setRegistration(await getRegistrations(supabase, eventDetails, search, from, to));
+      setRegistration(await getRegistrations(supabase, eventDetails, search));
     } else {
       console.log("Got error");
       console.log(error);
@@ -396,14 +375,15 @@ function ResultPage(props) {
 
   const registrationFilter = registration.filter((row) => {
     return (
-      (filterByAll ||
-        (row.picked_up_wristband == filterByWristband &&
-          row.waitlist == filterByWaitlist))
+      filterByAll ||
+      (row.picked_up_wristband == filterByWristband &&
+        row.waitlist == filterByWaitlist)
     );
   });
 
   async function handleSearch() {
     setRegistration(await getRegistrations(supabase, eventDetails, search));
+    setPage(0);
   }
 
   function handleKeyPress(event) {
@@ -414,18 +394,22 @@ function ResultPage(props) {
 
   async function handlePageIncrement() {
     setPage(page + 1);
-    const { from, to } = getPagination(page + 1, 50);
-    setRegistration(
-      await getRegistrations(supabase, eventDetails, search, from, to)
-    );
+    setRegistration(await getRegistrations(supabase, eventDetails, search));
   }
 
   async function handlePageDeincrement() {
     setPage(page - 1);
-    const { from, to } = getPagination(page - 1, 50);
-    setRegistration(
-      await getRegistrations(supabase, eventDetails, search, from, to)
-    );
+    setRegistration(await getRegistrations(supabase, eventDetails, search));
+  }
+
+  function filterRegistrations() {
+    return registration.filter((row) => {
+      return (
+        filterByAll ||
+        (row.picked_up_wristband == filterByWristband &&
+          row.waitlist == filterByWaitlist)
+      );
+    });
   }
 
   return (
@@ -598,87 +582,89 @@ function ResultPage(props) {
           <tbody>
             {
               //Add simple filter for row entries
-              registrationFilter.map((row, index) => {
-                let isChecked = row["picked_up_wristband"];
-                let isWaitlist = row["waitlist"];
-                return (
-                  <tr key={index}>
-                    <th></th>
-                    <td>
-                      <label
-                        htmlFor={index.toString()}
-                        className="btn btn-square"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-6 w-6"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
+              filterRegistrations()
+                .splice(from, to)
+                .map((row, index) => {
+                  let isChecked = row["picked_up_wristband"];
+                  let isWaitlist = row["waitlist"];
+                  return (
+                    <tr key={index}>
+                      <th></th>
+                      <td>
+                        <label
+                          htmlFor={index.toString()}
+                          className="btn btn-square"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </label>
-                      <input
-                        type="checkbox"
-                        id={index.toString()}
-                        className="modal-toggle"
-                      />
-                      <div className="modal">
-                        <div className="modal-box">
-                          <h3 className="font-bold text-lg">
-                            Are you sure you want to remove{" "}
-                            {row["first_name"] + " " + row["last_name"] + "?"}
-                          </h3>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        </label>
+                        <input
+                          type="checkbox"
+                          id={index.toString()}
+                          className="modal-toggle"
+                        />
+                        <div className="modal">
+                          <div className="modal-box">
+                            <h3 className="font-bold text-lg">
+                              Are you sure you want to remove{" "}
+                              {row["first_name"] + " " + row["last_name"] + "?"}
+                            </h3>
 
-                          <div className="modal-action">
-                            <label
-                              htmlFor={index.toString()}
-                              className="btn btn-outline btn-primary"
-                            >
-                              Cancel
-                            </label>
-                            <label
-                              htmlFor={index.toString()}
-                              className="btn btn-primary"
-                              onClick={() => removeAttendee(row["person_id"])}
-                            >
-                              Remove
-                            </label>
+                            <div className="modal-action">
+                              <label
+                                htmlFor={index.toString()}
+                                className="btn btn-outline btn-primary"
+                              >
+                                Cancel
+                              </label>
+                              <label
+                                htmlFor={index.toString()}
+                                className="btn btn-primary"
+                                onClick={() => removeAttendee(row["person_id"])}
+                              >
+                                Remove
+                              </label>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td>{row["created_at"]}</td>
-                    <td>{row["first_name"]}</td>
-                    <td>{row["last_name"]}</td>
-                    <td>{row["email"]}</td>
-                    <td>{row["netid"]}</td>
-                    <td>{row["college"]}</td>
-                    <td>
-                      <input
-                        type="checkbox"
-                        className="checkbox"
-                        checked={isChecked}
-                        onChange={(e) => updateWristband(row)}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="checkbox"
-                        className="checkbox"
-                        checked={isWaitlist}
-                        onChange={(e) => updateWaitlist(row)}
-                      />
-                    </td>
-                  </tr>
-                );
-              })
+                      </td>
+                      <td>{row["created_at"]}</td>
+                      <td>{row["first_name"]}</td>
+                      <td>{row["last_name"]}</td>
+                      <td>{row["email"]}</td>
+                      <td>{row["netid"]}</td>
+                      <td>{row["college"]}</td>
+                      <td>
+                        <input
+                          type="checkbox"
+                          className="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => updateWristband(row)}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="checkbox"
+                          className="checkbox"
+                          checked={isWaitlist}
+                          onChange={(e) => updateWaitlist(row)}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })
             }
           </tbody>
         </table>
@@ -697,7 +683,9 @@ function ResultPage(props) {
         </div>
         {/* display number of rows of the table */}
         <div className="text-center mt-4">
-          <span className="text">{registrationFilter.length} Attendee(s)</span>
+          <span className="text">
+            {filterRegistrations().length} Attendee(s)
+          </span>
         </div>
       </div>
     </div>
