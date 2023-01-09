@@ -1,5 +1,9 @@
-import { supabase } from '../../../../utils/db'
 import { useEffect, useState } from 'react';
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import {
+    SupabaseClient,
+    createServerSupabaseClient,
+  } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from 'next/router';
 
 /**
@@ -44,69 +48,249 @@ type volunteerRowObject =  {
 }
 
 /**
+* Gets the event that this user is an admin of, if they are one
+* @returns Event Details corresponding to said event
+*/
+async function getEvent(
+    supabase: SupabaseClient, 
+    slug: String
+): Promise<EventDetails> {
+    const {data, error} = await supabase
+    .from("events")
+    .select("id, name, organization, event_datetime")
+    .eq("slug", slug)
+    .single();
+
+    if (error) {
+        return {
+          eventName: "Error",
+          eventID: "Error",
+          organization: "Error",
+          event_date: "Error"
+        };
+    }
+    
+    return {
+        eventName: data.name,  
+        eventID: data!.id,
+        organization: data!.organization,
+        event_date : data!.event_datetime,
+    }
+};
+
+/**
+ * Checks if the user trying to look at this page is an admin of the associated event (and thus has the permission to look at this page)
+ * @param event_detail : event details of this page
+ * @returns true if the user looking at this page is an admin, false otherwise
+ */
+ async function isAdminUser(
+    supabase: SupabaseClient,
+    event_detail: EventDetails,
+    userId: string
+  ): Promise<boolean> {
+    let { data, error } = await supabase
+      .from("organizations_admins")
+      .select("organization")
+      .eq("profile", userId);
+  
+    if (error || data === null) {
+      return false;
+    }
+  
+    return data.some(
+      (event) => event.organization === event_detail!.organization
+    );
+  }
+
+/**
+ * Gets registrations from backend for appropriate event and reformats them into an array of row objects
+ * @param event_detail - information for the event we want to get information for
+ * @returns Array of row objects based on registration table on backend
+ */
+async function getRegistrations(supabase: SupabaseClient, event_detail: EventDetails, slug): Promise<volunteerRowObject[]> {
+    //Gets raw backend data corresponding to our event
+    //uses a inner join on the shifts table to get the relevant shift info 
+    console.log("==========")
+    console.log(slug)
+    console.log("==========")
+    const {data, error} = await supabase.
+        from("volunteers")
+        .select(`
+            profile,
+            created_at,
+            checked_in,
+            is_counter,
+            profiles (
+                id,
+                first_name,
+                last_name,
+                organizations (
+                     name
+                ),
+                netid
+            ),
+            shifts!inner (
+                start,
+                end,
+                id,
+                slug
+            )
+        `,)
+        .eq('event', event_detail.eventID)
+        .eq('shifts.slug', slug);
+        
+        //Holds data reformatted as array of rowobjects
+        let formatted_data: volunteerRowObject[] = []
+
+        if (error || data === null) {
+            console.log("GOT ERROR:")
+            console.log(error)
+            return formatted_data;
+        }
+
+        for(var i = 0; i < data.length; i++) {
+            let current_object = data[i];
+            let profiles = current_object["profiles"] as Object;
+            let shifts = current_object["shifts"] as Object;
+            if (profiles == null) {
+                return []
+            }
+
+            let formatted_object = {
+                "person_id" : current_object["profile"],
+                "created_at" : new Date(current_object["created_at"]!).toLocaleString(),
+                "first_name" : profiles["first_name"],
+                "last_name" : profiles["last_name"],
+                "email" : profiles["netid"] + "@rice.edu",
+                "netid" :  profiles["netid"],
+                "college" : profiles["organizations"].name,
+                "start_time" : new Date(shifts["start"]).toLocaleString(),
+                "end_time" : new Date(shifts["end"]).toLocaleString(),
+                "checked_in" : current_object["checked_in"],
+                "is_counter" : current_object["is_counter"], 
+            }
+
+            formatted_data[i] = formatted_object;
+        }
+        
+        return formatted_data;
+    }; 
+
+    async function getShift(supabase, shift, event_detail: EventDetails): Promise<String> {
+        const {data, error} = await supabase
+        .from("shifts")
+        .select("id")
+        .eq("event", event_detail.eventID)
+        .eq("slug", shift)
+        .single();
+
+        if (error) {
+            return "ERROR";
+        }
+
+        return data?.id;
+    }
+
+/**
  * Used to reliably get slug and avoid first render problems
  * Will probably be used later for loading other data
  * @param context - default paramater for server side props
  * @returns props holding the slug
  */
 export async function getServerSideProps(context) {
+    // Create authenticated Supabase Client
+    const supabase = createServerSupabaseClient(context);
+    // Check if we have a session
+    const {
+         data: { session },
+    } = await supabase.auth.getSession();
+    
+    if (!session) {
+        console.log("NO SESSION")
+        //navigate to account page
+        return {
+          redirect: {
+            destination: `http://${context.req.headers.host}/account`,
+            permanent: false,
+          },
+        };
+      }
+    
+    const event_detail = await getEvent(supabase, context.params.slug);
+
+    if (event_detail.eventName === "Error") {
+        console.log("NO EVENT")
+        return {
+          redirect: {
+            destination: `http://${context.req.headers.host}/events/${context.params.slug}`,
+            permanent: false,
+          },
+        };
+      }
+
+    //Get admin status
+    const admin_status = await isAdminUser(
+        supabase,
+        event_detail,
+        session.user.id
+    );
+    //If not admin, redirect to 404 page
+    if (!admin_status) {
+        console.log("NO ADMIN STATUS")
+        return {
+        redirect: {
+            destination: `http://${context.req.headers.host}/events/${context.params.slug}`,
+            permanent: false,
+            },
+        };
+    }
+
+    const registrations = await getRegistrations(supabase, event_detail, context.params.shift);
+
+    const shift_id = await getShift(supabase, context.params.shift, event_detail);
+
+    console.log("+++++++")
+    console.log(context.params.shift)
+    console.log("+++++++")
+
+    if (shift_id === "Error") {
+        console.log("NO SHIFT")
+        return {
+            redirect: {
+                destination: `http://${context.req.headers.host}/events/${context.params.slug}`,
+                permanent: false,
+            },
+        };
+    }
     return {
-      props: {params: context.params}
-    };
-  }
+        props: {
+            initialSession: session,
+            user: session.user,
+            params: context.params,
+            registrations,
+            event_detail,
+            shift_id
+        }
+    }
+}
 
 /**
  * Page holding registration results. Check figma for design source
  */
 function VolunteerPage(props) {
-    //is the data for this page loading still loading?
-    const [loading, setLoading] = useState(true)
+    const supabase = useSupabaseClient();
     //Array of registration entries formatted as an array of row objects
-    const [registration, setRegistration] = useState<volunteerRowObject[]>([]);
+    const [registration, setRegistration] = useState<volunteerRowObject[]>(props.registrations);
     //Event details for this page
-    const [eventDetails, setEventDetails] = useState<EventDetails>();
+    const [eventDetails, setEventDetails] = useState<EventDetails>(props.event_detail);
     //netID of user to add to registration table, used with the add attendee button
     const [netID, setNetID] = useState("");
     //shift id taken from the shift slug
-    const [shift, setShift] = useState<String>("");
+    const [shift, setShift] = useState<String>(props.shift_id);
     const [filterByAll, setFilterByAll] = useState(true); //starts as true as we want to start by initially showing the admin the entire set of registered users
     const [filterByCheckedIn, setFilterByCheckedIn] = useState(false);
     const [filterByCounter, setFilterByCounter] = useState(false);
     const router = useRouter();
-
-     /**
-     * Initial call that populates page
-     */
-    async function getData() {
-        //Get event details
-        const event_detail = await getEvent();
-        //Get admin status
-        const admin_status = await isAdminUser(event_detail);
-        //If not admin, redirect to 404 page
-        if (!admin_status) {
-            router.push("/404");
-        }
-        //Get registrations for that event
-        const registrations = await getRegistrations(event_detail);
-
-        const shift_id = await getShift(event_detail);
-
-        // //Set event details
-        setEventDetails(event_detail);
-        // //Set registrations
-        setRegistration(registrations);
-        // set shift id
-        setShift(shift_id);
-        //Stop loading
-        setLoading(false);
-    }
-
-    
-    useEffect(() => {
-        if (props.user) {
-          getData();
-        }
-        }, [props]);
 
     // Setup realtime for updates to registration table
     useEffect(() => {
@@ -136,123 +320,6 @@ function VolunteerPage(props) {
       }, []);
 
     /**
-     * Checks if the user trying to look at this page is an admin of the associated event (and thus has the permission to look at this page)
-     * @param event_detail : event details of this page
-     * @returns true if the user looking at this page is an admin, false otherwise
-     */
-    async function isAdminUser(event_detail: EventDetails): Promise<boolean> {
-            let {data, error} = await supabase
-            .from("organizations_admins")
-            .select("organization")
-            .eq("profile", props.user.id);
-
-            if(error || data === null) {
-                return false;
-            }
-    
-            for(let i = 0; i < data.length; i++) {
-                if(event_detail!.organization == data[i].organization) {
-                    return true;
-                }
-            }
-        return false;
-    }
-     /**
-     * Gets the event that this user is an admin of, if they are one
-     * @returns Event Details corresponding to said event
-     */
-    async function getEvent(): Promise<EventDetails> {
-        const {data, error} = await supabase
-        .from("events")
-        .select("id, organization, event_datetime")
-        .eq("slug", props.params.slug)
-        .single();
-
-        if (error) {
-            router.push("/404")
-        }
-
-        return {
-            eventName: props.params.slug,  
-            eventID: data!.id,
-            organization: data!.organization,
-            event_date : data!.event_datetime,
-        }
-    };
-
-    /**
-     * Gets registrations from backend for appropriate event and reformats them into an array of row objects
-     * @param event_detail - information for the event we want to get information for
-     * @returns Array of row objects based on registration table on backend
-     */
-    async function getRegistrations(event_detail: EventDetails): Promise<volunteerRowObject[]> {
-        //Gets raw backend data corresponding to our event
-        //uses a inner join on the shifts table to get the relevant shift info 
-        const {data, error} = await supabase.
-            from("volunteers")
-            .select(`
-                profile,
-                created_at,
-                checked_in,
-                is_counter,
-                profiles (
-                    id,
-                    first_name,
-                    last_name,
-                    organizations (
-                        name
-                    ),
-                    netid
-                ),
-                shifts!inner (
-                    start,
-                    end,
-                    id,
-                    slug
-                )
-            `,)
-            .eq('event', event_detail.eventID)
-            .eq('shifts.slug', props.params.shift);
-        
-        //Holds data reformatted as array of rowobjects
-        let formatted_data: volunteerRowObject[] = []
-
-        if (error || data === null) {
-            console.log("GOT ERROR:")
-            console.log(error)
-            //router.push("/404")
-            return formatted_data;
-        }
-        
-        for(var i = 0; i < data.length; i++) {
-            let current_object = data[i];
-            let profiles = current_object["profiles"] as Object;
-            let shifts = current_object["shifts"] as Object;
-            if (profiles == null) {
-                return []
-            }
-
-            let formatted_object = {
-                "person_id" : current_object["profile"],
-                "created_at" : new Date(current_object["created_at"]!).toLocaleString(),
-                "first_name" : profiles["first_name"],
-                "last_name" : profiles["last_name"],
-                "email" : profiles["netid"] + "@rice.edu",
-                "netid" :  profiles["netid"],
-                "college" : profiles["organizations"].name,
-                "start_time" : new Date(shifts["start"]).toLocaleString(),
-                "end_time" : new Date(shifts["end"]).toLocaleString(),
-                "checked_in" : current_object["checked_in"],
-                "is_counter" : current_object["is_counter"], 
-            }
-
-            formatted_data[i] = formatted_object;
-        }
-        
-        return formatted_data;
-    }; 
-
-    /**
      * Copies set of emails to clipboard
      */
     function copyEmails() {
@@ -265,53 +332,6 @@ function VolunteerPage(props) {
         }).forEach(row => emails.push(row.email));
 
         navigator.clipboard.writeText(emails!.join(' '))
-    }
-
-    async function getShift(event_detail: EventDetails): Promise<String> {
-        const {data, error} = await supabase
-        .from("shifts")
-        .select("id")
-        .eq("event", event_detail.eventID)
-        .eq("slug", props.params.shift)
-        .single();
-
-        if (error) {
-            console.log("ERROR");
-            router.push("/404");
-        }
-
-        return data?.id;
-    }
-
-    /**
-     * Registers attendee to this event given an inputted netID
-     * @param netID - you know what this is
-     */
-    async function addAttendee(netID: string) {
-        //Get UUID of user by netID
-        const {data, error} = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("netid", netID)
-        .single();
-
-        if(!error) {
-            let personID = data!.id;
-
-            //Insert person into registrations table for this event
-            const res = await supabase
-            .from("registrations")
-            .insert({"event" : eventDetails!.eventID, "person": personID})
-            .select();
-
-            //refresh page
-            setRegistration(await getRegistrations(eventDetails!));
-
-        } else {
-            console.log("Got error")
-            console.log(error)
-        }
-
     }
 
     /**
@@ -327,25 +347,24 @@ function VolunteerPage(props) {
         .single();
 
 
-        if(!error) {
-            let personID = data!.id;
-
-            //Insert person into registrations table for this event
-            const res = await supabase
-            .from("volunteers")
-            .insert({"event" : eventDetails!.eventID, "profile": personID, "shift" : shift})
-            .select();
-
-            console.log(eventDetails!.eventID)
-            console.log(personID)
-            console.log(res)
-            //refresh page
-            setRegistration(await getRegistrations(eventDetails!));
-
-        } else {
+        if(error) {
             console.log("Got error")
             console.log(error)
         }
+                    
+        let personID = data!.id;
+
+        //Insert person into registrations table for this event
+        const res = await supabase
+        .from("volunteers")
+        .insert({"event" : eventDetails!.eventID, "profile": personID, "shift" : shift})
+        .select();
+
+        //refresh page
+        console.log(supabase)
+        console.log(eventDetails)
+        console.log(shift)
+        setRegistration(await getRegistrations(supabase, eventDetails!, props.params.shift));
 
     }
 
@@ -394,10 +413,6 @@ function VolunteerPage(props) {
         if(error) {
             console.log(error)
         }
-    }
-
-    if(props.user === undefined || loading) {
-        return (<div>Loading...</div>)
     }
 
     return (
