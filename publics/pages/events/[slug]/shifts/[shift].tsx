@@ -217,7 +217,7 @@ function VolunteerPage(props) {
         //Holds data reformatted as array of rowobjects
         let formatted_data: volunteerRowObject[] = []
 
-        if (error) {
+        if (error || data === null) {
             console.log("GOT ERROR:")
             console.log(error)
             //router.push("/404")
