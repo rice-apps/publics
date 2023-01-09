@@ -67,8 +67,11 @@ function VolunteerPage(props) {
     const [eventDetails, setEventDetails] = useState<EventDetails>();
     //netID of user to add to registration table, used with the add attendee button
     const [netID, setNetID] = useState("");
+<<<<<<< HEAD
     //shift id taken from the shift slug
     const [shift, setShift] = useState<String>("");
+=======
+>>>>>>> 9c58da4 (add volunteer now creates a row with a null shift)
     const [filterByAll, setFilterByAll] = useState(true); //starts as true as we want to start by initially showing the admin the entire set of registered users
     const [filterByCheckedIn, setFilterByCheckedIn] = useState(false);
     const [filterByCounter, setFilterByCounter] = useState(false);
@@ -89,13 +92,15 @@ function VolunteerPage(props) {
         //Get registrations for that event
         const registrations = await getRegistrations(event_detail);
 
+<<<<<<< HEAD
         const shift_id = await getShift(event_detail);
+=======
+>>>>>>> 9c58da4 (add volunteer now creates a row with a null shift)
         // //Set event details
         setEventDetails(event_detail);
         // //Set registrations
         setRegistration(registrations);
         // set shift id
-        setShift(shift_id);
         //Stop loading
         setLoading(false);
     }
@@ -178,25 +183,6 @@ function VolunteerPage(props) {
             event_date : data!.event_datetime,
         }
     };
-
-    /**
-     * Gets the shift info for this page
-     * @returns the shift id for this page
-     */
-    async function getShift(event_detail: EventDetails): Promise<String> {
-        const {data, error} = await supabase
-        .from("shifts")
-        .select("id")
-        .eq('event', event_detail!.eventID)
-        .eq('slug', props.params.shift)
-        .single();
-
-        if (error) {
-            console.log("Could not find shift")
-        }
-
-        return data?.id;
-    }
 
     /**
      * Gets registrations from backend for appropriate event and reformats them into an array of row objects
@@ -328,8 +314,6 @@ function VolunteerPage(props) {
         .eq("netid", netID)
         .single();
 
-        //TODO create new shift using start and end values
-        //TODO add new person based on that shift
 
         if(!error) {
             let personID = data!.id;
@@ -337,7 +321,7 @@ function VolunteerPage(props) {
             //Insert person into registrations table for this event
             const res = await supabase
             .from("volunteers")
-            .insert({"event" : eventDetails!.eventID, "profile": personID, "shift" : shift})
+            .insert({"event" : eventDetails!.eventID, "profile": personID})
             .select();
 
             console.log(eventDetails!.eventID)
