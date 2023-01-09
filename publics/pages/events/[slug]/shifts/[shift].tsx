@@ -67,16 +67,8 @@ function VolunteerPage(props) {
     const [eventDetails, setEventDetails] = useState<EventDetails>();
     //netID of user to add to registration table, used with the add attendee button
     const [netID, setNetID] = useState("");
-<<<<<<< HEAD
-<<<<<<< HEAD
     //shift id taken from the shift slug
     const [shift, setShift] = useState<String>("");
-=======
->>>>>>> 9c58da4 (add volunteer now creates a row with a null shift)
-=======
-    //shift id taken from the shift slug
-    const [shift, setShift] = useState<String>("");
->>>>>>> 98aab8c (added functionaliy for adding/removing attendents and cleaned code)
     const [filterByAll, setFilterByAll] = useState(true); //starts as true as we want to start by initially showing the admin the entire set of registered users
     const [filterByCheckedIn, setFilterByCheckedIn] = useState(false);
     const [filterByCounter, setFilterByCounter] = useState(false);
@@ -97,15 +89,8 @@ function VolunteerPage(props) {
         //Get registrations for that event
         const registrations = await getRegistrations(event_detail);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-        const shift_id = await getShift(event_detail);
-=======
->>>>>>> 9c58da4 (add volunteer now creates a row with a null shift)
-=======
         const shift_id = await getShift(event_detail);
 
->>>>>>> 98aab8c (added functionaliy for adding/removing attendents and cleaned code)
         // //Set event details
         setEventDetails(event_detail);
         // //Set registrations
