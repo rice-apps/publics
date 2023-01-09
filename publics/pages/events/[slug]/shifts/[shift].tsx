@@ -328,6 +328,9 @@ function VolunteerPage(props) {
         .eq("netid", netID)
         .single();
 
+        //TODO create new shift using start and end values
+        //TODO add new person based on that shift
+
         if(!error) {
             let personID = data!.id;
 
