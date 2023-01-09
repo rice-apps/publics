@@ -206,7 +206,6 @@ export async function getServerSideProps(context) {
     } = await supabase.auth.getSession();
     
     if (!session) {
-        console.log("NO SESSION")
         //navigate to account page
         return {
           redirect: {
@@ -219,7 +218,6 @@ export async function getServerSideProps(context) {
     const event_detail = await getEvent(supabase, context.params.slug);
 
     if (event_detail.eventName === "Error") {
-        console.log("NO EVENT")
         return {
           redirect: {
             destination: `http://${context.req.headers.host}/events/${context.params.slug}`,
@@ -236,7 +234,6 @@ export async function getServerSideProps(context) {
     );
     //If not admin, redirect to 404 page
     if (!admin_status) {
-        console.log("NO ADMIN STATUS")
         return {
         redirect: {
             destination: `http://${context.req.headers.host}/events/${context.params.slug}`,
@@ -249,12 +246,7 @@ export async function getServerSideProps(context) {
 
     const shift_id = await getShift(supabase, context.params.shift, event_detail);
 
-    console.log("+++++++")
-    console.log(context.params.shift)
-    console.log("+++++++")
-
     if (shift_id === "Error") {
-        console.log("NO SHIFT")
         return {
             redirect: {
                 destination: `http://${context.req.headers.host}/events/${context.params.slug}`,
