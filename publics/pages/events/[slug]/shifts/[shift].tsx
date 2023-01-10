@@ -15,7 +15,6 @@ type EventDetails = {
     //uuid of event
     eventID: string, //Using string as unsure what UUID type is in TS
     organization: string, //Organization ID overseeing this event
-    event_date: string, //date that the event takes place
 }
 
 /**
@@ -57,7 +56,7 @@ async function getEvent(
 ): Promise<EventDetails> {
     const {data, error} = await supabase
     .from("events")
-    .select("id, name, organization, event_datetime")
+    .select("id, name, organization")
     .eq("slug", slug)
     .single();
 
@@ -66,7 +65,6 @@ async function getEvent(
           eventName: "Error",
           eventID: "Error",
           organization: "Error",
-          event_date: "Error"
         };
     }
     
@@ -74,7 +72,6 @@ async function getEvent(
         eventName: data.name,  
         eventID: data!.id,
         organization: data!.organization,
-        event_date : data!.event_datetime,
     }
 };
 
@@ -107,12 +104,9 @@ async function getEvent(
  * @param event_detail - information for the event we want to get information for
  * @returns Array of row objects based on registration table on backend
  */
-async function getRegistrations(supabase: SupabaseClient, event_detail: EventDetails, slug): Promise<volunteerRowObject[]> {
+async function getVolunteers(supabase: SupabaseClient, event_detail: EventDetails, slug): Promise<volunteerRowObject[]> {
     //Gets raw backend data corresponding to our event
     //uses a inner join on the shifts table to get the relevant shift info 
-    console.log("==========")
-    console.log(slug)
-    console.log("==========")
     const {data, error} = await supabase.
         from("volunteers")
         .select(`
@@ -242,7 +236,7 @@ export async function getServerSideProps(context) {
         };
     }
 
-    const registrations = await getRegistrations(supabase, event_detail, context.params.shift);
+    const registrations = await getVolunteers(supabase, event_detail, context.params.shift);
 
     const shift_id = await getShift(supabase, context.params.shift, event_detail);
 
@@ -353,10 +347,7 @@ function VolunteerPage(props) {
         .select();
 
         //refresh page
-        console.log(supabase)
-        console.log(eventDetails)
-        console.log(shift)
-        setRegistration(await getRegistrations(supabase, eventDetails!, props.params.shift));
+        setRegistration(await getVolunteers(supabase, eventDetails!, props.params.shift));
 
     }
 
@@ -414,7 +405,7 @@ function VolunteerPage(props) {
             </div>
             <div className="flex justify-end gap-4">
             <div className="dropdown">
-                    <label tabIndex={0} className="btn m-1">Filter Options</label>
+                    <label tabIndex={0} className="btn">Filter Options</label>
                         <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
                         <div className="AllCheckbox">
                                 <label className="label cursor-pointer">
