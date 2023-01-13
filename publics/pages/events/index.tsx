@@ -118,11 +118,11 @@ function Events(props: Props) {
       setRenderTab2(true);
     }
     if (props.volunteering.length > 0) {
-      setRenderTab3(false);
+      setRenderTab3(true);
     }
 
     if (props.hosting.length > 0) {
-      setRenderTab4(false);
+      setRenderTab4(true);
     }
   }, [props]);
 
