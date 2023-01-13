@@ -17,6 +17,7 @@ interface Registration {
   waitlist: boolean;
 }
 
+// get all events
 const getEvents = async (supabase: SupabaseClient) => {
   const { data, error } = await supabase
     .from("events")
@@ -29,6 +30,7 @@ const getEvents = async (supabase: SupabaseClient) => {
   return data;
 };
 
+// get all events that the user is registered for
 const getRegistrations = async (supabase: SupabaseClient, userId: string) => {
   const { data, count, error } = await supabase
     .from("registrations")
@@ -55,6 +57,7 @@ const getRegistrations = async (supabase: SupabaseClient, userId: string) => {
   return reg;
 };
 
+// get all events that the user is volunteering for
 const getVolunteerStatus = async (supabase: SupabaseClient, userId: string) => {
   const { data, error } = await supabase
     .from("volunteers")
@@ -72,6 +75,7 @@ const getVolunteerStatus = async (supabase: SupabaseClient, userId: string) => {
   return data.map((vol) => vol.event!["id"]);
 };
 
+// get all events that the user is hosting
 const getHostedEvents = async (
   supabase: SupabaseClient,
   userId: string,
@@ -98,11 +102,31 @@ const getHostedEvents = async (
 
 function Events(props: Props) {
   const [openTab, setOpenTab] = useState(1);
+  // only render tabs if the user has events in that category
+  const [renderTab2, setRenderTab2] = useState(false);
+  const [renderTab3, setRenderTab3] = useState(false);
+  const [renderTab4, setRenderTab4] = useState(false);
+  // tab classes
   const [tab1Class, setTab1Class] = useState("tab tab-active");
   const [tab2Class, setTab2Class] = useState("tab");
   const [tab3Class, setTab3Class] = useState("tab");
   const [tab4Class, setTab4Class] = useState("tab");
 
+  // set tab classes on mount
+  useEffect(() => {
+    if (props.registrations.length > 0) {
+      setRenderTab2(true);
+    }
+    if (props.volunteering.length > 0) {
+      setRenderTab3(false);
+    }
+
+    if (props.hosting.length > 0) {
+      setRenderTab4(false);
+    }
+  }, [props]);
+
+  // set tab classes on tab change
   function handleClick(tab) {
     if (tab === 1) {
       setOpenTab(1);
@@ -133,19 +157,25 @@ function Events(props: Props) {
 
   return (
     <div className="mb-5">
-      <div className="tabs tabs-boxed">
+      <div className="tabs bg-base-100">
         <a className={tab1Class} onClick={() => handleClick(1)}>
           Upcoming Events
         </a>
-        <a className={tab2Class} onClick={() => handleClick(2)}>
-          My Events
-        </a>
-        <a className={tab3Class} onClick={() => handleClick(3)}>
-          Volunteering
-        </a>
-        <a className={tab4Class} onClick={() => handleClick(4)}>
-          Hosting
-        </a>
+        {renderTab2 && (
+          <a className={tab2Class} onClick={() => handleClick(2)}>
+            My Events
+          </a>
+        )}
+        {renderTab3 && (
+          <a className={tab3Class} onClick={() => handleClick(3)}>
+            Volunteering
+          </a>
+        )}
+        {renderTab4 && (
+          <a className={tab4Class} onClick={() => handleClick(4)}>
+            Hosting
+          </a>
+        )}
       </div>
       <div className={openTab === 1 ? "block" : "hidden"}>
         <div className="divider">Upcoming Events</div>
