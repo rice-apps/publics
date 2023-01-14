@@ -374,13 +374,16 @@ function ResultPage(props) {
   }
 
   const registrationFilter = registration.filter((row) => {
-    return (
-      filterByAll ||
-      (row.picked_up_wristband == filterByWristband &&
-        row.waitlist == filterByWaitlist)
-    );
+    if (filterByAll) {
+      return true;
+    }
+    if (filterByWristband) {
+      return row.picked_up_wristband;
+    }
+    if (filterByWaitlist) {
+      return row.waitlist;
+    }
   });
-
   async function handleSearch() {
     setRegistration(await getRegistrations(supabase, eventDetails, search));
     setPage(0);

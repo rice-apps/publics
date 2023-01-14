@@ -126,8 +126,7 @@ async function getVolunteers(supabase: SupabaseClient, event_detail: EventDetail
             shifts!inner (
                 start,
                 end,
-                id,
-                slug
+                id
             )
         `,)
         .eq('event', event_detail.eventID)
@@ -470,8 +469,14 @@ function VolunteerPage(props) {
                 {
                         //Add simple filter for row entries
                         registration.filter(row => {
-                            if(filterByAll || (row.checked_in == filterByCheckedIn && row.is_counter == filterByCounter)) {
-                                return row;
+                            if(filterByAll) {
+                                return true;
+                            }
+                            if(filterByCheckedIn) {
+                                return row["checked_in"];
+                            }
+                            if(filterByCounter) {
+                                return row["is_counter"];
                             }
                         }).map((row, index) => {
                             let checkedIn = row["checked_in"];
