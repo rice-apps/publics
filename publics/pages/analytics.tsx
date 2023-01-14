@@ -40,8 +40,61 @@ export default function Analytics(props) {
         const { data: volunteers } = await supabase
           .from("volunteers")
           .select("id, profile(first_name), event(slug)");
+
+        if (
+          !data ||
+          !eventData ||
+          !volunteer ||
+          !volunteers ||
+          volunteer.event.slug !== query.slug
+        ) {
+          window.location.href = "/events/";
+          return;
+        }
+
+        const volunteerCountArray = volunteers.map((volunteer) => {
+          return {
+            name: volunteer.profile.first_name,
+            id: volunteer.id,
+            count:
+              data.filter(
+                (count) => count.volunteer.id === volunteer.id && count.inout
+              ).length -
+              data.filter(
+                (count) => count.volunteer.id === volunteer.id && !count.inout
+              ).length,
+          };
+        });
+
+        const countsData = data.map((data) => {
+          return {
+            id: data.eventData.id,
+            color: "hsl(220, 70%, 50%)",
+            data:
+              data.filter(
+                (count) => count.volunteer.id === volunteer.id && count.inout
+              ).length -
+              data.filter(
+                (count) => count.volunteer.id === volunteer.id && !count.inout
+              ).length,
+          };
+        });
     }
 
+    // Filters data into the format required by the library
+    /*
+    {
+      "id": "##:00", // Hour in military time
+      "color": "hsl(220, 70%, 50%)",
+      "data": [
+        {
+          "x": "##:00",
+          "y": #
+        },
+        {...}
+      ]
+    }
+     */
     const countsData = fetchPosts;
 
     // For reference: https://nivo.rocks/line/
@@ -115,7 +168,7 @@ const countsLineGraph = ({ countsData }) => (
 
 return (
   <div>
-
+      {countsLineGraph}
   </div>
 );
 }
