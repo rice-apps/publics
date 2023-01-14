@@ -220,19 +220,22 @@ export default function Analytics(props) {
           return;
         }
 
-        const countsData = data.map((data) => {
+        const countsData = data.group(data.eventData.id)
+        .map((data) => {
           return {
             id: data.eventData.id,
             color: "hsl(220, 70%, 50%)",
-            data:
-              data.filter(
-                (count) => count.volunteer.id === volunteer.id && count.inout
-              ).length -
-              data.filter(
-                (count) => count.volunteer.id === volunteer.id && !count.inout
-              ).length,
+            data: {
+              x: data.created_at.getHours(),
+              // Need to filter by event and hour, sum total for that event's hour save as a data entry
+              y: data.filter((count) => count.eventData.id === data.eventData.id && count.created_at.getHours() === data.created_at.getHours())
+            }
           };
         });
+
+        return (
+          countsData
+        );
     }
 
 <<<<<<< HEAD
@@ -257,8 +260,11 @@ export default function Analytics(props) {
       ]
     }
      */
+<<<<<<< HEAD
 >>>>>>> c7e5cdc (Filtering data for graph)
     const countsData = fetchPosts;
+=======
+>>>>>>> b2d96fc (Sorting out how to filter by event count and total)
 
     // For reference: https://nivo.rocks/line/
 const countsLineGraph = ({ countsData }) => (
