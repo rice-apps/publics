@@ -18,7 +18,7 @@ function MyApp({
       supabaseClient={supabaseClient}
       initialSession={pageProps.initialSession}
     >
-      <Layout>
+      <Layout session={pageProps["initialSession"]}>
         <Component {...pageProps} />
       </Layout>
     </SessionContextProvider>

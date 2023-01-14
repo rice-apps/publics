@@ -1,15 +1,9 @@
 import { useEffect } from 'react'
-import { themeChange } from 'theme-change'
 import Link from 'next/link'
 
-export default function Navbar() {
-    useEffect(() => {
-        themeChange(false)
-    }, [])
-    const themes: string[] = ["publics", "light", "dark", "cupcake", "bumblebee", "emerald", "corporate", "synthwave", "retro", "cyberpunk", "valentine", "halloween", "garden", "forest", "aqua", "lofi", "pastel", "fantasy", "wireframe", "black", "luxury", "dracula", "cmyk", "autumn", "business", "acid", "lemonade", "night", "coffee", "winter"];
-
+export default function Navbar({ session }) {
     const navbar_content = (<><li><Link href="/events">Events</Link></li>
-    <li><Link href="mailto:awj3@rice.edu">Contact</Link></li>
+        <li><Link href="mailto:awj3@rice.edu">Contact</Link></li>
         <li tabIndex={0}>
             <a className="justify-between">
                 Parent
@@ -44,21 +38,20 @@ export default function Navbar() {
             </div>
             <div className="navbar-end">
                 <div className="dropdown dropdown-end">
-                    <label tabIndex={0} className="m-1">
-                        <div className="avatar hover:scale-110 hover:drop-shadow-lg transition-all">
-                            <div className="w-16 rounded-full mr-2">
-                                <img src="https://placeimg.com/192/192/animals" />
-                            </div>
-                        </div>
-                    </label>
-                    <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 border border-secondary">
-                        <select data-choose-theme className="select select-bordered max-w-xs mr-2">
-                            {themes.map((theme) => (
-                                <option value={theme} key={theme}>{theme.toLocaleUpperCase()}</option>
-                            ))}
-                        </select>
-                        <li><Link href="/account">Account</Link></li>
-                    </ul>
+                    <Link href="/account" className='btn btn-outline hover:scale-110 hover:drop-shadow-lg transition-all'>
+                        {
+                            session && session.user && session.user.user_metadata.picture ? (
+                                <div className="avatar">
+                                    <div className="w-8 rounded">
+                                        <img src={session.user.user_metadata.picture} alt="Google profile avatar" className='w-fit' />
+                                    </div>
+                                </div>
+                            ) : (
+                                <span>Login or Signup</span>
+                            )
+                        }
+
+                    </Link>
                 </div>
             </div>
         </div>
