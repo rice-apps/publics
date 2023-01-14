@@ -5,6 +5,8 @@ import {
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs";
 import { getPagination } from "../../../utils/registration";
+import SuccessMsg from "../../../components/SuccessMsg";
+import ErrorMsg from "../../../components/ErrorMsg";
 /**
  * Simple type containing a friendly name for an event, and the UUID of the event
  */
@@ -246,6 +248,11 @@ function ResultPage(props) {
   const [page, setPage] = useState(props.page);
   const { from, to } = getPagination(page, 50);
 
+  //Confirmation Message
+  const [rError, setError] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [action, setAction] = useState("");
+
   // Setup realtime for updates to registration table
   useEffect(() => {
     const channel = supabase
@@ -313,12 +320,17 @@ function ResultPage(props) {
         .from("registrations")
         .insert({ event: eventDetails!.eventID, person: personID })
         .select();
+        setSuccess(true);
+        setError(false);
+        setAction("added")
 
       //refresh page
       setRegistration(await getRegistrations(supabase, eventDetails, search));
     } else {
       console.log("Got error");
       console.log(error);
+      setSuccess(false);
+      setError(true);
     }
   }
 
@@ -337,8 +349,13 @@ function ResultPage(props) {
     if (!res) {
       console.log("ERROR in removing attendee");
       console.log(res);
+      setError(true);
+      setSuccess(false);
     }
 
+    setError(false);
+    setSuccess(true);
+    setAction("removed");
     //refresh page
     setRegistration(registration.filter((v, i) => v.person_id !== user_id));
   }
@@ -414,6 +431,12 @@ function ResultPage(props) {
 
   return (
     <div key="registration_results_page" className="mx-auto mx-4 space-y-4">
+      <div className={success ? "block" : "hidden"}>
+        <SuccessMsg message={`Success! User ${action}!`}/>
+      </div>   
+      <div className={rError ? "block" : "hidden"}>
+        <ErrorMsg message={"Error! User doesn't exist "}/>
+      </div> 
       <div key="event_title">
         <h1>{eventDetails!.eventName}: Registration Results</h1>
       </div>
