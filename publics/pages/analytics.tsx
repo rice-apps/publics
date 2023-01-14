@@ -220,20 +220,6 @@ export default function Analytics(props) {
           return;
         }
 
-        const volunteerCountArray = volunteers.map((volunteer) => {
-          return {
-            name: volunteer.profile.first_name,
-            id: volunteer.id,
-            count:
-              data.filter(
-                (count) => count.volunteer.id === volunteer.id && count.inout
-              ).length -
-              data.filter(
-                (count) => count.volunteer.id === volunteer.id && !count.inout
-              ).length,
-          };
-        });
-
         const countsData = data.map((data) => {
           return {
             id: data.eventData.id,
