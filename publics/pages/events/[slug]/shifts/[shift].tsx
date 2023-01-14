@@ -131,7 +131,7 @@ async function getVolunteers(supabase: SupabaseClient, event_detail: EventDetail
             )
         `,)
         .eq('event', event_detail.eventID)
-        .eq('shifts.slug', slug);
+        .eq('shifts.id', slug);
         
         //Holds data reformatted as array of rowobjects
         let formatted_data: volunteerRowObject[] = []
@@ -238,7 +238,7 @@ export async function getServerSideProps(context) {
 
     const registrations = await getVolunteers(supabase, event_detail, context.params.shift);
 
-    const shift_id = await getShift(supabase, context.params.shift, event_detail);
+    const shift_id = context.params.shift
 
     if (shift_id === "Error") {
         return {
@@ -401,7 +401,7 @@ function VolunteerPage(props) {
     return (
         <div key = "registration_results_page" className="mx-auto mx-4 space-y-4">
             <div key = "event_title">
-                <h1>Volunteers for {props.params.shift}</h1>
+                <h1>Volunteers for {props.event_detail.eventName}</h1>
             </div>
             <div className="flex justify-end gap-4">
             <div className="dropdown">
