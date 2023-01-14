@@ -316,7 +316,7 @@ function VolunteerPage(props) {
             }
         }).forEach(row => emails.push(row.email));
 
-        navigator.clipboard.writeText(emails!.join(' '))
+        navigator.clipboard.writeText(emails!.join(', '))
     }
 
     /**

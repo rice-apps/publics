@@ -289,7 +289,7 @@ function ResultPage(props) {
     filterRegistrations().forEach((row) => emails.push(row.email));
 
     //Writing to clipboard
-    navigator.clipboard.writeText(emails!.join(" "));
+    navigator.clipboard.writeText(emails!.join(", "));
   }
 
   /**
