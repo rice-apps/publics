@@ -34,7 +34,19 @@ const LargeEventCard = (props: Props) => {
           </Link>
         </div>
       );
-    } else {
+    } else if (props.type === "my-events") {
+      return (
+        <div className="card-actions sm:justify-end">
+          <Link href = {link + "/transfer-ticket"}>
+            <button className="btn btn-primary">Transfer Ticket</button>
+          </Link>
+          <Link href={link} passHref>
+            <button className="btn btn-primary">Event Details</button>
+          </Link>
+        </div>
+      );
+    }
+    else {
       return (
         <div className="card-actions sm:justify-end">
           <Link href={link} passHref>
