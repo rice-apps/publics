@@ -1,13 +1,16 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
+import { useSession } from '@supabase/auth-helpers-react'
 
-export default function Navbar({ session }) {
+export default function Navbar() {
     const navbar_content = (
         <>
             <li><Link href="/events">Events</Link></li>
             <li><Link href="mailto:awj3@rice.edu">Contact</Link></li>
         </>
     )
+
+    const session = useSession()
 
     return (
         <div className="navbar bg-base-100 min-h-fit">
