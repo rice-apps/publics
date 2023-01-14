@@ -331,8 +331,6 @@ function ResultPage(props) {
       //refresh page
       setRegistration(await getRegistrations(supabase, eventDetails, search));
     } else {
-      console.log("Got error");
-      console.log(error);
       setResultSuccess(false);
       setResultError(true);
     }
@@ -351,13 +349,10 @@ function ResultPage(props) {
       .select();
 
     if (!res) {
-      console.log("ERROR in removing attendee");
-      console.log(res);
       setResultError(true);
       setResultSuccess(false);
     }
 
-    console.log(res);
     setResultError(false);
     setResultSuccess(true);
     setAction("User successfully removed.");
