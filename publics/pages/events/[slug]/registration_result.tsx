@@ -249,9 +249,11 @@ function ResultPage(props) {
   const { from, to } = getPagination(page, 50);
 
   //Confirmation Message
-  const [rError, setError] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [resultError, setResultError] = useState(false);
+  const [resultSuccess, setResultSuccess] = useState(false);
+  const [copiedEmails, setCopiedEmails] = useState(false);
   const [action, setAction] = useState("");
+
 
   // Setup realtime for updates to registration table
   useEffect(() => {
@@ -297,6 +299,7 @@ function ResultPage(props) {
 
     //Writing to clipboard
     navigator.clipboard.writeText(emails!.join(" "));
+    setCopiedEmails(true);
   }
 
   /**
@@ -320,17 +323,18 @@ function ResultPage(props) {
         .from("registrations")
         .insert({ event: eventDetails!.eventID, person: personID })
         .select();
-        setSuccess(true);
-        setError(false);
-        setAction("added")
+        setResultSuccess(true);
+        setResultError(false);
+        setAction(netID + " was successfully added.");
+        
 
       //refresh page
       setRegistration(await getRegistrations(supabase, eventDetails, search));
     } else {
       console.log("Got error");
       console.log(error);
-      setSuccess(false);
-      setError(true);
+      setResultSuccess(false);
+      setResultError(true);
     }
   }
 
@@ -349,13 +353,14 @@ function ResultPage(props) {
     if (!res) {
       console.log("ERROR in removing attendee");
       console.log(res);
-      setError(true);
-      setSuccess(false);
+      setResultError(true);
+      setResultSuccess(false);
     }
 
-    setError(false);
-    setSuccess(true);
-    setAction("removed");
+    console.log(res);
+    setResultError(false);
+    setResultSuccess(true);
+    setAction("User successfully removed.");
     //refresh page
     setRegistration(registration.filter((v, i) => v.person_id !== user_id));
   }
@@ -431,11 +436,14 @@ function ResultPage(props) {
 
   return (
     <div key="registration_results_page" className="mx-auto mx-4 space-y-4">
-      <div className={success ? "block" : "hidden"}>
-        <SuccessMsg message={`Success! User ${action}!`}/>
+      <div className={resultSuccess ? "block" : "hidden"}>
+        <SuccessMsg message={`${action}`}/>
       </div>   
-      <div className={rError ? "block" : "hidden"}>
+      <div className={resultError ? "block" : "hidden"}>
         <ErrorMsg message={"Error! User doesn't exist "}/>
+      </div> 
+      <div className={copiedEmails ? "block" : "hidden"}>
+        <SuccessMsg message={`Emails copied to clipboard`}/>
       </div> 
       <div key="event_title">
         <h1>{eventDetails!.eventName}: Registration Results</h1>
