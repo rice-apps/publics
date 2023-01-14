@@ -535,15 +535,16 @@ function ResultPage(props) {
             <div className="modal-box">
               <h3 className="font-bold text-lg">Add attendee</h3>
               <div className="form-control w-full max-w-xs">
+              <label className="label">
+                  <span className="label-text">netID</span>
+                </label>
                 <input
                   type="text"
                   placeholder="Type here"
                   className="input input-bordered w-full max-w-xs"
                   onChange={(event) => setNetID(event.target.value)}
                 />
-                <label className="label">
-                  <span className="label-text-alt">netID</span>
-                </label>
+
               </div>
               <div className="modal-action">
                 <label
