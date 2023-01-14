@@ -5,6 +5,8 @@ import {
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs";
 import { getPagination } from "../../../utils/registration";
+import SuccessMsg from "../../../components/SuccessMsg";
+import ErrorMsg from "../../../components/ErrorMsg";
 /**
  * Simple type containing a friendly name for an event, and the UUID of the event
  */
@@ -246,6 +248,13 @@ function ResultPage(props) {
   const [page, setPage] = useState(props.page);
   const { from, to } = getPagination(page, 50);
 
+  //Confirmation Message
+  const [resultError, setResultError] = useState(false);
+  const [resultSuccess, setResultSuccess] = useState(false);
+  const [copiedEmails, setCopiedEmails] = useState(false);
+  const [action, setAction] = useState("");
+
+
   // Setup realtime for updates to registration table
   useEffect(() => {
     const channel = supabase
@@ -289,7 +298,8 @@ function ResultPage(props) {
     filterRegistrations().forEach((row) => emails.push(row.email));
 
     //Writing to clipboard
-    navigator.clipboard.writeText(emails!.join(", "));
+    navigator.clipboard.writeText(emails!.join(" "));
+    setCopiedEmails(true);
   }
 
   /**
@@ -313,12 +323,18 @@ function ResultPage(props) {
         .from("registrations")
         .insert({ event: eventDetails!.eventID, person: personID })
         .select();
+        setResultSuccess(true);
+        setResultError(false);
+        setAction(netID + " was successfully added.");
+        
 
       //refresh page
       setRegistration(await getRegistrations(supabase, eventDetails, search));
     } else {
       console.log("Got error");
       console.log(error);
+      setResultSuccess(false);
+      setResultError(true);
     }
   }
 
@@ -337,8 +353,14 @@ function ResultPage(props) {
     if (!res) {
       console.log("ERROR in removing attendee");
       console.log(res);
+      setResultError(true);
+      setResultSuccess(false);
     }
 
+    console.log(res);
+    setResultError(false);
+    setResultSuccess(true);
+    setAction("User successfully removed.");
     //refresh page
     setRegistration(registration.filter((v, i) => v.person_id !== user_id));
   }
@@ -417,6 +439,15 @@ function ResultPage(props) {
 
   return (
     <div key="registration_results_page" className="mx-auto mx-4 space-y-4">
+      <div className={resultSuccess ? "block" : "hidden"}>
+        <SuccessMsg message={`${action}`}/>
+      </div>   
+      <div className={resultError ? "block" : "hidden"}>
+        <ErrorMsg message={"Error! User doesn't exist "}/>
+      </div> 
+      <div className={copiedEmails ? "block" : "hidden"}>
+        <SuccessMsg message={`Emails copied to clipboard`}/>
+      </div> 
       <div key="event_title">
         <h1>{eventDetails!.eventName}: Registration Results</h1>
       </div>
