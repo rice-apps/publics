@@ -245,9 +245,7 @@ export default function Edit(props) {
                   <span className="label-text-alt">Description</span>
                 </label>
               </div>
-              <div>
-                <button className="btn normal-case">Upload Cover Photo</button>
-              </div>
+              <input type="file" className="file-input file-input-bordered file-input-primary w-full max-w-xs" />
             </div>
             <div className="sm:flex">
               <div className="form-control">
@@ -330,7 +328,7 @@ export default function Edit(props) {
               <input
                 type="submit"
                 value="Update"
-                className="btn sm:float-right normal-case border-0 focus:outline-none focus:ring"
+                className="btn btn-primary sm:float-right normal-case border-0 focus:outline-none focus:ring"
               />
             </div>
           </div>

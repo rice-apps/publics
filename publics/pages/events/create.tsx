@@ -94,7 +94,7 @@ export default function Create(props) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="h-screen bg-[#F5F5F5]">
+      <main>
         <h1 className="mx-3 text-2xl normal-case leading-[3rem] font-family: inter font-bold">
           Create an Event
         </h1>
@@ -102,7 +102,7 @@ export default function Create(props) {
           <h2 className="mx-3 text-lg leading-[2rem] normal-case font-family-inter font-medium">
             Event Details
           </h2>
-          <div className="mx-3 divider leading-[1px] h-[0.5px] w-[950px]"></div>
+          <div className="mx-3 divider"></div>
         </div>
         <form onSubmit={insert}>
           <div className="p-2">
@@ -219,9 +219,7 @@ export default function Create(props) {
                 </label>
               </div>
               <div>
-                <button className="btn normal-case border-0 bg-gray-400 hover:bg-fuchsia-700">
-                  Upload Cover Photo
-                </button>
+              <input type="file" className="file-input file-input-bordered file-input-primary w-full max-w-xs" />
               </div>
             </div>
             <div className="sm:flex">
@@ -305,7 +303,7 @@ export default function Create(props) {
               <input
                 type="submit"
                 value="Submit"
-                className="btn sm:float-right normal-case border-0 bg-[#AC1FB8] hover:bg-fuchsia-900 focus:outline-none focus:ring focus:ring-fuchsia-700"
+                className="btn btn-primary sm:float-right normal-case border-0"
               />
             </div>
           </div>
