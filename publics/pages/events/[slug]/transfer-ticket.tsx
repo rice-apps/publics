@@ -25,11 +25,11 @@ async function getEventInfo(supabase: SupabaseClient, slug: string): Promise<Obj
 async function isUserRegistered(supabase: SupabaseClient, user_id: string, event_id: string): Promise<boolean> {
     const {data, error} = await supabase
     .from("registrations")
-    .select("*")
+    .select("waitlist")
     .eq("event", event_id)
     .eq("person", user_id);
 
-    if (error || data.length < 1) {
+    if (error || data.length < 1 || data[0].waitlist) {
         return false;
     }
 
@@ -116,6 +116,7 @@ async function getTransferMessage(supabase:SupabaseClient, netID: string, setTra
 
 /**
  * Updates the registration for the "from" user to be set to the "to" user
+ * Has basic error checking to ensure that tickets can only be transferred once!
  * @param from - person sending the ticket
  * @param to - person receiving the ticket
  */
