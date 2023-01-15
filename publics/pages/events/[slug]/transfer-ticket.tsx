@@ -37,9 +37,6 @@ async function isUserRegistered(supabase: SupabaseClient, user_id: string, event
 }
 
 export const getServerSideProps = async (ctx) => {
-    /*
-    session stuff might be useless
-    */
     // Create authenticated Supabase Client
     const supabase = createServerSupabaseClient(ctx);
     // Check if we have a session
@@ -122,12 +119,42 @@ async function getTransferMessage(supabase:SupabaseClient, netID: string, setTra
  * @param from - person sending the ticket
  * @param to - person receiving the ticket
  */
-async function transferTicket(supabase: SupabaseClient, from: string, to: string, event_id: string, setTranferedTicketMessage, setCanTransfer) {
+async function transferTicket(
+    supabase: SupabaseClient, 
+    from: string, to: string,
+     event_id: string, 
+     setTranferedTicketMessage,
+     setCanTransfer) {
+
     if (from === to) {
         setTranferedTicketMessage("You can't transfer a ticket to yourself!")
         return
     }
 
+    //is from already in the DB for this event?
+    const transferee_info =  await supabase
+    .from("registrations")
+    .select("waitlist")
+    .eq("person", to)
+    .eq("event", event_id)
+    .single();
+
+    //if they're on the registrations table and they're on the waitlist then we can still transfer
+    if(!transferee_info.error && transferee_info.data?.waitlist) {
+        const deleted = await supabase
+        .from("registrations")
+        .delete()
+        .eq("person", to)
+        .eq("event", event_id);
+
+        //if we can't delete that row then return
+        if (deleted.error) {
+            setTranferedTicketMessage("An error occured. Please try again; If the problems persist then please contact the dev team.")
+            return;
+        }
+    }
+
+    //update to's registration to hold from's id
     const {data, error} = await supabase
     .from("registrations")
     .update({person : to})
@@ -151,6 +178,7 @@ async function transferTicket(supabase: SupabaseClient, from: string, to: string
 }
 
 function TransferTicketPage(props) {
+    const router = useRouter();
     const supabase: SupabaseClient = useSupabaseClient();
     //net id of the person who is being sent this ticket
     const [to, setTo] = useState<string>("");
@@ -172,40 +200,49 @@ function TransferTicketPage(props) {
     }, [transferRequest]);
 
     return (
-        <div className="grid place-items-center h-screen">
-            <div>
-                <h1>Transfer Tickets for {props.event_info["name"]}</h1>
-            </div>
-            <div className="form-control w-full max-w-xs">
-                <input type="text" placeholder="Enter NetID here" onChange={(e) => setTo(e.target.value)} className="input input-bordered w-full max-w-xs" />
-                <label className="label">
-                    <span className="label-text-alt">Net ID</span>
-                </label>
-            </div>
-            <div>
-                <label htmlFor="transfer-modal" className="btn btn-primary" onClick = {() => setTransferRequest(true)}>Transfer Ticket</label>
+        
+        <div className = "flex flex-col justify-center items-center m-5">
+            <div className="card w-96 bg-base-100">
+                <div className="card-body items-center text-center">
+                    <h1>Transfer Tickets for {props.event_info["name"]}</h1>
+                    <div className="form-control w-full max-w-xs">
+                        <input type="text" placeholder="Enter NetID here" onChange={(e) => setTo(e.target.value)} className="input input-bordered w-full max-w-xs" />
+                        <label className="label">
+                            <span className="label-text-alt">Net ID</span>
+                        </label>
+                    </div>
+                    <div className="card-actions justify-end">
+                    <label htmlFor="transfer-modal" className="btn btn-primary" onClick = {() => setTransferRequest(true)}>Transfer Ticket</label>
                 <input type="checkbox" id="transfer-modal" className="modal-toggle" />
                 <div className="modal">
-                <div className="modal-box">
-                    <h1 className="font-bold text-lg">{transferMessage}</h1>
-                    <div className="modal-action">
-                    <label htmlFor="transfer-modal" className="btn btn-outline btn-primary" onClick = {() => {setTransferRequest(false); setTranferedTicketMessage("")}}>Cancel</label>
-                    <label htmlFor="transfer-modal" className="btn btn-primary" onClick = {() => {
-                        setTransferRequest(false);
-                        if (!canTransfer) {
-                            setTranferedTicketMessage("You are unable to transfer at this time!")
-                        }
-                        else {
-                            transferTicket(supabase, props.user.id, transfereeID, props.event_info["id"], setTranferedTicketMessage, setCanTransfer)}
-                        }
-                    }>Transfer</label>
+                    <div className="modal-box">
+                        <h1 className="font-bold text-lg">{transferMessage}</h1>
+                        <div className="modal-action">
+                        <label htmlFor="transfer-modal" className="btn btn-outline btn-primary" onClick = {() => {setTransferRequest(false); setTranferedTicketMessage("")}}>Cancel</label>
+                        <label htmlFor="transfer-modal" className="btn btn-primary" onClick = {() => {
+                                if (!canTransfer) {
+                                    setTranferedTicketMessage("You are unable to transfer at this time!")
+                                }
+                                else {
+                                    transferTicket(supabase, props.user.id, transfereeID, props.event_info["id"], setTranferedTicketMessage, setCanTransfer)
+                                }
+                                setTransferRequest(false);
+                            }
+                        }>Transfer</label>
+                        </div>
+                    </div>
+                    </div>
+                        <button className="btn btn-ghost" onClick={() => router.push("/events")}>Go Back</button>
+                        </div>
                     </div>
                 </div>
-                </div>
-            </div>
             <div>
-                {tranferedTicketMessage}
             </div>
+                <div className = "card w-96 bg-base m-5">
+                    <span className = "font-bold text-center">
+                        {tranferedTicketMessage}
+                    </span>
+                </div>
         </div>
     )   
 }
