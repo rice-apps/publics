@@ -35,9 +35,9 @@ const getRegistrations = async (supabase: SupabaseClient, userId: string) => {
   const { data, count, error } = await supabase
     .from("registrations")
     .select(
-      `person!inner(id), event(*, organization (name, photo, id)), waitlist`
+      `event(*, organization (name, photo, id)), waitlist`
     )
-    .eq("person.id", userId)
+    .eq("person", userId);
 
   if (error) {
     throw error
@@ -61,8 +61,8 @@ const getRegistrations = async (supabase: SupabaseClient, userId: string) => {
 const getVolunteerStatus = async (supabase: SupabaseClient, userId: string) => {
   const { data, error } = await supabase
     .from("volunteers")
-    .select(`profile!inner(id), event(id)`)
-    .eq("profile.id", userId)
+    .select(`event(id)`)
+    .eq("profile", userId);
 
   if (error) {
     throw error
@@ -83,8 +83,8 @@ const getHostedEvents = async (
 ) => {
   const { data, error } = await supabase
     .from("organizations_admins")
-    .select(`organization(id), profile!inner(id)`)
-    .eq("profile.id", userId)
+    .select(`organization(id)`)
+    .eq("profile", userId);
   if (error) {
     throw error
   }
