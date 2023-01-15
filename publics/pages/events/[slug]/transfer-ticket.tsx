@@ -6,10 +6,10 @@ import {
     createServerSupabaseClient,
   } from "@supabase/auth-helpers-nextjs";
 
-async function getEventID(supabase: SupabaseClient, slug: string): Promise<string> {
+async function getEventInfo(supabase: SupabaseClient, slug: string): Promise<Object> {
     const {data, error} = await supabase
     .from("events")
-    .select("id")
+    .select("id, name")
     .eq("slug", slug)
     .single();
 
@@ -17,7 +17,10 @@ async function getEventID(supabase: SupabaseClient, slug: string): Promise<strin
         return "ERROR";
     }
 
-    return data?.id;
+    return {
+        id: data?.id,
+        name: data?.name
+    };
 }
 async function isUserRegistered(supabase: SupabaseClient, user_id: string, event_id: string): Promise<boolean> {
     const {data, error} = await supabase
@@ -55,9 +58,9 @@ export const getServerSideProps = async (ctx) => {
     }
 
     //getting event id from slug
-    const event_id: string = await getEventID(supabase, ctx.params.slug);
+    const event_info: Object = await getEventInfo(supabase, ctx.params.slug);
 
-    if (event_id === "ERROR") {
+    if (event_info["id"] === "ERROR") {
         return {
             redirect: {
               destination: `http://${ctx.req.headers.host}/events`,
@@ -67,7 +70,7 @@ export const getServerSideProps = async (ctx) => {
     }
     //Checking if this user is actually registered for this event
     //Useful in case anyone wants to manually navigate to this page again after they've transferred tickets
-    const is_registered = await isUserRegistered(supabase, session.user.id, event_id);
+    const is_registered = await isUserRegistered(supabase, session.user.id, event_info["id"]);
 
     if (!is_registered) {
         return {
@@ -82,11 +85,18 @@ export const getServerSideProps = async (ctx) => {
         props: {
             params: ctx.params,
             user: session.user,
-            event_id: event_id
+            event_info: event_info
         }
     };
 }
 
+/**
+ * Gets and sets message to be displayed when a user tries to transfer a ticket
+ * @param supabase
+ * @param netID - net id of the person that we are trying to transfer the ticket to
+ * @param setTranferMessage - setter function for the message we want to display
+ * @param setTransfereeID - setter function for the UUID of the person that we are trying to transfer the ticket to
+ */
 async function getTransferMessage(supabase:SupabaseClient, netID: string, setTranferMessage, setTransfereeID) {
     const {data, error} = await supabase
     .from("profiles")
@@ -102,20 +112,17 @@ async function getTransferMessage(supabase:SupabaseClient, netID: string, setTra
         setTranferMessage("Are you sure you want to transfer your ticket to " + data?.first_name + " " + data?.last_name + "?");
         setTransfereeID(data?.id);
     } else {
-        setTranferMessage("There is no profile associated with that netID, please check your spelling. If issues persist, send an email!")
+        setTranferMessage("There is no profile associated with that netID! Please make sure they have signed into the website already and that their netID is spelled correctly. If issues persist, send an email!")
         setTransfereeID("");
     }
 }
 
 /**
- * 
+ * Updates the registration for the "from" user to be set to the "to" user
  * @param from - person sending the ticket
  * @param to - person receiving the ticket
  */
 async function transferTicket(supabase: SupabaseClient, from: string, to: string, event_id: string, setTranferedTicketMessage, setCanTransfer) {
-    console.log("FROM")
-    console.log(from)
-    console.log(to)
     if (from === to) {
         setTranferedTicketMessage("You can't transfer a ticket to yourself!")
         return
@@ -128,7 +135,13 @@ async function transferTicket(supabase: SupabaseClient, from: string, to: string
     .eq("person", from);
 
     if (error) {
-        setTranferedTicketMessage("Error in transferring ticket " + error.message)
+        switch (error.code) {
+            case "23505":
+                setTranferedTicketMessage("Cannot transfer ticket as they are already registered for this event!")
+                break;
+            default:
+                setTranferedTicketMessage("An error occured. Please try again; If the problems persist then please contact the dev team.") //Setting it to error m
+        }
         return
     }
 
@@ -139,24 +152,32 @@ async function transferTicket(supabase: SupabaseClient, from: string, to: string
 
 function TransferTicketPage(props) {
     const supabase: SupabaseClient = useSupabaseClient();
-    const [netID, setnetID] = useState<string>("");
+    //net id of the person who is being sent this ticket
+    const [to, setTo] = useState<string>("");
+    //UUID of the person who is being sent this ticket
     const [transfereeID, setTransfereeID] = useState<string>("");
+    //message displayed in pop-up box after you click the transfer button
     const [transferMessage, setTransferMessage] = useState<string>("");
+    //message displayed indicating success/failure of trying to transfer a ticket
     const [tranferedTicketMessage, setTranferedTicketMessage] = useState<string>("");
+    //set to true when we try and actually transfer a ticket (i.,e when the transfer ticket button gets pressed)
     const [transferRequest, setTransferRequest] = useState<boolean>(false);
+    //boolean indicating when the user is still able to transfer a ticket (this is set to false after they've already transfered a ticket)
+    //used in making sure users don't try and transfer their own ticket twice
     const [canTransfer, setCanTransfer] = useState<boolean>(true);
 
+    //makes backend call when a user tries to transfer
     useEffect(() => {
-        getTransferMessage(supabase, netID, setTransferMessage, setTransfereeID)
+        getTransferMessage(supabase, to, setTransferMessage, setTransfereeID)
     }, [transferRequest]);
 
     return (
-        <div>
+        <div className="grid place-items-center h-screen">
             <div>
-                <h1>Transfer Tickets for {props.params.slug}</h1>
+                <h1>Transfer Tickets for {props.event_info["name"]}</h1>
             </div>
             <div className="form-control w-full max-w-xs">
-                <input type="text" placeholder="Enter NetID here" onChange={(e) => setnetID(e.target.value)} className="input input-bordered w-full max-w-xs" />
+                <input type="text" placeholder="Enter NetID here" onChange={(e) => setTo(e.target.value)} className="input input-bordered w-full max-w-xs" />
                 <label className="label">
                     <span className="label-text-alt">Net ID</span>
                 </label>
@@ -168,13 +189,14 @@ function TransferTicketPage(props) {
                 <div className="modal-box">
                     <h1 className="font-bold text-lg">{transferMessage}</h1>
                     <div className="modal-action">
-                    <label htmlFor="transfer-modal" className="btn btn-outline btn-primary" onClick = {() => setTransferRequest(false)}>Cancel</label>
+                    <label htmlFor="transfer-modal" className="btn btn-outline btn-primary" onClick = {() => {setTransferRequest(false); setTranferedTicketMessage("")}}>Cancel</label>
                     <label htmlFor="transfer-modal" className="btn btn-primary" onClick = {() => {
+                        setTransferRequest(false);
                         if (!canTransfer) {
                             setTranferedTicketMessage("You are unable to transfer at this time!")
                         }
                         else {
-                            transferTicket(supabase, props.user.id, transfereeID, props.event_id, setTranferedTicketMessage, setCanTransfer)}
+                            transferTicket(supabase, props.user.id, transfereeID, props.event_info["id"], setTranferedTicketMessage, setCanTransfer)}
                         }
                     }>Transfer</label>
                     </div>
