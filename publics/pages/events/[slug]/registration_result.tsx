@@ -287,7 +287,7 @@ function ResultPage(props) {
     filterRegistrations().forEach((row) => emails.push(row.email))
 
     //Writing to clipboard
-    navigator.clipboard.writeText(emails!.join(" "))
+    navigator.clipboard.writeText(emails!.join(", "));
   }
 
   /**
@@ -372,13 +372,16 @@ function ResultPage(props) {
   }
 
   const registrationFilter = registration.filter((row) => {
-    return (
-      filterByAll ||
-      (row.picked_up_wristband == filterByWristband &&
-        row.waitlist == filterByWaitlist)
-    )
-  })
-
+    if (filterByAll) {
+      return true;
+    }
+    if (filterByWristband) {
+      return row.picked_up_wristband;
+    }
+    if (filterByWaitlist) {
+      return row.waitlist;
+    }
+  });
   async function handleSearch() {
     setRegistration(await getRegistrations(supabase, eventDetails, search))
     setPage(0)
@@ -530,15 +533,16 @@ function ResultPage(props) {
             <div className="modal-box">
               <h3 className="font-bold text-lg">Add attendee</h3>
               <div className="form-control w-full max-w-xs">
+              <label className="label">
+                  <span className="label-text">netID</span>
+                </label>
                 <input
                   type="text"
                   placeholder="Type here"
                   className="input input-bordered w-full max-w-xs"
                   onChange={(event) => setNetID(event.target.value)}
                 />
-                <label className="label">
-                  <span className="label-text-alt">netID</span>
-                </label>
+
               </div>
               <div className="modal-action">
                 <label

@@ -128,13 +128,14 @@ async function getVolunteers(
             shifts!inner (
                 start,
                 end,
-                id,
-                slug
+                id
             )
-        `
-    )
-    .eq("event", event_detail.eventID)
-    .eq("shifts.slug", slug)
+        `,)
+        .eq('event', event_detail.eventID)
+        .eq('shifts.id', slug);
+        
+        //Holds data reformatted as array of rowobjects
+        let formatted_data: volunteerRowObject[] = []
 
   //Holds data reformatted as array of rowobjects
   let formatted_data: volunteerRowObject[] = []
@@ -249,16 +250,7 @@ export async function getServerSideProps(context) {
     context.params.shift
   )
 
-  const shift_id = await getShift(supabase, context.params.shift, event_detail)
-
-  if (shift_id === "Error") {
-    return {
-      redirect: {
-        destination: `http://${context.req.headers.host}/events/${context.params.slug}`,
-        permanent: false,
-      },
-    }
-  }
+  const shift_id = context.params.shift
   return {
     props: {
       initialSession: session,
