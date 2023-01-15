@@ -130,12 +130,11 @@ async function getVolunteers(
                 end,
                 id
             )
-        `,)
-        .eq('event', event_detail.eventID)
-        .eq('shifts.id', slug);
+        `
+    )
+    .eq('event', event_detail.eventID)
+    .eq('shifts.id', slug);
         
-        //Holds data reformatted as array of rowobjects
-        let formatted_data: volunteerRowObject[] = []
 
   //Holds data reformatted as array of rowobjects
   let formatted_data: volunteerRowObject[] = []
