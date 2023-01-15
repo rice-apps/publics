@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import { useRouter } from 'next/router'
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
@@ -16,9 +16,9 @@ export default function Account({ session }) {
       setLoading(true)
 
       let { data, error, status } = await supabaseClient
-        .from('profiles')
+        .from("profiles")
         .select(`first_name, last_name, netid`)
-        .eq('id', session.user.id)
+        .eq("id", session.user.id)
         .single()
 
       if (error && status !== 406) {
@@ -48,9 +48,8 @@ export default function Account({ session }) {
     } catch (error) {
       if (error instanceof Error) {
         //alert(error.message)
-        console.log(error.message);
+        console.log(error.message)
       }
-
     } finally {
       setLoading(false)
     }
@@ -69,7 +68,7 @@ export default function Account({ session }) {
   }
 
   return (
-    <main className='px-3'>
+    <main className="px-3">
       <h1>Your Account Info</h1>
       {/* show avatar */}
       <div className="avatar">

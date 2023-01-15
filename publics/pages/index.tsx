@@ -1,7 +1,7 @@
-import type { NextPage } from "next";
-import Head from "next/head";
-import Link from "next/link";
-import Image from "next/image";
+import type { NextPage } from "next"
+import Head from "next/head"
+import Link from "next/link"
+import Image from "next/image"
 
 const Home: NextPage = () => {
   return (
@@ -16,8 +16,8 @@ const Home: NextPage = () => {
         <div className="hero min-h-screen bg-base-200">
           <div className="hero-content flex-col lg:flex-row-reverse">
             <Image
-            width={500}
-            height={500}
+              width={500}
+              height={500}
               src="/martelpic.jpg"
               className="sm:max-w-sm rounded-lg shadow-2xl"
               alt="Home"
@@ -38,7 +38,7 @@ const Home: NextPage = () => {
         </div>
       </main>
     </div>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home
