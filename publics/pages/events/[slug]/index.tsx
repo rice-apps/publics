@@ -1,15 +1,15 @@
-import { useRouter } from "next/router";
-import Head from "next/head";
+import { useRouter } from "next/router"
+import Head from "next/head"
 import {
   SupabaseClient,
   createServerSupabaseClient,
-} from "@supabase/auth-helpers-nextjs";
-import { authorize } from "../../../utils/admin";
+} from "@supabase/auth-helpers-nextjs"
+import { authorize } from "../../../utils/admin"
 export async function getServerSideProps(ctx) {
-  const supabase = createServerSupabaseClient(ctx);
+  const supabase = createServerSupabaseClient(ctx)
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = await supabase.auth.getSession()
 
   if (!session) {
     return {
@@ -17,14 +17,10 @@ export async function getServerSideProps(ctx) {
         destination: `http://${ctx.req.headers.host}/account`,
         permanent: false,
       },
-    };
+    }
   }
 
-  const authorized = await authorize(
-    supabase,
-    ctx.params.slug,
-    session.user.id
-  );
+  const authorized = await authorize(supabase, ctx.params.slug, session.user.id)
 
   const { data, error } = await supabase
     .from("events")
@@ -35,51 +31,51 @@ export async function getServerSideProps(ctx) {
         )`
     )
     .eq("slug", ctx.params?.slug)
-    .single();
+    .single()
 
   if (error) {
     return {
       notFound: true,
-    };
+    }
   }
 
   // if no event is found, redirect to 404 page
   if (data === null) {
     return {
       notFound: true,
-    };
+    }
   }
 
   return {
     props: { data, authorized },
-  };
+  }
 }
 
 type EventDetail = {
-  name: string;
-  description: string;
-  event_datetime: string | Date;
-  registration_datetime: string | Date;
-  registration: boolean;
-  capacity: number;
-  waitlist_size: number;
-  organization: OrganizationDetail;
-};
+  name: string
+  description: string
+  event_datetime: string | Date
+  registration_datetime: string | Date
+  registration: boolean
+  capacity: number
+  waitlist_size: number
+  organization: OrganizationDetail
+}
 
 type OrganizationDetail = {
-  name: string;
-  photo: string;
-};
+  name: string
+  photo: string
+}
 
 type Props = {
-  data: EventDetail;
-  authorized: boolean;
-};
+  data: EventDetail
+  authorized: boolean
+}
 
 const Details = (props: Props) => {
-  const router = useRouter();
+  const router = useRouter()
 
-  const event = props.data;
+  const event = props.data
 
   // process datetimes
   const weekday = [
@@ -90,7 +86,7 @@ const Details = (props: Props) => {
     "Thursday",
     "Friday",
     "Saturday",
-  ];
+  ]
   const month = [
     "January",
     "February",
@@ -104,10 +100,10 @@ const Details = (props: Props) => {
     "October",
     "November",
     "December",
-  ];
+  ]
 
-  event.registration_datetime = new Date(event.registration_datetime);
-  event.event_datetime = new Date(event.event_datetime);
+  event.registration_datetime = new Date(event.registration_datetime)
+  event.event_datetime = new Date(event.event_datetime)
 
   return (
     <div id="index">
@@ -162,7 +158,7 @@ const Details = (props: Props) => {
         </div>
       </main>
     </div>
-  );
-};
+  )
+}
 
-export default Details;
+export default Details

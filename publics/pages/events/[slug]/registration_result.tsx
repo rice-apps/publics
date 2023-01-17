@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useEffect, useState } from "react"
+import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import {
   SupabaseClient,
   createServerSupabaseClient,
@@ -12,35 +12,35 @@ import ErrorMsg from "../../../components/ErrorMsg";
  */
 type EventDetails = {
   //friendly name
-  eventName: string;
+  eventName: string
   //uuid of event
-  eventID: string; //Using string as unsure what UUID type is in TS
-  organization: string; //Organization ID overseeing this event
-};
+  eventID: string //Using string as unsure what UUID type is in TS
+  organization: string //Organization ID overseeing this event
+}
 
 /**
  * Simple interface containing values stored within a row in the table of registrations presented to the userp
  */
 type rowObject = {
   //uuid of person
-  person_id: string;
+  person_id: string
   //date this registration was created
-  created_at: string;
+  created_at: string
   //first name of registered person
-  first_name: string;
+  first_name: string
   //last name of registered person
-  last_name: string;
+  last_name: string
   //email of registered person
-  email: string;
+  email: string
   //netid of registered
-  netid: string;
+  netid: string
   //residential college that that registered person is contained within
-  college: string;
+  college: string
   //Has this person picked up the wristband
-  picked_up_wristband: boolean;
+  picked_up_wristband: boolean
   //Is this person on the waitlist?
-  waitlist: boolean;
-};
+  waitlist: boolean
+}
 
 /**
  * Checks if the user trying to look at this page is an admin of the associated event (and thus has the permission to look at this page)
@@ -55,15 +55,13 @@ async function isAdminUser(
   let { data, error } = await supabase
     .from("organizations_admins")
     .select("organization")
-    .eq("profile", userId);
+    .eq("profile", userId)
 
   if (error || data === null) {
-    return false;
+    return false
   }
 
-  return data.some(
-    (event) => event.organization === event_detail!.organization
-  );
+  return data.some((event) => event.organization === event_detail!.organization)
 }
 /**
  * Gets the event that this user is an admin of, if they are one
@@ -77,21 +75,21 @@ async function getEvent(
     .from("events")
     .select("id, name, organization")
     .eq("slug", slug)
-    .single();
+    .single()
 
   if (error) {
     return {
       eventName: "Error",
       eventID: "Error",
       organization: "Error",
-    };
+    }
   }
 
   return {
     eventName: data.name,
     eventID: data.id,
     organization: data.organization,
-  };
+  }
 }
 
 /**
@@ -125,21 +123,21 @@ async function getRegistrations(
     `
     )
     .eq("event", event_detail.eventID)
-    .like("profiles.netid", `%${search}%`);
+    .like("profiles.netid", `%${search}%`)
 
   //Holds data reformatted as array of rowobjects
-  let formatted_data: rowObject[] = [];
+  let formatted_data: rowObject[] = []
 
   if (error) {
-    return formatted_data;
+    return formatted_data
   }
 
   for (var i = 0; i < data.length; i++) {
-    let current_object = data[i];
-    let profiles = current_object["profiles"] as Object;
+    let current_object = data[i]
+    let profiles = current_object["profiles"] as Object
 
     if (profiles == null) {
-      return [];
+      return []
     }
 
     let formatted_object = {
@@ -152,12 +150,12 @@ async function getRegistrations(
       college: profiles["organizations"].name,
       picked_up_wristband: current_object["picked_up_wristband"],
       waitlist: current_object["waitlist"],
-    };
+    }
 
-    formatted_data[i] = formatted_object;
+    formatted_data[i] = formatted_object
   }
 
-  return formatted_data;
+  return formatted_data
 }
 
 /**
@@ -168,11 +166,11 @@ async function getRegistrations(
  */
 export const getServerSideProps = async (ctx) => {
   // Create authenticated Supabase Client
-  const supabase = createServerSupabaseClient(ctx);
+  const supabase = createServerSupabaseClient(ctx)
   // Check if we have a session
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = await supabase.auth.getSession()
 
   if (!session) {
     //navigate to account page
@@ -181,25 +179,25 @@ export const getServerSideProps = async (ctx) => {
         destination: `http://${ctx.req.headers.host}/account`,
         permanent: false,
       },
-    };
+    }
   }
 
   //Get event details
-  const event_detail = await getEvent(supabase, ctx.params.slug);
+  const event_detail = await getEvent(supabase, ctx.params.slug)
   if (event_detail.eventName === "Error") {
     return {
       redirect: {
         destination: `http://${ctx.req.headers.host}/events/${ctx.params.slug}`,
         permanent: false,
       },
-    };
+    }
   }
   //Get admin status
   const admin_status = await isAdminUser(
     supabase,
     event_detail,
     session.user.id
-  );
+  )
   //If not admin, redirect to 404 page
   if (!admin_status) {
     return {
@@ -207,11 +205,11 @@ export const getServerSideProps = async (ctx) => {
         destination: `http://${ctx.req.headers.host}/events/${ctx.params.slug}`,
         permanent: false,
       },
-    };
+    }
   }
   //Get registrations for that event
-  const page = +ctx.query.page || 0;
-  const registrations = await getRegistrations(supabase, event_detail);
+  const page = +ctx.query.page || 0
+  const registrations = await getRegistrations(supabase, event_detail)
 
   return {
     props: {
@@ -222,31 +220,31 @@ export const getServerSideProps = async (ctx) => {
       event_detail,
       page: page,
     },
-  };
-};
+  }
+}
 
 /**
  * Page holding registration results. Check figma for design source
  */
 function ResultPage(props) {
-  const supabase = useSupabaseClient();
+  const supabase = useSupabaseClient()
   //Array of registration entries formatted as an array of row objects
   const [registration, setRegistration] = useState<rowObject[]>(
     props.registrations
-  );
+  )
   //Event details for this page
-  const [eventDetails] = useState<EventDetails>(props.event_detail);
+  const [eventDetails] = useState<EventDetails>(props.event_detail)
   //netID of user to add to registration table, used with the add attendee button
-  const [netID, setNetID] = useState("");
+  const [netID, setNetID] = useState("")
   //boolean values that we use to filter registrations by when displaying them to the screen
-  const [filterByAll, setFilterByAll] = useState(true); //starts as true as we want to start by initially showing the admin the entire set of registered users
-  const [filterByWristband, setFilterByWristband] = useState(false);
-  const [filterByWaitlist, setFilterByWaitlist] = useState(false);
+  const [filterByAll, setFilterByAll] = useState(true) //starts as true as we want to start by initially showing the admin the entire set of registered users
+  const [filterByWristband, setFilterByWristband] = useState(false)
+  const [filterByWaitlist, setFilterByWaitlist] = useState(false)
   //Search bar value
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState("")
   // Pagination
-  const [page, setPage] = useState(props.page);
-  const { from, to } = getPagination(page, 50);
+  const [page, setPage] = useState(props.page)
+  const { from, to } = getPagination(page, 50)
 
   //Confirmation Message
   const [resultError, setResultError] = useState(false);
@@ -270,32 +268,32 @@ function ResultPage(props) {
                   ...item,
                   picked_up_wristband: payload.new.picked_up_wristband,
                   waitlist: payload.new.waitlist,
-                };
+                }
               }
-              return item;
-            });
-            return new_arr;
-          });
+              return item
+            })
+            return new_arr
+          })
         }
       )
-      .subscribe();
+      .subscribe()
     return () => {
-      supabase.removeChannel(channel);
-    };
+      supabase.removeChannel(channel)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [])
 
   useEffect(() => {
-    window.history.pushState(null, "", `?page=${page}`);
-  }, [page]);
+    window.history.pushState(null, "", `?page=${page}`)
+  }, [page])
 
   /**
    * Copies set of emails to clipboard
    */
   function copyEmails() {
-    let emails: string[] = [];
+    let emails: string[] = []
     //Filtering by what we currently are showing to the screen
-    filterRegistrations().forEach((row) => emails.push(row.email));
+    filterRegistrations().forEach((row) => emails.push(row.email))
 
     //Writing to clipboard
     navigator.clipboard.writeText(emails!.join(" "));
@@ -312,10 +310,10 @@ function ResultPage(props) {
       .from("profiles")
       .select("id")
       .eq("netid", netID)
-      .single();
+      .single()
 
     if (!error) {
-      let personID = data!.id;
+      let personID = data!.id
 
       //ERROR: Runs into Row level security error here
       //Insert person into registrations table for this event
@@ -326,10 +324,9 @@ function ResultPage(props) {
         setResultSuccess(true);
         setResultError(false);
         setAction(netID + " was successfully added.");
-        
 
       //refresh page
-      setRegistration(await getRegistrations(supabase, eventDetails, search));
+      setRegistration(await getRegistrations(supabase, eventDetails, search))
     } else {
       setResultSuccess(false);
       setResultError(true);
@@ -346,7 +343,7 @@ function ResultPage(props) {
       .delete()
       .eq("event", eventDetails?.eventID)
       .eq("person", user_id)
-      .select();
+      .select()
 
     if (!res) {
       setResultError(true);
@@ -357,7 +354,7 @@ function ResultPage(props) {
     setResultSuccess(true);
     setAction("User successfully removed.");
     //refresh page
-    setRegistration(registration.filter((v, i) => v.person_id !== user_id));
+    setRegistration(registration.filter((v, i) => v.person_id !== user_id))
   }
 
   /**
@@ -370,10 +367,10 @@ function ResultPage(props) {
       .update({ picked_up_wristband: !row["picked_up_wristband"] })
       //Ensuring we only update the person who is registered for this event
       .eq("event", eventDetails?.eventID)
-      .eq("person", row["person_id"]);
+      .eq("person", row["person_id"])
 
     if (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -383,10 +380,10 @@ function ResultPage(props) {
       .update({ waitlist: !row["waitlist"] })
       //Ensuring we only update the person who is registered for this event
       .eq("event", eventDetails?.eventID)
-      .eq("person", row["person_id"]);
+      .eq("person", row["person_id"])
 
     if (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -402,24 +399,24 @@ function ResultPage(props) {
     }
   });
   async function handleSearch() {
-    setRegistration(await getRegistrations(supabase, eventDetails, search));
-    setPage(0);
+    setRegistration(await getRegistrations(supabase, eventDetails, search))
+    setPage(0)
   }
 
   function handleKeyPress(event) {
     if (event.key === "Enter") {
-      handleSearch();
+      handleSearch()
     }
   }
 
   async function handlePageIncrement() {
-    setPage(page + 1);
-    setRegistration(await getRegistrations(supabase, eventDetails, search));
+    setPage(page + 1)
+    setRegistration(await getRegistrations(supabase, eventDetails, search))
   }
 
   async function handlePageDeincrement() {
-    setPage(page - 1);
-    setRegistration(await getRegistrations(supabase, eventDetails, search));
+    setPage(page - 1)
+    setRegistration(await getRegistrations(supabase, eventDetails, search))
   }
 
   function filterRegistrations() {
@@ -428,8 +425,8 @@ function ResultPage(props) {
         filterByAll ||
         (row.picked_up_wristband == filterByWristband &&
           row.waitlist == filterByWaitlist)
-      );
-    });
+      )
+    })
   }
 
   return (
@@ -516,7 +513,7 @@ function ResultPage(props) {
                     type="checkbox"
                     defaultChecked={filterByAll}
                     onClick={() => {
-                      setFilterByAll(!filterByAll);
+                      setFilterByAll(!filterByAll)
                     }}
                     className="checkbox"
                   />
@@ -529,7 +526,7 @@ function ResultPage(props) {
                     type="checkbox"
                     defaultChecked={filterByWristband}
                     onClick={() => {
-                      setFilterByWristband(!filterByWristband);
+                      setFilterByWristband(!filterByWristband)
                     }}
                     className="checkbox"
                   />
@@ -542,7 +539,7 @@ function ResultPage(props) {
                     type="checkbox"
                     defaultChecked={filterByWaitlist}
                     onClick={() => {
-                      setFilterByWaitlist(!filterByWaitlist);
+                      setFilterByWaitlist(!filterByWaitlist)
                     }}
                     className="checkbox"
                   />
@@ -583,7 +580,7 @@ function ResultPage(props) {
                   htmlFor="add-modal"
                   className="btn btn-primary"
                   onClick={() => {
-                    addAttendee(netID);
+                    addAttendee(netID)
                   }}
                 >
                   Add
@@ -615,8 +612,8 @@ function ResultPage(props) {
               filterRegistrations()
                 .splice(from, to)
                 .map((row, index) => {
-                  let isChecked = row["picked_up_wristband"];
-                  let isWaitlist = row["waitlist"];
+                  let isChecked = row["picked_up_wristband"]
+                  let isWaitlist = row["waitlist"]
                   return (
                     <tr key={index}>
                       <th></th>
@@ -693,7 +690,7 @@ function ResultPage(props) {
                         />
                       </td>
                     </tr>
-                  );
+                  )
                 })
             }
           </tbody>
@@ -719,7 +716,7 @@ function ResultPage(props) {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default ResultPage;
+export default ResultPage
