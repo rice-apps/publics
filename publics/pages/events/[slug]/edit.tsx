@@ -95,7 +95,7 @@ export default function Edit(props) {
     const insert = {
       name,
       slug,
-      event_datetime: eventDateTime,
+      event_datetime: new Date(eventDateTime),
       organization: host,
       location,
       capacity,
@@ -103,8 +103,8 @@ export default function Edit(props) {
       registration,
       ...(registration
         ? {
-            college_registration_datetime: collegeRegistration,
-            registration_datetime: registrationDatetime,
+            college_registration_datetime: new Date(collegeRegistration),
+            registration_datetime: new Date(registrationDatetime),
             signup_size: signupSize,
             waitlist_size: waitlistSize,
           }

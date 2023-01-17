@@ -59,7 +59,7 @@ export default function Create(props) {
     let insert1 = {
       name: name,
       slug: slug,
-      event_datetime: eventDateTime,
+      event_datetime: new Date(eventDateTime),
       organization: host,
       location: location,
       capacity: capacity,
@@ -70,8 +70,8 @@ export default function Create(props) {
     let insert2 = {}
     if (registration) {
       insert2 = {
-        college_registration_datetime: collegeRegistration,
-        registration_datetime: registrationDatetime,
+        college_registration_datetime: new Date(collegeRegistration),
+        registration_datetime: new Date(registrationDatetime),
         signup_size: signupSize,
         waitlist_size: waitlistSize,
       }

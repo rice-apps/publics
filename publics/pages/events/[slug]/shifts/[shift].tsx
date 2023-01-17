@@ -286,7 +286,7 @@ function VolunteerPage(props) {
 
   // Setup realtime for updates to registration table
   useEffect(() => {
-    supabase
+    const channel = supabase
       .channel(`volunteers:${props.params.slug}`)
       .on(
         "postgres_changes",
@@ -309,6 +309,9 @@ function VolunteerPage(props) {
         }
       )
       .subscribe()
+      return () => {
+        supabase.removeChannel(channel)
+      }
   }, [])
 
   /**
@@ -329,7 +332,7 @@ function VolunteerPage(props) {
       })
       .forEach((row) => emails.push(row.email))
 
-    navigator.clipboard.writeText(emails!.join(" "))
+    navigator.clipboard.writeText(emails!.join(", "))
   }
 
   /**
@@ -413,7 +416,7 @@ function VolunteerPage(props) {
   return (
     <div key="registration_results_page" className="mx-auto mx-4 space-y-4">
       <div key="event_title">
-        <h1>Volunteers for {props.params.shift}</h1>
+        <h1>Volunteers for {props.event_detail.eventName}</h1>
       </div>
       <div className="flex justify-end gap-4">
         <div className="dropdown">
