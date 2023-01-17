@@ -64,7 +64,9 @@ export default function ShiftCard({ start, end, id, count, total }) {
           </div>
         </div>
         <p>
-          {count}/{total} checked in
+          {now >= start_time && now <= end_time
+            ? `${count}/${total} checked in`
+            : `${total} volunteers`}
         </p>
         <div className="card-actions justify-end">
           <Link className="text" href={url} passHref>
