@@ -213,7 +213,7 @@ function TransferTicketPage(props) {
                         </label>
                     </div>
                     <div className="card-actions justify-end">
-                    <label htmlFor="transfer-modal" className="btn btn-primary" onClick = {() => setTransferRequest(true)}>Transfer Ticket</label>
+                    <label htmlFor="transfer-modal" className="btn btn-primary" onClick = {() => {setTransferMessage("Loading...");     setTransferRequest(true)}}>Transfer Ticket</label>
                 <input type="checkbox" id="transfer-modal" className="modal-toggle" />
                 <div className="modal">
                     <div className="modal-box">
