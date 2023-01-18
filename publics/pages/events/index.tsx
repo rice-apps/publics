@@ -34,10 +34,8 @@ const getEvents = async (supabase: SupabaseClient) => {
 const getRegistrations = async (supabase: SupabaseClient, userId: string) => {
   const { data, count, error } = await supabase
     .from("registrations")
-    .select(
-      `event(*, organization (name, photo, id)), waitlist`
-    )
-    .eq("person", userId);
+    .select(`event(*, organization (name, photo, id)), waitlist`)
+    .eq("person", userId)
 
   if (error) {
     throw error
@@ -62,7 +60,7 @@ const getVolunteerStatus = async (supabase: SupabaseClient, userId: string) => {
   const { data, error } = await supabase
     .from("volunteers")
     .select(`event(id)`)
-    .eq("profile", userId);
+    .eq("profile", userId)
 
   if (error) {
     throw error
@@ -84,7 +82,7 @@ const getHostedEvents = async (
   const { data, error } = await supabase
     .from("organizations_admins")
     .select(`organization(id)`)
-    .eq("profile", userId);
+    .eq("profile", userId)
   if (error) {
     throw error
   }
@@ -156,7 +154,7 @@ function Events(props: Props) {
   }
 
   return (
-    <div className="mb-5">
+    <div>
       <div className="tabs bg-base-100">
         <a className={tab1Class} onClick={() => handleClick(1)}>
           Upcoming Events

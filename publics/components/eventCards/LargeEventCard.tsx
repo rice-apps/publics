@@ -18,8 +18,9 @@ const LargeEventCard = (props: Props) => {
           <Link href={`${link}/registration_result`}>
             <button className="btn btn-primary">Registration Results</button>
           </Link>
-
-          <button className="btn btn-primary btn-outline">Volunteers</button>
+          <Link href={`${link}/shifts`}>
+            <button className="btn btn-primary btn-outline">Volunteers</button>
+          </Link>
         </div>
       )
     } else if (props.type === "volunteering") {
@@ -45,7 +46,7 @@ const LargeEventCard = (props: Props) => {
     }
   }
   return (
-    <div className="card lg:card-side bg-base-100 shadow-xl max-w-4xl">
+    <div className="card lg:card-side bg-base-100 shadow-xl max-w-4xl max-h-[600px]">
       <figure>
         <img src="https://placeimg.com/400/400/arch" alt="Album" />
       </figure>
