@@ -3,10 +3,10 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import {
   SupabaseClient,
   createServerSupabaseClient,
-} from "@supabase/auth-helpers-nextjs";
-import { getPagination } from "../../../utils/registration";
-import SuccessMsg from "../../../components/SuccessMsg";
-import ErrorMsg from "../../../components/ErrorMsg";
+} from "@supabase/auth-helpers-nextjs"
+import { getPagination } from "../../../utils/registration"
+import SuccessMsg from "../../../components/SuccessMsg"
+import ErrorMsg from "../../../components/ErrorMsg"
 /**
  * Simple type containing a friendly name for an event, and the UUID of the event
  */
@@ -247,11 +247,10 @@ function ResultPage(props) {
   const { from, to } = getPagination(page, 50)
 
   //Confirmation Message
-  const [resultError, setResultError] = useState(false);
-  const [resultSuccess, setResultSuccess] = useState(false);
-  const [copiedEmails, setCopiedEmails] = useState(false);
-  const [action, setAction] = useState("");
-
+  const [resultError, setResultError] = useState(false)
+  const [resultSuccess, setResultSuccess] = useState(false)
+  const [copiedEmails, setCopiedEmails] = useState(false)
+  const [action, setAction] = useState("")
 
   // Setup realtime for updates to registration table
   useEffect(() => {
@@ -296,8 +295,8 @@ function ResultPage(props) {
     filterRegistrations().forEach((row) => emails.push(row.email))
 
     //Writing to clipboard
-    navigator.clipboard.writeText(emails!.join(" "));
-    setCopiedEmails(true);
+    navigator.clipboard.writeText(emails!.join(", "))
+    setCopiedEmails(true)
   }
 
   /**
@@ -320,16 +319,16 @@ function ResultPage(props) {
       const { data: regData } = await supabase
         .from("registrations")
         .insert({ event: eventDetails!.eventID, person: personID })
-        .select();
-        setResultSuccess(true);
-        setResultError(false);
-        setAction(netID + " was successfully added.");
+        .select()
+      setResultSuccess(true)
+      setResultError(false)
+      setAction(netID + " was successfully added.")
 
       //refresh page
       setRegistration(await getRegistrations(supabase, eventDetails, search))
     } else {
-      setResultSuccess(false);
-      setResultError(true);
+      setResultSuccess(false)
+      setResultError(true)
     }
   }
 
@@ -346,13 +345,13 @@ function ResultPage(props) {
       .select()
 
     if (!res) {
-      setResultError(true);
-      setResultSuccess(false);
+      setResultError(true)
+      setResultSuccess(false)
     }
 
-    setResultError(false);
-    setResultSuccess(true);
-    setAction("User successfully removed.");
+    setResultError(false)
+    setResultSuccess(true)
+    setAction("User successfully removed.")
     //refresh page
     setRegistration(registration.filter((v, i) => v.person_id !== user_id))
   }
@@ -389,15 +388,15 @@ function ResultPage(props) {
 
   const registrationFilter = registration.filter((row) => {
     if (filterByAll) {
-      return true;
+      return true
     }
     if (filterByWristband) {
-      return row.picked_up_wristband;
+      return row.picked_up_wristband
     }
     if (filterByWaitlist) {
-      return row.waitlist;
+      return row.waitlist
     }
-  });
+  })
   async function handleSearch() {
     setRegistration(await getRegistrations(supabase, eventDetails, search))
     setPage(0)
@@ -432,14 +431,14 @@ function ResultPage(props) {
   return (
     <div key="registration_results_page" className="mx-auto mx-4 space-y-4">
       <div className={resultSuccess ? "block" : "hidden"}>
-        <SuccessMsg message={`${action}`}/>
-      </div>   
+        <SuccessMsg message={`${action}`} />
+      </div>
       <div className={resultError ? "block" : "hidden"}>
-        <ErrorMsg message={"Error! User doesn't exist "}/>
-      </div> 
+        <ErrorMsg message={"Error! User doesn't exist "} />
+      </div>
       <div className={copiedEmails ? "block" : "hidden"}>
-        <SuccessMsg message={`Emails copied to clipboard`}/>
-      </div> 
+        <SuccessMsg message={`Emails copied to clipboard`} />
+      </div>
       <div key="event_title">
         <h1>{eventDetails!.eventName}: Registration Results</h1>
       </div>
@@ -558,7 +557,7 @@ function ResultPage(props) {
             <div className="modal-box">
               <h3 className="font-bold text-lg">Add attendee</h3>
               <div className="form-control w-full max-w-xs">
-              <label className="label">
+                <label className="label">
                   <span className="label-text">netID</span>
                 </label>
                 <input
@@ -567,7 +566,6 @@ function ResultPage(props) {
                   className="input input-bordered w-full max-w-xs"
                   onChange={(event) => setNetID(event.target.value)}
                 />
-
               </div>
               <div className="modal-action">
                 <label

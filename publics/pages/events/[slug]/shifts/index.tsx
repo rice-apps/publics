@@ -107,7 +107,7 @@ export const getServerSideProps = async (ctx) => {
     .eq("slug", ctx.query.slug)
     .single()
 
-  if (error || eventError || volunteersError || event.length === 0) {
+  if (error || eventError || volunteersError || !event) {
     return {
       redirect: {
         destination: `http://${ctx.req.headers.host}/404`,
