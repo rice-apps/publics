@@ -5,6 +5,7 @@ import {
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs";
 import { authorize } from "../../../utils/admin";
+import { volunteer_authorize } from "../../../utils/volunteer";
 export async function getServerSideProps(ctx) {
   const supabase = createServerSupabaseClient(ctx);
   const {
@@ -20,11 +21,19 @@ export async function getServerSideProps(ctx) {
     };
   }
 
-  const authorized = await authorize(
+  const edit_authorized = await authorize(
     supabase,
     ctx.params.slug,
     session.user.id
   );
+
+  const volunteer = await volunteer_authorize(
+    supabase,
+    ctx.params.slug,
+    session.user.id
+  );
+
+  const volunteer_authorized = volunteer[0].length > 0
 
   const { data, error } = await supabase
     .from("events")
@@ -51,7 +60,7 @@ export async function getServerSideProps(ctx) {
   }
 
   return {
-    props: { data, authorized },
+    props: { data, edit_authorized, volunteer_authorized },
   };
 }
 
@@ -73,7 +82,8 @@ type OrganizationDetail = {
 
 type Props = {
   data: EventDetail;
-  authorized: boolean;
+  edit_authorized: boolean;
+  volunteer_authorized: boolean;
 };
 
 const Details = (props: Props) => {
@@ -144,12 +154,20 @@ const Details = (props: Props) => {
                 </p>
               </span>
               <p className="">Description: {event.description}</p>
-              {props.authorized && (
+              {props.edit_authorized && (
                 <button
                   className="btn btn-primary"
                   onClick={() => router.push(`${router.asPath}/edit`)}
                 >
                   Edit event
+                </button>
+              )}
+              {props.volunteer_authorized && (
+                <button
+                  className="btn btn-primary"
+                  onClick={() => router.push(`${router.asPath}/checkin`)}
+                >
+                  Check in
                 </button>
               )}
             </div>
