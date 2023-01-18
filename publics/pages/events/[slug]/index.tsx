@@ -25,7 +25,7 @@ export async function getServerSideProps(ctx) {
   const { data, error } = await supabase
     .from("events")
     .select(
-      `name, description, event_datetime, registration_datetime, registration, capacity, waitlist_size, organization (
+      `name, description, event_datetime, registration_datetime, registration, capacity, waitlist_size, img_url, organization (
             name,
             photo
         )`
@@ -59,6 +59,7 @@ type EventDetail = {
   registration: boolean
   capacity: number
   waitlist_size: number
+  img_url: string
   organization: OrganizationDetail
 }
 
@@ -116,7 +117,7 @@ const Details = (props: Props) => {
         <div className="hero min-h-[60vh] object-left-top">
           <div className="hero-content items-stretch flex-col md:flex-row min-w-[70vw]">
             <img
-              src="https://as2.ftcdn.net/v2/jpg/03/09/55/15/1000_F_309551534_hkPIgAAsyc5EQg0Ny2bUYh8ttkUWc8fA.jpg"
+              src={event.img_url}
               className="object-cover min-w-[30%] sm:max-w-[30%] min-h-sm rounded-lg shadow-2xl"
             />
             <div className="flex flex-col space-y-4">
