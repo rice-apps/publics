@@ -1,16 +1,16 @@
-import Link from "next/link";
-import { registrationOpen } from "../../utils/registration";
-import { ListEvent } from "../../utils/types";
-import { eventCardDate } from "./cardDate";
+import Link from "next/link"
+import { registrationOpen } from "../../utils/registration"
+import { ListEvent } from "../../utils/types"
+import { eventCardDate } from "./cardDate"
 
 type Props = {
-  event: ListEvent;
-  registration_status?: string;
-  type: string;
-};
+  event: ListEvent
+  registration_status?: string
+  type: string
+}
 
 const LargeEventCard = (props: Props) => {
-  const link = "/events/" + props.event.slug;
+  const link = "/events/" + props.event.slug
   const setButtons = () => {
     if (props.type === "hosting") {
       return (
@@ -18,10 +18,11 @@ const LargeEventCard = (props: Props) => {
           <Link href={`${link}/registration_result`}>
             <button className="btn btn-primary">Registration Results</button>
           </Link>
-
-          <button className="btn btn-primary btn-outline">Volunteers</button>
+          <Link href={`${link}/shifts`}>
+            <button className="btn btn-primary btn-outline">Volunteers</button>
+          </Link>
         </div>
-      );
+      )
     } else if (props.type === "volunteering") {
       return (
         <div className="card-actions sm:justify-end">
@@ -33,7 +34,7 @@ const LargeEventCard = (props: Props) => {
             </button>
           </Link>
         </div>
-      );
+      )
     } else {
       return (
         <div className="card-actions sm:justify-end">
@@ -41,11 +42,11 @@ const LargeEventCard = (props: Props) => {
             <button className="btn btn-primary">Event Details</button>
           </Link>
         </div>
-      );
+      )
     }
-  };
+  }
   return (
-    <div className="card lg:card-side bg-base-100 shadow-xl max-w-4xl">
+    <div className="card lg:card-side bg-base-100 shadow-xl max-w-4xl max-h-[600px]">
       <figure>
         <img src="https://placeimg.com/400/400/arch" alt="Album" />
       </figure>
@@ -87,7 +88,7 @@ const LargeEventCard = (props: Props) => {
         {setButtons()}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default LargeEventCard;
+export default LargeEventCard

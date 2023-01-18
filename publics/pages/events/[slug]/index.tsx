@@ -1,5 +1,5 @@
-import { useRouter } from "next/router";
-import Head from "next/head";
+import { useRouter } from "next/router"
+import Head from "next/head"
 import {
   SupabaseClient,
   createServerSupabaseClient,
@@ -7,12 +7,13 @@ import {
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { authorize } from "../../../utils/admin";
 import { useState } from "react";
+import React from "react";
 
 export async function getServerSideProps(ctx) {
-  const supabase = createServerSupabaseClient(ctx);
+  const supabase = createServerSupabaseClient(ctx)
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = await supabase.auth.getSession()
 
   if (!session) {
     return {
@@ -20,15 +21,10 @@ export async function getServerSideProps(ctx) {
         destination: `http://${ctx.req.headers.host}/account`,
         permanent: false,
       },
-    };
+    }
   }
 
-  // Authorization
-  const authorized = await authorize(
-    supabase,
-    ctx.params.slug,
-    session.user.id
-  );
+  const authorized = await authorize(supabase, ctx.params.slug, session.user.id)
 
   // Event Details
   const { data: data, error: error0} = await supabase
@@ -40,19 +36,19 @@ export async function getServerSideProps(ctx) {
         )`
     )
     .eq("slug", ctx.params?.slug)
-    .single();
+    .single()
 
   if (error0) {
     return {
       notFound: true,
-    };
+    }
   }
 
   // if no event is found, redirect to 404 page
   if (data === null) {
     return {
       notFound: true,
-    };
+    }
   }
 
   // User Details
@@ -110,9 +106,9 @@ type EventDetail = {
 };
 
 type OrganizationDetail = {
-  name: string;
-  photo: string;
-};
+  name: string
+  photo: string
+}
 
 type Props = {
   data: EventDetail;
@@ -174,7 +170,7 @@ const Details = (props: Props) => {
     "Thursday",
     "Friday",
     "Saturday",
-  ];
+  ]
   const month = [
     "January",
     "February",
@@ -188,9 +184,9 @@ const Details = (props: Props) => {
     "October",
     "November",
     "December",
-  ];
+  ]
 
-  event.event_datetime = new Date(event.event_datetime);
+  event.event_datetime = new Date(event.event_datetime)
 
   //current time
   const curr_date = new Date();
@@ -264,7 +260,7 @@ const Details = (props: Props) => {
         </div>
       </main>
     </div>
-  );
-};
+  )
+}
 
-export default Details;
+export default Details

@@ -7,22 +7,22 @@ module.exports = {
   theme: {
     extend: {},
   },
-  plugins: [require('daisyui')],
+  plugins: [require("daisyui")],
 
   daisyui: {
     themes: [
       {
-        'publics': {
+        publics: {
           "color-scheme": "light",
-          'primary': '#AC1FB8',
-          'secondary': '#E9498C',
-          'accent': '#D9D9D9',
-          'neutral': '#AC1FB8',
-          'base-100': '#FFFFFF',
-          'info': '#4AA8BF',
-          'success': '#81328F',
-          'warning': '#EF8234',
-          'error': '#EA4034',
+          primary: "#AC1FB8",
+          secondary: "#E9498C",
+          accent: "#D9D9D9",
+          neutral: "#AC1FB8",
+          "base-100": "#FFFFFF",
+          info: "#4AA8BF",
+          success: "#81328F",
+          warning: "#EF8234",
+          error: "#EA4034",
         },
       },
       "light",
@@ -53,7 +53,7 @@ module.exports = {
       "lemonade",
       "night",
       "coffee",
-      "winter"
+      "winter",
     ],
   },
 }
