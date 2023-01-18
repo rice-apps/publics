@@ -1,9 +1,6 @@
-import { useState } from "react"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 
 export default function Auth() {
-  const [loading, setLoading] = useState(false)
-  const [email, setEmail] = useState("")
   const supabaseClient = useSupabaseClient()
 
   const getURL = () => {
@@ -30,19 +27,35 @@ export default function Auth() {
 
   return (
     <div className="hero min-h-screen bg-base-200">
-      <div className="hero-content text-center">
-        <div className="max-w-md">
-          <img src="https://placeimg.com/500/250/arch" className="mb-8 rounded-lg shadow-2xl" />
-          <h1 className="text-5xl font-bold">Publics Login or Signup</h1>
+      <div className="hero-content flex-col lg:flex-row-reverse">
+        <img
+          src="https://placeimg.com/260/400/arch"
+          className="max-w-sm rounded-lg shadow-2xl"
+        />
+        <div>
+          <h1 className="text-4xl font-bold">
+            Streamlining public parties at Rice.
+          </h1>
+          <p className="py-6">
+            <span className="text-primary">Attendees</span> can register for
+            events in-app and access important event information.
+          </p>
+          <p className="py-6">
+            <span className="text-primary">Volunteers</span> can seamlessly
+            check in and out of their shift and track event capacity.
+          </p>
+          <p className="py-6">
+            <span className="text-primary">Socials</span> can create events,
+            manage attendees and volunteers, and view event analytics.
+          </p>
           <button
+            className="btn btn-primary"
             onClick={(e) => {
               e.preventDefault()
               handleLogin()
             }}
-            className="btn btn-outline-primary mt-4"
-            disabled={loading}
           >
-            <span>Sign In With Rice Google</span>
+            Sign in with your Rice Google
           </button>
         </div>
       </div>
