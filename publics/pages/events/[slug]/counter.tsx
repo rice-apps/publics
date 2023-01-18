@@ -29,18 +29,27 @@ const fetchCounts = async (
     .single()
   const { data: volunteer } = await supabase
     .from("volunteers")
-    .select("id, event(slug)")
+    .select("id, event(slug), is_counter, checked_in, checked_out")
     .eq("profile", userId)
+    .eq("event.slug", slug)
     .single()
+
   const { data: volunteers } = await supabase
     .from("volunteers")
-    .select("id, profile(first_name), event!inner(slug)")
+    .select(
+      "id, is_counter, checked_in, profile(first_name), event!inner(slug)"
+    )
     .eq("event.slug", slug)
+    .eq("is_counter", true)
+    .eq("checked_in", true)
 
   if (
     !data ||
     !eventData ||
     !volunteer ||
+    !volunteer.is_counter ||
+    !volunteer.checked_in ||
+    volunteer.checked_out ||
     !volunteers ||
     !volunteer.event ||
     volunteer.event["slug"] !== slug

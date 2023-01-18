@@ -132,9 +132,8 @@ async function getVolunteers(
             )
         `
     )
-    .eq('event', event_detail.eventID)
-    .eq('shifts.id', slug);
-        
+    .eq("event", event_detail.eventID)
+    .eq("shifts.id", slug)
 
   //Holds data reformatted as array of rowobjects
   let formatted_data: volunteerRowObject[] = []
@@ -309,9 +308,9 @@ function VolunteerPage(props) {
         }
       )
       .subscribe()
-      return () => {
-        supabase.removeChannel(channel)
-      }
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [])
 
   /**
@@ -432,7 +431,7 @@ function VolunteerPage(props) {
                 <span className="label-text">Show All</span>
                 <input
                   type="checkbox"
-                  checked={filterByAll}
+                  defaultChecked={filterByAll}
                   onClick={() => {
                     setFilterByAll(!filterByAll)
                   }}
@@ -445,7 +444,7 @@ function VolunteerPage(props) {
                 <span className="label-text">Checked In?</span>
                 <input
                   type="checkbox"
-                  checked={filterByCheckedIn}
+                  defaultChecked={filterByCheckedIn}
                   onClick={() => {
                     setFilterByCheckedIn(!filterByCheckedIn)
                   }}
@@ -458,7 +457,7 @@ function VolunteerPage(props) {
                 <span className="label-text">Counter?</span>
                 <input
                   type="checkbox"
-                  checked={filterByCounter}
+                  defaultChecked={filterByCounter}
                   onClick={() => {
                     setFilterByCounter(!filterByCounter)
                   }}
@@ -606,7 +605,7 @@ function VolunteerPage(props) {
                         <input
                           type="checkbox"
                           className="checkbox"
-                          checked={checkedIn}
+                          defaultChecked={checkedIn}
                           onChange={(e) => updateCheckedInStatus(row)}
                         />
                       </td>
@@ -614,7 +613,7 @@ function VolunteerPage(props) {
                         <input
                           type="checkbox"
                           className="checkbox"
-                          checked={isCounter}
+                          defaultChecked={isCounter}
                           onChange={(e) => updateIsCounterStatus(row)}
                         />
                       </td>
