@@ -37,7 +37,7 @@ const LargeEventCard = (props: Props) => {
     } else if (props.type === "my-events" && props.registration_status !== "Waitlisted") {
       return (
         <div className="card-actions sm:justify-end">
-          <Link href = {link + "/transfer-ticket"}>
+          <Link href = {`${link}/transfer-ticket`} passHref>
             <button className="btn btn-primary">Transfer Ticket</button>
           </Link>
           <Link href={link} passHref>
