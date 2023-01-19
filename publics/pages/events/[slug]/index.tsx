@@ -117,8 +117,12 @@ const Details = (props: Props) => {
         <div className="hero min-h-[60vh] object-left-top">
           <div className="hero-content items-stretch flex-col md:flex-row min-w-[70vw]">
             <img
-              src={event.img_url ? event.img_url : "https://placeimg.com/400/400/arch"}
-              className="object-cover min-w-[30%] sm:max-w-[30%] min-h-sm rounded-lg shadow-2xl"
+              src={
+                event.img_url
+                  ? event.img_url
+                  : "https://placeimg.com/400/400/arch"
+              }
+              className="object-cover min-w-md sm:max-w-lg min-h-sm rounded-lg shadow-2xl"
             />
             <div className="flex flex-col space-y-4">
               <h1 className="text-5xl font-bold">{event.name}</h1>
