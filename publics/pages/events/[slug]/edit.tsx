@@ -41,7 +41,7 @@ export default function Edit(props) {
 
   const [name, setName] = useState(String)
   const [slug, setSlug] = useState(String)
-  const [origSlug] = useState(String)
+  const [origSlug, setOrigSlug] = useState(String)
   const [eventDateTime, setEventDateTime] = useState(Date)
   const [host, setHost] = useState<String>(props.orgs[0].organization.id)
   const [location, setLocation] = useState(String)
@@ -55,6 +55,7 @@ export default function Edit(props) {
   const [waitlistSize, setWaitlistSize] = useState(Number)
 
   const [orgs] = useState<any[]>(props.orgs)
+  const [uploadImg, setUploadImg] = useState<File>()
 
   function format_date(date: string) {
     if (date === null) {
@@ -73,6 +74,7 @@ export default function Edit(props) {
     setCapacity(data.capacity)
     setDescription(data.description)
     setRegistration(data.registration)
+    setOrigSlug(data.slug)
     if (data.registration) {
       setCollegeRegistration(format_date(data.college_registration_datetime))
       setRegistrationDatetime(format_date(data.registration_datetime))
@@ -92,6 +94,19 @@ export default function Edit(props) {
   }, [])
 
   async function update() {
+
+    let url = ""
+
+    if (uploadImg) {
+      const fileName = uploadImg.name
+      let { error: uploadError } = await supabase.storage.from('images/' + slug).upload(fileName, uploadImg)
+
+      if (uploadError) {
+        alert(uploadError.message)
+      }
+      url = "https://rgdrbnbynqacsbkzofyf.supabase.co/storage/v1/object/public/images/" + slug + "/" + fileName;
+    }
+
     const insert = {
       name,
       slug,
@@ -100,15 +115,17 @@ export default function Edit(props) {
       location,
       capacity,
       description,
+      img_url: url,
       registration,
       ...(registration
         ? {
-            college_registration_datetime: new Date(collegeRegistration),
-            registration_datetime: new Date(registrationDatetime),
-            signup_size: signupSize,
-            waitlist_size: waitlistSize,
-          }
+          college_registration_datetime: new Date(collegeRegistration),
+          registration_datetime: new Date(registrationDatetime),
+          signup_size: signupSize,
+          waitlist_size: waitlistSize,
+        }
         : {}),
+
     }
 
     const { error } = await supabase
@@ -245,7 +262,12 @@ export default function Edit(props) {
                   <span className="label-text-alt">Description</span>
                 </label>
               </div>
-              <input type="file" className="file-input file-input-bordered file-input-primary w-full max-w-xs" />
+              <input type="file" onChange={(e) => {
+                const files = e.target.files
+                if (files && files.length > 0) {
+                  setUploadImg(files[0])
+                }
+              }} className="file-input file-input-bordered file-input-primary w-full max-w-xs" />
             </div>
             <div className="sm:flex">
               <div className="form-control">
