@@ -27,7 +27,7 @@ export async function getServerSideProps(ctx) {
   const authorized = await authorize(supabase, ctx.params.slug, session.user.id)
 
   // Event Details
-  const { data: data, error: error0} = await supabase
+  const { data: collData, error: eventError} = await supabase
     .from("events")
     .select(
       `id, name, description, event_datetime, registration_datetime, college_registration_datetime, registration, capacity, waitlist_size, registration_closed, organization (
@@ -38,34 +38,35 @@ export async function getServerSideProps(ctx) {
     .eq("slug", ctx.params?.slug)
     .single()
 
-  if (error0) {
+  if (eventError) {
     return {
       notFound: true,
     }
   }
 
   // if no event is found, redirect to 404 page
-  if (data === null) {
+  if (collData === null) {
     return {
       notFound: true,
     }
   }
 
   // User Details
-  const {data: user_data, error: error1} = await supabase
+  const {data: userData, error: userError} = await supabase
   .from("profiles")
   .select(`college (name)`)
   .eq("id", session.user?.id)
+  .single()
 
-  if (error1) {
+  if (userError || (userData == null)) {
     return {
       notFound: true,
     };
   }
 
   const userid = session.user.id;
-  const userCollege = user_data[0]["college"];
-  const orgCollege = data["organization"];
+  const userCollege = userData["college"];
+  const orgCollege = collData["organization"];
 
   // check if same college
   var sameCollege = false;
@@ -79,7 +80,7 @@ export async function getServerSideProps(ctx) {
   const {data: check_user, error: error2 } = await supabase
   .from("registrations")
   .select()
-  .match({'person': session.user.id, 'event': data.id})
+  .match({'person': session.user.id, 'event': collData.id})
   .single()
 
   if (check_user !== null) {
@@ -87,7 +88,7 @@ export async function getServerSideProps(ctx) {
   }
 
   return {
-    props: { data, authorized, sameCollege, userid, userRegistered},
+    props: { collData, authorized, sameCollege, userid, userRegistered},
   };
 }
 
@@ -111,7 +112,7 @@ type OrganizationDetail = {
 }
 
 type Props = {
-  data: EventDetail;
+  collData: EventDetail;
   authorized: boolean;
   sameCollege: boolean;
   userid: string;
@@ -125,7 +126,7 @@ const Details = (props: Props) => {
 
   const [loading, setLoading] = useState(false)
 
-  const event = props.data;
+  const event = props.collData;
   const collCheck = props.sameCollege;
   const user = props.userid;
   const userReg = props.userRegistered;
