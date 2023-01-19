@@ -7,6 +7,7 @@ import {
 import { getPagination } from "../../../utils/registration"
 import SuccessMsg from "../../../components/SuccessMsg"
 import ErrorMsg from "../../../components/ErrorMsg"
+import MoveRegistrationsModal from "../../../components/registrations/MoveRegistrationsModal"
 /**
  * Simple type containing a friendly name for an event, and the UUID of the event
  */
@@ -16,6 +17,7 @@ type EventDetails = {
   //uuid of event
   eventID: string //Using string as unsure what UUID type is in TS
   organization: string //Organization ID overseeing this event
+  capacity: number //Capacity of this event
 }
 
 /**
@@ -73,7 +75,7 @@ async function getEvent(
 ): Promise<EventDetails> {
   const { data, error } = await supabase
     .from("events")
-    .select("id, name, organization")
+    .select("id, name, organization, capacity")
     .eq("slug", slug)
     .single()
 
@@ -82,6 +84,7 @@ async function getEvent(
       eventName: "Error",
       eventID: "Error",
       organization: "Error",
+      capacity: 0,
     }
   }
 
@@ -89,6 +92,7 @@ async function getEvent(
     eventName: data.name,
     eventID: data.id,
     organization: data.organization,
+    capacity: data.capacity,
   }
 }
 
@@ -297,6 +301,9 @@ function ResultPage(props) {
     //Writing to clipboard
     navigator.clipboard.writeText(emails!.join(", "))
     setCopiedEmails(true)
+    setTimeout(() => {
+      setCopiedEmails(false)
+    }, 2000)
   }
 
   /**
@@ -323,12 +330,18 @@ function ResultPage(props) {
       setResultSuccess(true)
       setResultError(false)
       setAction(netID + " was successfully added.")
+      setTimeout(() => {
+        setResultSuccess(false)
+      }, 2000)
 
       //refresh page
       setRegistration(await getRegistrations(supabase, eventDetails, search))
     } else {
       setResultSuccess(false)
       setResultError(true)
+      setTimeout(() => {
+        setResultError(false)
+      }, 2000)
     }
   }
 
@@ -347,11 +360,17 @@ function ResultPage(props) {
     if (!res) {
       setResultError(true)
       setResultSuccess(false)
+      setTimeout(() => {
+        setResultError(false)
+      }, 2000)
     }
 
     setResultError(false)
     setResultSuccess(true)
     setAction("User successfully removed.")
+    setTimeout(() => {
+      setResultSuccess(false)
+    }, 2000)
     //refresh page
     setRegistration(registration.filter((v, i) => v.person_id !== user_id))
   }
@@ -443,7 +462,7 @@ function ResultPage(props) {
         <h1>{eventDetails!.eventName}: Registration Results</h1>
       </div>
 
-      <div className="flex justify-between gap-4">
+      <div className="flex justify-between gap-4 flex-wrap">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
             <svg
@@ -497,58 +516,95 @@ function ResultPage(props) {
           </div>
         </div>
         <div className="flex justify-end gap-4">
-          <div className="dropdown">
-            <label tabIndex={0} className="btn">
-              Filter Options
-            </label>
-            <ul
-              tabIndex={0}
-              className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
-            >
-              <div className="AllCheckbox">
-                <label className="label cursor-pointer">
-                  <span className="label-text">Show All</span>
-                  <input
-                    type="checkbox"
-                    defaultChecked={filterByAll}
-                    onClick={() => {
-                      setFilterByAll(!filterByAll)
-                    }}
-                    className="checkbox"
-                  />
-                </label>
-              </div>
-              <div className="WristbandCheckbox">
-                <label className="label cursor-pointer">
-                  <span className="label-text">Wristband</span>
-                  <input
-                    type="checkbox"
-                    defaultChecked={filterByWristband}
-                    onClick={() => {
-                      setFilterByWristband(!filterByWristband)
-                    }}
-                    className="checkbox"
-                  />
-                </label>
-              </div>
-              <div className="WaitlistCheckbox">
-                <label className="label cursor-pointer">
-                  <span className="label-text">Waitlist</span>
-                  <input
-                    type="checkbox"
-                    defaultChecked={filterByWaitlist}
-                    onClick={() => {
-                      setFilterByWaitlist(!filterByWaitlist)
-                    }}
-                    className="checkbox"
-                  />
-                </label>
-              </div>
-            </ul>
+          <div className="tooltip" data-tip="Copy Emails">
+            <button className="btn btn-circle btn-outline" onClick={copyEmails}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 32 32"
+                stroke="currentColor"
+              >
+                <path
+                  d="M27.845 7.385l-5.384-5.384h-11.845v4.307h-6.461v23.69h17.229v-4.307h6.461v-18.306zM22.461 3.524l3.861 3.861h-3.861v-3.861zM5.232 28.922v-21.537h9.692v5.384h5.384v16.153h-15.076zM16 7.831l3.861 3.861h-3.861v-3.861zM21.384 24.615v-12.922l-5.384-5.384h-4.307v-3.231h9.692v5.384h5.384v16.153h-5.384z"
+                  fill="#000000"
+                />
+              </svg>
+            </button>
           </div>
-          <button className="btn btn-outline btn-primary" onClick={copyEmails}>
-            Copy Emails
-          </button>
+          <div className="tooltip" data-tip="Filter Results">
+            <div className="dropdown">
+              <label tabIndex={0} className="btn btn-circle btn-outline">
+                <svg
+                  fill="#000000"
+                  className="h-8 w-8"
+                  viewBox="-5.5 0 32 32"
+                  version="1.1"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g
+                    id="SVGRepo_tracerCarrier"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  ></g>
+                  <g id="SVGRepo_iconCarrier">
+                    {" "}
+                    <title>filter</title>{" "}
+                    <path d="M8.48 25.72c-0.16 0-0.32-0.040-0.44-0.12-0.24-0.16-0.4-0.44-0.4-0.72v-8.72l-7.48-8.48c-0.2-0.24-0.28-0.6-0.12-0.88s0.44-0.48 0.76-0.48h19.8c0.32 0 0.64 0.2 0.76 0.48 0.12 0.32 0.080 0.64-0.12 0.92l-7.8 8.8v6.32c0 0.32-0.2 0.6-0.48 0.76l-4.080 2c-0.080 0.080-0.24 0.12-0.4 0.12zM2.64 7.96l6.48 7.32c0.12 0.16 0.2 0.36 0.2 0.56v7.64l2.4-1.2v-6.080c0-0.2 0.080-0.4 0.2-0.56l6.8-7.68c0.040 0-16.080 0-16.080 0z"></path>{" "}
+                  </g>
+                </svg>
+              </label>
+              <ul
+                tabIndex={0}
+                className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
+              >
+                <div className="AllCheckbox">
+                  <label className="label cursor-pointer">
+                    <span className="label-text">Show All</span>
+                    <input
+                      type="checkbox"
+                      defaultChecked={filterByAll}
+                      onClick={() => {
+                        setFilterByAll(!filterByAll)
+                      }}
+                      className="checkbox"
+                    />
+                  </label>
+                </div>
+                <div className="WristbandCheckbox">
+                  <label className="label cursor-pointer">
+                    <span className="label-text">Wristband</span>
+                    <input
+                      type="checkbox"
+                      defaultChecked={filterByWristband}
+                      onClick={() => {
+                        setFilterByWristband(!filterByWristband)
+                      }}
+                      className="checkbox"
+                    />
+                  </label>
+                </div>
+                <div className="WaitlistCheckbox">
+                  <label className="label cursor-pointer">
+                    <span className="label-text">Waitlist</span>
+                    <input
+                      type="checkbox"
+                      defaultChecked={filterByWaitlist}
+                      onClick={() => {
+                        setFilterByWaitlist(!filterByWaitlist)
+                      }}
+                      className="checkbox"
+                    />
+                  </label>
+                </div>
+              </ul>
+            </div>
+          </div>
+          <MoveRegistrationsModal
+            eventId={eventDetails.eventID}
+            capacity={eventDetails.capacity}
+          />
           <label htmlFor="add-modal" className="btn btn-primary">
             Add Attendee
           </label>
