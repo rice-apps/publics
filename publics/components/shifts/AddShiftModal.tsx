@@ -1,33 +1,34 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 
 function AddShiftModal(props) {
-  const [name, setName] = useState()
-  const [shiftStartDateTime, setShiftStartDateTime] = useState()
-  const [shiftEndDateTime, setShiftEndDateTime] = useState()
-  const [volunteerInstructions, setVolunteerInstructions] = useState()
+  const [name, setName] = useState<string>("")
+  const [shiftStartDateTime, setShiftStartDateTime] = useState<string | number>(
+    ""
+  )
+  const [shiftEndDateTime, setShiftEndDateTime] = useState<string | number>("")
+  const [volunteerInstructions, setVolunteerInstructions] = useState<
+    string | number
+  >("")
 
   const supabase = useSupabaseClient()
 
   const createShift = async (e) => {
     e.preventDefault()
 
-    const { data, error } = await supabase
-        .from("shifts")
-        .insert([
-            {
-                name: name,
-                start: new Date(shiftStartDateTime),
-                end: new Date(shiftEndDateTime),
-                volunteer_instructions: volunteerInstructions,
-                event: props.eventId
-            }
-        ])
+    const { data, error } = await supabase.from("shifts").insert([
+      {
+        name: name,
+        start: new Date(shiftStartDateTime),
+        end: new Date(shiftEndDateTime),
+        volunteer_instructions: volunteerInstructions,
+        event: props.eventId,
+      },
+    ])
     if (error) {
-        alert(error)
+      alert(error)
     } else {
-        document.getElementById("add-modal").checked = false
-        window.location.reload()
+      window.location.reload()
     }
   }
 
@@ -95,7 +96,12 @@ function AddShiftModal(props) {
               ></textarea>
             </div>
             <div className="modal-action">
-              <label className="btn btn-outline btn-primary" htmlFor="add-modal">Cancel</label>
+              <label
+                className="btn btn-outline btn-primary"
+                htmlFor="add-modal"
+              >
+                Cancel
+              </label>
               <button type="submit" className="btn btn-primary">
                 Add
               </button>
