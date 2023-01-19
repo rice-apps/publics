@@ -48,7 +48,7 @@ const LargeEventCard = (props: Props) => {
   return (
     <div className="card lg:card-side bg-base-100 shadow-xl max-w-4xl max-h-[600px]">
       <figure>
-        <img src="https://placeimg.com/400/400/arch" alt="Album" />
+        <img src={props.event.img_url ? props.event.img_url : "https://placeimg.com/400/400/arch"} alt="Album" />
       </figure>
       <div className="card-body">
         <div className="flex justify-between">
@@ -78,8 +78,8 @@ const LargeEventCard = (props: Props) => {
             {!props.event.registration
               ? "No registration required"
               : registrationOpen(props.event)
-              ? "Registration open!"
-              : `Registration opens: ${eventCardDate(
+                ? "Registration open!"
+                : `Registration opens: ${eventCardDate(
                   props.event.registration_datetime,
                   true
                 )}`}

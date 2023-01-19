@@ -41,7 +41,6 @@ export default function Edit(props) {
 
   const [name, setName] = useState(String)
   const [slug, setSlug] = useState(String)
-  const [origSlug, setOrigSlug] = useState(String)
   const [eventDateTime, setEventDateTime] = useState(Date)
   const [host, setHost] = useState<String>(props.orgs[0].organization.id)
   const [location, setLocation] = useState(String)
@@ -56,6 +55,7 @@ export default function Edit(props) {
 
   const [orgs] = useState<any[]>(props.orgs)
   const [uploadImg, setUploadImg] = useState<File>()
+  const [imgUrl, setImgUrl] = useState(String)
 
   function format_date(date: string) {
     if (date === null) {
@@ -74,7 +74,8 @@ export default function Edit(props) {
     setCapacity(data.capacity)
     setDescription(data.description)
     setRegistration(data.registration)
-    setOrigSlug(data.slug)
+    setImgUrl(data.img_url)
+
     if (data.registration) {
       setCollegeRegistration(format_date(data.college_registration_datetime))
       setRegistrationDatetime(format_date(data.registration_datetime))
@@ -93,18 +94,33 @@ export default function Edit(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  async function update() {
+  async function update(event) {
 
-    let url = ""
+    event.preventDefault()
+    let newImgUrl = imgUrl
 
     if (uploadImg) {
-      const fileName = uploadImg.name
-      let { error: uploadError } = await supabase.storage.from('images/' + slug).upload(fileName, uploadImg)
+      const fileExt = uploadImg.name.split('.').pop()
+      const fileName = `cover_image.${fileExt}`
+
+      let { error: uploadError } = await supabase.storage.from('images/' + slug).upload(fileName, uploadImg, {
+        upsert: true
+      })
 
       if (uploadError) {
         alert(uploadError.message)
       }
-      url = "https://rgdrbnbynqacsbkzofyf.supabase.co/storage/v1/object/public/images/" + slug + "/" + fileName;
+
+      // if (updateError) {
+      //   // might not be able to update due to different extensions
+      //   // try upload the img instead
+
+      //   let { error: uploadError } = await supabase.storage.from('images/' + slug).upload(fileName, uploadImg)
+      //   if (uploadError) {
+      //     alert(uploadError.message)
+      //   }
+      // }
+      newImgUrl = "https://rgdrbnbynqacsbkzofyf.supabase.co/storage/v1/object/public/images/" + slug + "/" + fileName
     }
 
     const insert = {
@@ -115,7 +131,7 @@ export default function Edit(props) {
       location,
       capacity,
       description,
-      img_url: url,
+      img_url: newImgUrl,
       registration,
       ...(registration
         ? {
@@ -125,17 +141,17 @@ export default function Edit(props) {
           waitlist_size: waitlistSize,
         }
         : {}),
-
     }
 
     const { error } = await supabase
       .from("events")
       .update(insert)
-      .eq("slug", origSlug)
+      .eq("slug", props.data.slug)
     if (error) {
       alert(error.message)
     } else {
       router.push(`/events/${slug}`)
+      return
     }
   }
 

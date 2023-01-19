@@ -59,10 +59,12 @@ export default function Create(props) {
   async function insert() {
     // uploading image to supabase
 
-    let url = ""
+    var url = ""
 
     if (uploadImg) {
-      const fileName = uploadImg.name
+      const fileExt = uploadImg.name.split('.').pop()
+      const fileName = `cover_image.${fileExt}`
+
       let { error: uploadError } = await supabase.storage.from('images/' + slug).upload(fileName, uploadImg)
 
       if (uploadError) {
@@ -80,7 +82,7 @@ export default function Create(props) {
       capacity: capacity,
       description: description,
       registration: registration,
-      img_url: url
+      img_url: (url == "" ? null : url)
     }
 
     let insert2 = {}
