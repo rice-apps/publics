@@ -179,9 +179,11 @@ function Events(props: Props) {
         <div className="divider">Upcoming Events</div>
         {props.events.length > 0 ? (
           <div className="px-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-            {props.events.map((event) => (
-              <EventCard key={event.slug} event={event} />
-            ))}
+            {props.events
+              .filter((event) => new Date(event.event_datetime) >= new Date())
+              .map((event) => (
+                <EventCard key={event.slug} event={event} />
+              ))}
           </div>
         ) : (
           <div className="px-8">There are currently no upcoming events.</div>

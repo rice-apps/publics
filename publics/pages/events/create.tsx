@@ -274,7 +274,7 @@ export default function Create(props) {
                 <h2 className="text-lg leading-10 normal-case font-family: inter font-medium">
                   Registration Details
                 </h2>
-                <div className="mx-3 divider leading-[1px] h-[0.5px] w-[950px]"></div>
+                <div className="mx-3 divider"></div>
               </div>
               <div className={`sm:flex`}>
                 <div className="form-control w-full max-w-xs mr-2">
