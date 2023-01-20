@@ -47,8 +47,16 @@ const LargeEventCard = (props: Props) => {
   }
   return (
     <div className="card lg:card-side bg-base-100 shadow-xl max-w-4xl max-h-[600px]">
-      <figure>
-        <img src="https://placeimg.com/400/400/arch" alt="Album" />
+      <figure className="max-w-sm max-h-sm">
+        <img
+          className="aspect-square"
+          src={
+            props.event.img_url
+              ? props.event.img_url
+              : "https://placeimg.com/400/400/arch"
+          }
+          alt="Event Image"
+        />
       </figure>
       <div className="card-body">
         <div className="flex justify-between">

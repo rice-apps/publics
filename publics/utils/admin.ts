@@ -30,6 +30,7 @@ export async function authorize(
 
   return (
     user_orgs &&
+    org.length > 0 && user_orgs.length > 0 &&
     user_orgs.some(
       (user_org) => user_org.organization!["id"] === org[0].organization!["id"]
     )
