@@ -405,17 +405,6 @@ function ResultPage(props) {
     }
   }
 
-  const registrationFilter = registration.filter((row) => {
-    if (filterByAll) {
-      return true
-    }
-    if (filterByWristband) {
-      return row.picked_up_wristband
-    }
-    if (filterByWaitlist) {
-      return row.waitlist
-    }
-  })
   async function handleSearch() {
     setRegistration(await getRegistrations(supabase, eventDetails, search))
     setPage(0)
@@ -542,7 +531,7 @@ function ResultPage(props) {
                   version="1.1"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
                   <g
                     id="SVGRepo_tracerCarrier"
                     stroke-linecap="round"
@@ -753,11 +742,22 @@ function ResultPage(props) {
         {/* center following div */}
         <div className="flex justify-center mt-4">
           <div className="btn-group">
-            <button className="btn" onClick={handlePageDeincrement}>
+            <button
+              className="btn"
+              disabled={page < 1}
+              onClick={handlePageDeincrement}
+            >
               «
             </button>
             <button className="btn">Page {page}</button>
-            <button className="btn" onClick={handlePageIncrement}>
+            <button
+              className="btn"
+              disabled={
+                filterRegistrations().splice(from, to).length !== 50 ||
+                page > 100
+              }
+              onClick={handlePageIncrement}
+            >
               »
             </button>
           </div>
