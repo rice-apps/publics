@@ -164,7 +164,7 @@ const Counter = (props: Props) => {
   return (
     <div className="flex flex-col h-screen">
       <div className="flex flex-row justify-center mt-8">
-        <h1 className={count > props.event.capacity ? "text-red-600" : ""}>
+        <h1 className={count > props.event.capacity ? "text-red-700" : ""}>
           {count}
         </h1>
         <h1 className="text-primary">/{props.event.capacity}</h1>
