@@ -339,6 +339,20 @@ function VolunteerPage(props) {
    * @param netID - you know what this is
    */
   async function addVolunteer(netID: string) {
+    //check if volunteer is already in table
+    const { data: inTable } = await supabase
+      .from("volunteers")
+      .select("id")
+      .eq("event", eventDetails!.eventID)
+      .eq("profile", props.user.id)
+      .eq("shift", shift)
+      .single()
+
+    if (inTable) {
+      alert("Volunteer already registered for this shift")
+      return
+    }
+
     //Get UUID of user by netID
     const { data, error } = await supabase
       .from("profiles")
@@ -375,6 +389,7 @@ function VolunteerPage(props) {
       .delete()
       .eq("event", eventDetails?.eventID)
       .eq("profile", user_id)
+      .eq("shift", shift)
       .select()
 
     if (!res) {
