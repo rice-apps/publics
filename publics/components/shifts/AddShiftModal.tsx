@@ -34,10 +34,10 @@ function AddShiftModal(props) {
 
   return (
     <>
-      <label htmlFor="add-modal" className="btn btn-primary">
+      <label htmlFor="move-modal" className="btn btn-primary">
         Add Shift
       </label>
-      <input type="checkbox" id="add-modal" className="modal-toggle" />
+      <input type="checkbox" id="move-modal" className="modal-toggle" />
       <div className="modal">
         <div className="modal-box w-5/6 max-w-3xl">
           <h3 className="font-bold text-lg">Add Shift</h3>
@@ -98,7 +98,7 @@ function AddShiftModal(props) {
             <div className="modal-action">
               <label
                 className="btn btn-outline btn-primary"
-                htmlFor="add-modal"
+                htmlFor="move-modal"
               >
                 Cancel
               </label>

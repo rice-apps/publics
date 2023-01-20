@@ -14,7 +14,7 @@ const MoveRegistrationsModal = (props) => {
       throw eventError
     }
     if (event.registration_closed) {
-      const modal = document.getElementById("add-modal") as HTMLInputElement
+      const modal = document.getElementById("move-modal") as HTMLInputElement
       modal.checked = false
       alert("Registration is already closed")
       return
@@ -25,7 +25,7 @@ const MoveRegistrationsModal = (props) => {
     })
     if (error) {
       alert("Error moving registrations")
-      const modal = document.getElementById("add-modal") as HTMLInputElement
+      const modal = document.getElementById("move-modal") as HTMLInputElement
       modal.checked = false
       return
     }
@@ -39,21 +39,21 @@ const MoveRegistrationsModal = (props) => {
       alert("Waitlist updated but registration not closed")
     }
 
-    const modal = document.getElementById("add-modal") as HTMLInputElement
+    const modal = document.getElementById("move-modal") as HTMLInputElement
     modal.checked = false
   }
   return (
     <>
-      <label htmlFor="add-modal" className="btn btn-primary">
+      <label htmlFor="move-modal" className="btn btn-primary">
         Move Registrations
       </label>
-      <input type="checkbox" id="add-modal" className="modal-toggle" />
+      <input type="checkbox" id="move-modal" className="modal-toggle" />
       <div className="modal">
         <div className="modal-box">
           <h3 className="font-bold text-lg">{`This action will move the first ${props.capacity} registrants from the waitlist and close registration. Proceed?`}</h3>
 
           <div className="modal-action">
-            <label htmlFor="add-modal" className="btn btn-outline btn-primary">
+            <label htmlFor="move-modal" className="btn btn-outline btn-primary">
               Cancel
             </label>
             <button
