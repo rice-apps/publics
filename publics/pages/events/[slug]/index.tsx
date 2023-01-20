@@ -3,8 +3,12 @@ import Head from "next/head"
 import {
   SupabaseClient,
   createServerSupabaseClient,
-} from "@supabase/auth-helpers-nextjs"
-import { authorize } from "../../../utils/admin"
+} from "@supabase/auth-helpers-nextjs";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { authorize } from "../../../utils/admin";
+import { useState } from "react";
+import React from "react";
+
 export async function getServerSideProps(ctx) {
   const supabase = createServerSupabaseClient(ctx)
   const {
@@ -22,10 +26,11 @@ export async function getServerSideProps(ctx) {
 
   const authorized = await authorize(supabase, ctx.params.slug, session.user.id)
 
-  const { data, error } = await supabase
+  // Event Details
+  const { data: collData, error: eventError} = await supabase
     .from("events")
     .select(
-      `name, description, event_datetime, registration_datetime, registration, capacity, waitlist_size, img_url, organization (
+      `id, name, description, event_datetime, registration_datetime, college_registration_datetime, registration, capacity, waitlist_size, registration_closed, organization (
             name,
             photo
         )`
@@ -33,35 +38,73 @@ export async function getServerSideProps(ctx) {
     .eq("slug", ctx.params?.slug)
     .single()
 
-  if (error) {
+  if (eventError) {
     return {
       notFound: true,
     }
   }
 
   // if no event is found, redirect to 404 page
-  if (data === null) {
+  if (collData === null) {
     return {
       notFound: true,
     }
   }
 
-  return {
-    props: { data, authorized },
+  // User Details
+  const {data: userData, error: userError} = await supabase
+  .from("profiles")
+  .select(`college (name)`)
+  .eq("id", session.user?.id)
+  .single()
+
+  if (userError || (userData == null)) {
+    return {
+      notFound: true,
+    };
   }
+
+  const userid = session.user.id;
+  const userCollege = userData["college"];
+  const orgCollege = collData["organization"];
+
+  // check if same college
+  var sameCollege = false;
+
+  if (userCollege["name"] == orgCollege["name"]){
+    sameCollege = true;
+  }
+
+  // check if registered already
+  var userRegistered = false;
+  const {data: check_user, error: error2 } = await supabase
+  .from("registrations")
+  .select()
+  .match({'person': session.user.id, 'event': collData.id})
+  .single()
+
+  if (check_user !== null) {
+    userRegistered = true;
+  }
+
+  return {
+    props: { collData, authorized, sameCollege, userid, userRegistered},
+  };
 }
 
 type EventDetail = {
-  name: string
-  description: string
-  event_datetime: string | Date
-  registration_datetime: string | Date
-  registration: boolean
-  capacity: number
-  waitlist_size: number
-  img_url: string
-  organization: OrganizationDetail
-}
+  id: string;
+  name: string;
+  description: string;
+  event_datetime: string | Date;
+  registration_datetime: string | Date;
+  college_registration_datetime: string | Date;
+  registration: boolean;
+  capacity: number;
+  waitlist_size: number;
+  registration_closed: boolean;
+  organization: OrganizationDetail;
+};
 
 type OrganizationDetail = {
   name: string
@@ -69,14 +112,55 @@ type OrganizationDetail = {
 }
 
 type Props = {
-  data: EventDetail
-  authorized: boolean
-}
+  collData: EventDetail;
+  authorized: boolean;
+  sameCollege: boolean;
+  userid: string;
+  userRegistered: boolean;
+};
+
 
 const Details = (props: Props) => {
-  const router = useRouter()
+  const supabase = useSupabaseClient();
+  const router = useRouter();
 
-  const event = props.data
+  const [loading, setLoading] = useState(false)
+
+  const event = props.collData;
+  const collCheck = props.sameCollege;
+  const user = props.userid;
+  const userReg = props.userRegistered;
+
+  // Registration function (used when register button is clicked)
+  async function register() {
+    setLoading(true)
+
+    const {data: registration_closed} = await supabase
+      .from("events")
+      .select("id, registration_closed")
+      .eq("id", event.id)
+      .single()
+
+    if (registration_closed?.registration_closed) {
+      alert("Event registration has already closed")
+      setLoading(false)
+      setEnabled(false)
+    }
+    //check if registered
+    const { error } = await supabase
+        .from("registrations")
+        .insert({ event: event["id"], person: user, waitlist: true })
+
+    if (error) {
+      alert(error.message)
+    } else {
+      alert("Your registration request has been processed. You will be notified via email about your registration status shortly")
+      setEnabled(false)
+    }
+
+    setLoading(false)
+        
+  }
 
   // process datetimes
   const weekday = [
@@ -103,8 +187,26 @@ const Details = (props: Props) => {
     "December",
   ]
 
-  event.registration_datetime = new Date(event.registration_datetime)
   event.event_datetime = new Date(event.event_datetime)
+
+  //current time
+  const curr_date = new Date();
+
+  //college check logic
+  var reg_time = new Date();
+
+  if(collCheck){
+    event.college_registration_datetime = new Date(event.college_registration_datetime);
+    reg_time = event.college_registration_datetime;
+  }
+  else{
+    event.registration_datetime = new Date(event.registration_datetime);
+    reg_time = event.registration_datetime;
+  }
+
+  const [enabled, setEnabled] = useState((!userReg && !event.registration_closed && (reg_time.getTime() < curr_date.getTime())))
+
+
 
   return (
     <div id="index">
@@ -115,7 +217,7 @@ const Details = (props: Props) => {
       </Head>
       <main>
         <div className="hero min-h-[60vh] object-left-top">
-          <div className="hero-content items-stretch flex-col md:flex-row min-w-[70vw]">
+          <div className="hero-content flex-col lg:flex-row min-w-[70vw]">
             <img
               src={
                 event.img_url
@@ -159,7 +261,7 @@ const Details = (props: Props) => {
         <div className="divider"></div>
         <div className="flex-col ml-4 sm:ml-8 md:ml-24">
           <h2 className="mb-2">Register for Event</h2>
-          <button className="btn btn-primary">Register</button>
+          {loading ? <button className="btn btn-loading">loading</button> : <button onClick={register} className={enabled ? "btn btn-primary" : "btn btn-disabled"}>Register</button>}
         </div>
       </main>
     </div>
