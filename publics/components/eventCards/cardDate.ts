@@ -9,7 +9,7 @@ export function getOrdinal(n: string) {
   return newNum.toString() + nth
 }
 
-export function eventCardDate(datetime: string, registration: boolean) {
+export function eventCardDate(datetime: string | Date, registration: boolean) {
   const dt: Date = new Date(datetime)
 
   const date = dt.toLocaleDateString("en-us", {

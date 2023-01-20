@@ -62,15 +62,21 @@ export default function Create(props) {
     var url = ""
 
     if (uploadImg) {
-      const fileExt = uploadImg.name.split('.').pop()
+      const fileExt = uploadImg.name.split(".").pop()
       const fileName = `cover_image.${fileExt}`
 
-      let { error: uploadError } = await supabase.storage.from('images/' + slug).upload(fileName, uploadImg)
+      let { error: uploadError } = await supabase.storage
+        .from("images/" + slug)
+        .upload(fileName, uploadImg)
 
       if (uploadError) {
         alert(uploadError.message)
       }
-      url = "https://rgdrbnbynqacsbkzofyf.supabase.co/storage/v1/object/public/images/" + slug + "/" + fileName;
+      url =
+        "https://rgdrbnbynqacsbkzofyf.supabase.co/storage/v1/object/public/images/" +
+        slug +
+        "/" +
+        fileName
     }
 
     let insert1 = {
@@ -82,7 +88,7 @@ export default function Create(props) {
       capacity: capacity,
       description: description,
       registration: registration,
-      img_url: (url == "" ? null : url)
+      img_url: url == "" ? null : url,
     }
 
     let insert2 = {}
@@ -210,7 +216,6 @@ export default function Create(props) {
                   type="number"
                   onInput={(e) => {
                     if (e.target.value < 1) {
-                      console.log("here")
                       e.target.setCustomValidity(
                         "The capacity must be greater than 0."
                       )
@@ -239,12 +244,16 @@ export default function Create(props) {
                 </label>
               </div>
               <div>
-                <input type="file" onChange={(e) => {
-                  const files = e.target.files
-                  if (files && files.length > 0) {
-                    setUploadImg(files[0])
-                  }
-                }} className="file-input file-input-bordered file-input-primary w-full max-w-xs" />
+                <input
+                  type="file"
+                  onChange={(e) => {
+                    const files = e.target.files
+                    if (files && files.length > 0) {
+                      setUploadImg(files[0])
+                    }
+                  }}
+                  className="file-input file-input-bordered file-input-primary w-full max-w-xs"
+                />
               </div>
             </div>
             <div className="sm:flex">

@@ -7,6 +7,8 @@ export type ListEvent = {
   organization: Organization
   registration: boolean
   registration_datetime: string
+  college_registration_datetime: string
+  registration_closed: boolean
   img_url: string
 }
 
