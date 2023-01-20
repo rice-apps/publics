@@ -237,10 +237,10 @@ const Details = (props: Props) => {
               <p className="font-medium text-primary">
                 {!event.registration
                   ? "No registration required"
-                  : registrationOpen(event)
-                  ? "Registration open!"
                   : event.registration_closed
                   ? `Registration closed`
+                  : registrationOpen(event)
+                  ? "Registration open!"
                   : collCheck
                   ? `Registration opens for ${
                       event.organization.name
