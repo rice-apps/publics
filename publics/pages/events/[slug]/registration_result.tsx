@@ -243,7 +243,7 @@ function ResultPage(props) {
   //boolean values that we use to filter registrations by when displaying them to the screen
   const [filterByAll, setFilterByAll] = useState(true) //starts as true as we want to start by initially showing the admin the entire set of registered users
   const [filterByWristband, setFilterByWristband] = useState(false)
-  const [filterByWaitlist, setFilterByWaitlist] = useState(false)
+  const [filterByRegistered, setFilterByRegistered] = useState(false)
   //Search bar value
   const [search, setSearch] = useState("")
   // Pagination
@@ -431,7 +431,7 @@ function ResultPage(props) {
       return (
         filterByAll ||
         (row.picked_up_wristband == filterByWristband &&
-          row.waitlist == filterByWaitlist)
+          row.waitlist !== filterByRegistered)
       )
     })
   }
@@ -576,12 +576,12 @@ function ResultPage(props) {
                 </div>
                 <div className="WaitlistCheckbox">
                   <label className="label cursor-pointer">
-                    <span className="label-text">Waitlist</span>
+                    <span className="label-text">Registered</span>
                     <input
                       type="checkbox"
-                      defaultChecked={filterByWaitlist}
+                      defaultChecked={filterByRegistered}
                       onClick={() => {
-                        setFilterByWaitlist(!filterByWaitlist)
+                        setFilterByRegistered(!filterByRegistered)
                       }}
                       className="checkbox"
                     />
