@@ -469,6 +469,7 @@ function VolunteerPage(props) {
                 className="h-8 w-8"
                 viewBox="-5.5 0 32 32"
                 version="1.1"
+                stroke="currentColor"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>

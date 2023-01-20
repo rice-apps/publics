@@ -527,6 +527,7 @@ function ResultPage(props) {
                 <svg
                   fill="#000000"
                   className="h-8 w-8"
+                  stroke="currentColor"
                   viewBox="-5.5 0 32 32"
                   version="1.1"
                   xmlns="http://www.w3.org/2000/svg"
