@@ -33,7 +33,7 @@ export async function getServerSideProps(ctx) {
   const { data: collData, error: eventError } = await supabase
     .from("events")
     .select(
-      `id, name, description, event_datetime, registration_datetime, college_registration_datetime, registration, capacity, waitlist_size, registration_closed, organization (
+      `id, name, description, event_datetime, registration_datetime, college_registration_datetime, registration, capacity, waitlist_size, registration_closed, img_url, organization (
             id,
             name,
             photo
@@ -92,21 +92,6 @@ export async function getServerSideProps(ctx) {
   return {
     props: { collData, authorized, sameCollege, userid, userRegistered },
   }
-}
-
-type EventDetail = {
-  id: string
-  name: string
-  description: string
-  event_datetime: string | Date
-  registration_datetime: string | Date
-  college_registration_datetime: string | Date
-  registration: boolean
-  capacity: number
-  waitlist_size: number
-  registration_closed: boolean
-  organization: OrganizationDetail
-  img_url: string
 }
 
 type OrganizationDetail = {
