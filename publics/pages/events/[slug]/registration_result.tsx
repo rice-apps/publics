@@ -645,8 +645,8 @@ function ResultPage(props) {
               <th>Email Address</th>
               <th>NetID</th>
               <th>Residential College</th>
+              <th>Registered?</th>
               <th>Wristband?</th>
-              <th>Waitlist?</th>
             </tr>
           </thead>
           <tbody>
@@ -656,7 +656,7 @@ function ResultPage(props) {
                 .splice(from, to)
                 .map((row, index) => {
                   let isChecked = row["picked_up_wristband"]
-                  let isWaitlist = row["waitlist"]
+                  let isRegistered = !row["waitlist"]
                   return (
                     <tr key={index}>
                       <th></th>
@@ -720,16 +720,16 @@ function ResultPage(props) {
                         <input
                           type="checkbox"
                           className="checkbox"
-                          checked={isChecked}
-                          onChange={(e) => updateWristband(row)}
+                          checked={isRegistered}
+                          onChange={(e) => updateWaitlist(row)}
                         />
                       </td>
                       <td>
                         <input
                           type="checkbox"
                           className="checkbox"
-                          checked={isWaitlist}
-                          onChange={(e) => updateWaitlist(row)}
+                          checked={isChecked}
+                          onChange={(e) => updateWristband(row)}
                         />
                       </td>
                     </tr>

@@ -172,23 +172,23 @@ async function getVolunteers(
   return formatted_data
 }
 
-async function getShift(
+async function getShiftName(
   supabase,
   shift,
   event_detail: EventDetails
 ): Promise<String> {
   const { data, error } = await supabase
     .from("shifts")
-    .select("id")
-    .eq("event", event_detail.eventID)
-    .eq("slug", shift)
+    .select("name")
+    .eq("id", shift)
     .single()
 
   if (error) {
+    console.log("GOT ERROR:", error.message)
     return "ERROR"
   }
 
-  return data?.id
+  return data?.name
 }
 
 /**
@@ -249,6 +249,9 @@ export async function getServerSideProps(context) {
   )
 
   const shift_id = context.params.shift
+  //get shift name
+  const shift_name = await getShiftName(supabase, shift_id, event_detail)
+
   return {
     props: {
       initialSession: session,
@@ -257,6 +260,7 @@ export async function getServerSideProps(context) {
       registrations,
       event_detail,
       shift_id,
+      shift_name,
     },
   }
 }
@@ -367,10 +371,18 @@ function VolunteerPage(props) {
 
     let personID = data!.id
 
+    //if props.shift_name is "Capacity Counter" then set is_counter to true, else false
+    let is_counter = props.shift_name == "Capacity Counter" ? true : false
+
     //Insert person into registrations table for this event
     const res = await supabase
       .from("volunteers")
-      .insert({ event: eventDetails!.eventID, profile: personID, shift: shift })
+      .insert({
+        event: eventDetails!.eventID,
+        profile: personID,
+        shift: shift,
+        is_counter: is_counter,
+      })
       .select()
 
     //refresh page
