@@ -2,7 +2,6 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/router"
 import {
   SupabaseClient,
-  createBrowserSupabaseClient,
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
@@ -13,47 +12,64 @@ interface Volunteer {
   count: number
 }
 
+interface Event {
+  id: string
+  capacity: number
+  organization: string
+}
+
+interface Props {
+  authorized: boolean
+  volunteers: Volunteer[]
+  count: number
+  myCount: number
+  event: Event
+  capacity: number
+  organization: string
+  volunteer: Volunteer
+}
+
 const fetchCounts = async (
   supabase: SupabaseClient,
   slug: string,
   userId: string
 ) => {
-  const { data } = await supabase
-    .from("counts")
-    .select("*, event!inner(*), volunteer(id, profile(first_name))")
-    .eq("event.slug", slug)
   const { data: eventData } = await supabase
     .from("events")
-    .select("id")
+    .select("id, capacity, organization")
     .eq("slug", slug)
     .single()
+
+  if (!eventData) {
+    return { authorized: false }
+  }
+
+  const { data } = await supabase
+    .from("counts")
+    .select("inout, volunteer, volunteer(id, profile(first_name))")
+    .eq("event", eventData.id)
+
+  if (!data) {
+    return { authorized: false }
+  }
   const { data: volunteer } = await supabase
     .from("volunteers")
-    .select("id, event(slug), is_counter, checked_in, checked_out")
-    .eq("profile", userId)
-    .eq("event.slug", slug)
+    .select("id, event")
+    .match({
+      profile: userId,
+      event: eventData.id,
+      is_counter: true,
+      checked_in: true,
+      checked_out: false,
+    })
     .single()
 
   const { data: volunteers } = await supabase
     .from("volunteers")
-    .select(
-      "id, is_counter, checked_in, profile(first_name), event!inner(slug)"
-    )
-    .eq("event.slug", slug)
-    .eq("is_counter", true)
-    .eq("checked_in", true)
+    .select("id, profile(first_name)")
+    .match({ event: eventData.id, is_counter: true, checked_in: true })
 
-  if (
-    !data ||
-    !eventData ||
-    !volunteer ||
-    !volunteer.is_counter ||
-    !volunteer.checked_in ||
-    volunteer.checked_out ||
-    !volunteers ||
-    !volunteer.event ||
-    volunteer.event["slug"] !== slug
-  ) {
+  if (!volunteer || !volunteers || !volunteer.event) {
     return { authorized: false }
   }
 
@@ -73,8 +89,8 @@ const fetchCounts = async (
 
   return {
     authorized: true,
-    volunteer: volunteer.id,
-    event: eventData.id,
+    volunteer: volunteer?.id,
+    event: eventData,
     volunteers: volunteerCountArray,
     count:
       data.filter((row) => row.inout).length -
@@ -87,7 +103,7 @@ const fetchCounts = async (
   }
 }
 
-const Counter = (props) => {
+const Counter = (props: Props) => {
   const supabase = useSupabaseClient()
   const router = useRouter() || { query: { slug: "" } }
   const query = router.query
@@ -140,7 +156,7 @@ const Counter = (props) => {
       {
         inout: inout,
         volunteer: props.volunteer,
-        event: props.event,
+        event: props.event.id,
       },
     ])
     setMyCount((count) => count + (inout ? 1 : -1))
@@ -148,8 +164,10 @@ const Counter = (props) => {
   return (
     <div className="flex flex-col h-screen">
       <div className="flex flex-row justify-center mt-8">
-        <h1>{myCount}</h1>
-        <h1 className="text-primary">/{count}</h1>
+        <h1 className={count > props.event.capacity ? "text-red-600" : ""}>
+          {count}
+        </h1>
+        <h1 className="text-primary">/{props.event.capacity}</h1>
       </div>
       <p className="text-sm grid place-items-center">total count</p>
       <div className="grid grid-cols-3 gap-4 place-items-center mt-8">
