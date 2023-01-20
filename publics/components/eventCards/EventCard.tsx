@@ -24,6 +24,8 @@ export default function EventCard(props: Props) {
         <p className="font-medium text-primary">
           {!props.event.registration
             ? "No registration required"
+            : props.event.registration_closed
+            ? `Registration closed`
             : registrationOpen(props.event)
             ? "Registration open!"
             : `Registration opens: ${eventCardDate(

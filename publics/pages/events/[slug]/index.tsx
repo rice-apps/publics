@@ -8,6 +8,9 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import { authorize } from "../../../utils/admin"
 import { useState } from "react"
 import React from "react"
+import { registrationOpen } from "../../../utils/registration"
+import { eventCardDate } from "../../../components/eventCards/cardDate"
+import { ListEvent } from "../../../utils/types"
 
 export async function getServerSideProps(ctx) {
   const supabase = createServerSupabaseClient(ctx)
@@ -112,7 +115,7 @@ type OrganizationDetail = {
 }
 
 type Props = {
-  collData: EventDetail
+  collData: ListEvent
   authorized: boolean
   sameCollege: boolean
   userid: string
@@ -187,7 +190,7 @@ const Details = (props: Props) => {
     "December",
   ]
 
-  event.event_datetime = new Date(event.event_datetime)
+  const event_datetime = new Date(event.event_datetime)
 
   //current time
   const curr_date = new Date()
@@ -227,11 +230,11 @@ const Details = (props: Props) => {
             <div className="flex flex-col space-y-4">
               <h1 className="text-5xl font-bold">{event.name}</h1>
               <p className="text-xl">
-                {weekday[event.event_datetime.getDay()] +
+                {weekday[event_datetime.getDay()] +
                   ", " +
-                  month[event.event_datetime.getMonth()] +
+                  month[event_datetime.getMonth()] +
                   " " +
-                  event.event_datetime.getDate()}{" "}
+                  event_datetime.getDate()}{" "}
               </p>
               <span>
                 <p>
@@ -244,7 +247,27 @@ const Details = (props: Props) => {
                   Hosted by {event.organization.name}
                 </p>
               </span>
-              <p className="">Description: {event.description}</p>
+              <p className="">{event.description}</p>
+
+              <p className="font-medium text-primary">
+                {!event.registration
+                  ? "No registration required"
+                  : registrationOpen(event)
+                  ? "Registration open!"
+                  : event.registration_closed
+                  ? `Registration closed`
+                  : collCheck
+                  ? `Registration opens for ${
+                      event.organization.name
+                    }: ${eventCardDate(
+                      event.college_registration_datetime,
+                      true
+                    )}`
+                  : `Registration opens: ${eventCardDate(
+                      event.registration_datetime,
+                      true
+                    )}`}
+              </p>
               {props.authorized && (
                 <button
                   className="btn btn-primary"
