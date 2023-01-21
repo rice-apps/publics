@@ -61,8 +61,10 @@ export default function Edit(props) {
     if (date === null) {
       return "purposely-nonformatted-date"
     }
-    let eventDate = new Date(date).toISOString()
-    return eventDate.slice(0, eventDate.indexOf("+"))
+    let eventDate = new Date(date)
+    let tzoffset = new Date().getTimezoneOffset() * 60000
+    let localISOTime = new Date(eventDate.getTime() - tzoffset).toISOString()
+    return localISOTime.slice(0, localISOTime.indexOf('Z'))
   }
 
   async function setData(data) {
