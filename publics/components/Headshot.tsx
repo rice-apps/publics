@@ -13,10 +13,11 @@ const Headshot = (props: Props) =>{
                 <figure className = "object-fill">
                 <img src= {props.member.image_url} className="rounded object-fill" /> </figure>
                 <h2 className="card-title">{props.member.name}</h2>
-                <p>{props.member.title}</p>
+                <p className="font-medium text-primary" >{props.member.title}</p>
                 <p>{props.member.college}</p>
             </div>
         </div>
+        
     )
     
 }
