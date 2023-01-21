@@ -17,33 +17,17 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: net; Type: SCHEMA; Schema: -; Owner: supabase_admin
+-- Name: pg_net; Type: EXTENSION; Schema: -; Owner: -
 --
 
-CREATE SCHEMA "net";
+CREATE EXTENSION IF NOT EXISTS "pg_net" WITH SCHEMA "public";
 
-
-ALTER SCHEMA "net" OWNER TO "supabase_admin";
 
 --
 -- Name: pgsodium; Type: EXTENSION; Schema: -; Owner: -
 --
 
 CREATE EXTENSION IF NOT EXISTS "pgsodium" WITH SCHEMA "pgsodium";
-
-
---
--- Name: pg_graphql; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS "pg_graphql" WITH SCHEMA "graphql";
-
-
---
--- Name: pg_net; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS "pg_net" WITH SCHEMA "net";
 
 
 --
@@ -722,6 +706,16 @@ GRANT USAGE ON SCHEMA "public" TO "service_role";
 
 
 --
+-- Name: SCHEMA "net"; Type: ACL; Schema: -; Owner: supabase_admin
+--
+
+GRANT USAGE ON SCHEMA "net" TO "supabase_functions_admin";
+GRANT USAGE ON SCHEMA "net" TO "anon";
+GRANT USAGE ON SCHEMA "net" TO "authenticated";
+GRANT USAGE ON SCHEMA "net" TO "service_role";
+
+
+--
 -- Name: FUNCTION "algorithm_sign"("signables" "text", "secret" "text", "algorithm" "text"); Type: ACL; Schema: extensions; Owner: supabase_admin
 --
 
@@ -1107,56 +1101,6 @@ GRANT ALL ON FUNCTION "extensions"."verify"("token" "text", "secret" "text", "al
 
 
 --
--- Name: FUNCTION "comment_directive"("comment_" "text"); Type: ACL; Schema: graphql; Owner: supabase_admin
---
-
-GRANT ALL ON FUNCTION "graphql"."comment_directive"("comment_" "text") TO "postgres";
-GRANT ALL ON FUNCTION "graphql"."comment_directive"("comment_" "text") TO "anon";
-GRANT ALL ON FUNCTION "graphql"."comment_directive"("comment_" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "graphql"."comment_directive"("comment_" "text") TO "service_role";
-
-
---
--- Name: FUNCTION "exception"("message" "text"); Type: ACL; Schema: graphql; Owner: supabase_admin
---
-
-GRANT ALL ON FUNCTION "graphql"."exception"("message" "text") TO "postgres";
-GRANT ALL ON FUNCTION "graphql"."exception"("message" "text") TO "anon";
-GRANT ALL ON FUNCTION "graphql"."exception"("message" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "graphql"."exception"("message" "text") TO "service_role";
-
-
---
--- Name: FUNCTION "get_schema_version"(); Type: ACL; Schema: graphql; Owner: supabase_admin
---
-
-GRANT ALL ON FUNCTION "graphql"."get_schema_version"() TO "postgres";
-GRANT ALL ON FUNCTION "graphql"."get_schema_version"() TO "anon";
-GRANT ALL ON FUNCTION "graphql"."get_schema_version"() TO "authenticated";
-GRANT ALL ON FUNCTION "graphql"."get_schema_version"() TO "service_role";
-
-
---
--- Name: FUNCTION "increment_schema_version"(); Type: ACL; Schema: graphql; Owner: supabase_admin
---
-
-GRANT ALL ON FUNCTION "graphql"."increment_schema_version"() TO "postgres";
-GRANT ALL ON FUNCTION "graphql"."increment_schema_version"() TO "anon";
-GRANT ALL ON FUNCTION "graphql"."increment_schema_version"() TO "authenticated";
-GRANT ALL ON FUNCTION "graphql"."increment_schema_version"() TO "service_role";
-
-
---
--- Name: FUNCTION "graphql"("operationName" "text", "query" "text", "variables" "jsonb", "extensions" "jsonb"); Type: ACL; Schema: graphql_public; Owner: supabase_admin
---
-
--- GRANT ALL ON FUNCTION "graphql_public"."graphql"("operationName" "text", "query" "text", "variables" "jsonb", "extensions" "jsonb") TO "postgres";
--- GRANT ALL ON FUNCTION "graphql_public"."graphql"("operationName" "text", "query" "text", "variables" "jsonb", "extensions" "jsonb") TO "anon";
--- GRANT ALL ON FUNCTION "graphql_public"."graphql"("operationName" "text", "query" "text", "variables" "jsonb", "extensions" "jsonb") TO "authenticated";
--- GRANT ALL ON FUNCTION "graphql_public"."graphql"("operationName" "text", "query" "text", "variables" "jsonb", "extensions" "jsonb") TO "service_role";
-
-
---
 -- Name: FUNCTION "http_collect_response"("request_id" bigint, "async" boolean); Type: ACL; Schema: net; Owner: supabase_admin
 --
 
@@ -1251,16 +1195,6 @@ GRANT ALL ON TABLE "extensions"."pg_stat_statements" TO "dashboard_user";
 --
 
 GRANT ALL ON TABLE "extensions"."pg_stat_statements_info" TO "dashboard_user";
-
-
---
--- Name: SEQUENCE "seq_schema_version"; Type: ACL; Schema: graphql; Owner: supabase_admin
---
-
-GRANT ALL ON SEQUENCE "graphql"."seq_schema_version" TO "postgres";
-GRANT ALL ON SEQUENCE "graphql"."seq_schema_version" TO "anon";
-GRANT ALL ON SEQUENCE "graphql"."seq_schema_version" TO "authenticated";
-GRANT ALL ON SEQUENCE "graphql"."seq_schema_version" TO "service_role";
 
 
 --
