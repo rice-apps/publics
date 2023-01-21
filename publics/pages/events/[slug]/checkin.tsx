@@ -124,12 +124,12 @@ export default function CheckIn(props) {
                 </div>
                 {!checked_in && !checked_out && (
                     <div className='mx-3 mt-8'>
-                        <p className="text-lg normal-case font-family-inter font-bold">You can check in any time within 15 minutes of your shift's start.</p>
+                        <p className="text-lg normal-case font-family-inter font-bold">You can check in any time within 15 minutes of your shift&apos;s start.</p>
                     </div>
                 )}
                 {checked_in && !checked_out && (
                     <div className='mx-3 mt-8'>
-                        <p className="text-lg normal-case font-family-inter font-bold">You can check out any time within 15 minutes of your shift's end.</p>
+                        <p className="text-lg normal-case font-family-inter font-bold">You can check out any time within 15 minutes of your shift&apos;s end.</p>
                     </div>
                 )}
                 {checked_in && checked_out && (
