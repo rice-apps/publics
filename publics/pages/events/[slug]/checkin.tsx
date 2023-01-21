@@ -19,11 +19,8 @@ export default function CheckIn(props) {
     const [correct_cw_entered, setCorrectCWEntered] = useState(Boolean)
     const [checked_in, setCheckIn] = useState<boolean>(props.checked_in)
     const [checked_out, setCheckOut] = useState<boolean>(props.checked_out)
-    const [checking_in_wrong_time, setCheckingInWrongTime] = useState(Boolean)
-    const [checking_out_wrong_time, setCheckingOutWrongTime] = useState(Boolean)
     const [shift] = useState<any[]>(props.shift)
-    const [instructions, setInstructions] = useState<string>(props.shift.volunteer_instructions)
-    const [authorizedVolunteer] = useState<boolean>(props.volunteer_status)
+    const [instructions] = useState<string>(props.shift.volunteer_instructions)
     const [userID] = useState<string>(props.userID)
 
     const shift_start = new Date(shift.start)
