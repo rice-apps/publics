@@ -1,9 +1,10 @@
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
-import { useEffect, useState } from "react"
 import EventCard from "../../components/eventCards/EventCard"
-import type { ListEvent } from "../../utils/types"
 import LargeEventCard from "../../components/eventCards/LargeEventCard"
+import type { ListEvent } from "../../utils/types"
+import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
 import { SupabaseClient } from "@supabase/supabase-js"
+import { useRouter } from "next/router"
+import { useEffect, useState } from "react"
 
 type Props = {
   events: ListEvent[]
@@ -99,83 +100,61 @@ const getHostedEvents = async (
 }
 
 function Events(props: Props) {
-  const [openTab, setOpenTab] = useState(1)
-  // only render tabs if the user has events in that category
-  const [renderTab2, setRenderTab2] = useState(false)
-  const [renderTab3, setRenderTab3] = useState(false)
-  const [renderTab4, setRenderTab4] = useState(false)
-  // tab classes
-  const [tab1Class, setTab1Class] = useState("tab tab-active")
-  const [tab2Class, setTab2Class] = useState("tab")
-  const [tab3Class, setTab3Class] = useState("tab")
-  const [tab4Class, setTab4Class] = useState("tab")
+  const router = useRouter()
 
-  // set tab classes on mount
+  let tabNum = 0
+  const urlTab = router.query.tab
+  if (urlTab && !Array.isArray(urlTab) && /^\d+$/.test(urlTab)) {
+    const urlNum = parseInt(urlTab)
+    if (urlNum > 0) {
+      tabNum = urlNum
+    }
+  }
+  const [openTab, setOpenTab] = useState(tabNum)
+
+  let startingTabs = ["Upcoming Events"]
+  if (props.registrations.length > 0) {
+    startingTabs.push("My Events")
+  }
+  if (props.volunteering.length > 0) {
+    startingTabs.push("Volunteering")
+  }
+
+  if (props.hosting.length > 0) {
+    startingTabs.push("Hosting")
+  }
+  const [tabs, setTabs] = useState(["Upcoming Events"])
+
   useEffect(() => {
-    if (props.registrations.length > 0) {
-      setRenderTab2(true)
+    setTabs(startingTabs)
+    if (tabNum > startingTabs.length) {
+      setOpenTab(0)
     }
-    if (props.volunteering.length > 0) {
-      setRenderTab3(true)
-    }
+  }, [])
 
-    if (props.hosting.length > 0) {
-      setRenderTab4(true)
-    }
-  }, [props])
+  console.log(tabs)
 
-  // set tab classes on tab change
-  function handleClick(tab) {
-    if (tab === 1) {
-      setOpenTab(1)
-      setTab1Class("tab tab-active")
-      setTab2Class("tab")
-      setTab3Class("tab")
-      setTab4Class("tab")
-    } else if (tab === 2) {
-      setOpenTab(2)
-      setTab1Class("tab")
-      setTab2Class("tab tab-active")
-      setTab3Class("tab")
-      setTab4Class("tab")
-    } else if (tab === 3) {
-      setOpenTab(3)
-      setTab1Class("tab")
-      setTab2Class("tab")
-      setTab3Class("tab tab-active")
-      setTab4Class("tab")
-    } else {
-      setOpenTab(4)
-      setTab1Class("tab")
-      setTab2Class("tab")
-      setTab3Class("tab")
-      setTab4Class("tab tab-active")
-    }
+  function handleClick(tab: number) {
+    setOpenTab(tab)
+    history.pushState(null, "", `?tab=${tab}`)
   }
 
   return (
     <div>
       <div className="tabs bg-base-100">
-        <a className={tab1Class} onClick={() => handleClick(1)}>
-          Upcoming Events
-        </a>
-        {renderTab2 && (
-          <a className={tab2Class} onClick={() => handleClick(2)}>
-            My Events
-          </a>
-        )}
-        {renderTab3 && (
-          <a className={tab3Class} onClick={() => handleClick(3)}>
-            Volunteering
-          </a>
-        )}
-        {renderTab4 && (
-          <a className={tab4Class} onClick={() => handleClick(4)}>
-            Hosting
-          </a>
-        )}
+        {tabs.map((tab, index) => {
+          return (
+            <a
+              className={openTab === index ? "tab tab-active" : "tab"}
+              onClick={() => handleClick(index)}
+              key={index}
+            >
+              {tab}
+            </a>
+          )
+        })}
       </div>
-      <div className={openTab === 1 ? "block" : "hidden"}>
+      <div className={tabs[openTab] == "Upcoming Events" ? "block" : "hidden"}>
         <div className="divider">Upcoming Events</div>
         {props.events.length > 0 ? (
           <div className="px-8 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -189,7 +168,7 @@ function Events(props: Props) {
           <div className="px-8">There are currently no upcoming events.</div>
         )}
       </div>
-      <div className={openTab === 2 ? "block" : "hidden"}>
+      <div className={tabs[openTab] == "My Events" ? "block" : "hidden"}>
         <div className="divider">My Events</div>
         {props.registrations.length > 0 ? (
           <div className="flex flex-col gap-4 px-8">
@@ -210,7 +189,7 @@ function Events(props: Props) {
           </div>
         )}
       </div>
-      <div className={openTab === 3 ? "block" : "hidden"}>
+      <div className={tabs[openTab] == "Volunteering" ? "block" : "hidden"}>
         <div className="divider">Volunteering</div>
         {props.volunteering.length > 0 ? (
           <div className="flex flex-col gap-4 px-8">
@@ -228,7 +207,7 @@ function Events(props: Props) {
           <div className="px-8">You are not volunteering for any events.</div>
         )}
       </div>
-      <div className={openTab === 4 ? "block" : "hidden"}>
+      <div className={tabs[openTab] == "Hosting" ? "block" : "hidden"}>
         <div className="divider">Hosting</div>
         {props.hosting.length > 0 ? (
           <div className="flex flex-col gap-4 px-8">
