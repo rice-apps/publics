@@ -1,12 +1,12 @@
-import Head from "next/head"
-import { useState, useEffect } from "react"
-import { useRouter } from "next/router"
-import React from "react"
 import {
   SupabaseClient,
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
+import Head from "next/head"
+import { useRouter } from "next/router"
+import { useState, useEffect } from "react"
+import React from "react"
 
 async function authorize(supabase: SupabaseClient, userId: string) {
   const { data, error } = await supabase
@@ -112,12 +112,6 @@ export default function Create(props) {
 
   return (
     <div id="form">
-      <Head>
-        <title>Create Event Form</title>
-        <meta name="eventcreate" content="Form for creating new event" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
       <main>
         <h1 className="mx-3 text-2xl normal-case leading-[3rem] font-family: inter font-bold">
           Create an Event

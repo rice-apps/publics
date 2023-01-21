@@ -1,13 +1,13 @@
-import Head from "next/head"
-import { useState, useEffect } from "react"
-import { useRouter } from "next/router"
-import React from "react"
+import { authorize } from "../../../utils/admin"
 import {
   SupabaseClient,
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs"
-import { authorize } from "../../../utils/admin"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
+import Head from "next/head"
+import { useRouter } from "next/router"
+import { useState, useEffect } from "react"
+import React from "react"
 
 async function getData(supabase: SupabaseClient, slug: string) {
   const { data, error } = await supabase
@@ -95,17 +95,18 @@ export default function Edit(props) {
   }, [])
 
   async function update(event) {
-
     event.preventDefault()
     let newImgUrl = imgUrl
 
     if (uploadImg) {
-      const fileExt = uploadImg.name.split('.').pop()
+      const fileExt = uploadImg.name.split(".").pop()
       const fileName = `cover_image.${fileExt}`
 
-      let { error: uploadError } = await supabase.storage.from('images/' + slug).upload(fileName, uploadImg, {
-        upsert: true
-      })
+      let { error: uploadError } = await supabase.storage
+        .from("images/" + slug)
+        .upload(fileName, uploadImg, {
+          upsert: true,
+        })
 
       if (uploadError) {
         alert(uploadError.message)
@@ -120,7 +121,11 @@ export default function Edit(props) {
       //     alert(uploadError.message)
       //   }
       // }
-      newImgUrl = "https://rgdrbnbynqacsbkzofyf.supabase.co/storage/v1/object/public/images/" + slug + "/" + fileName
+      newImgUrl =
+        "https://rgdrbnbynqacsbkzofyf.supabase.co/storage/v1/object/public/images/" +
+        slug +
+        "/" +
+        fileName
     }
 
     const insert = {
@@ -135,11 +140,11 @@ export default function Edit(props) {
       registration,
       ...(registration
         ? {
-          college_registration_datetime: new Date(collegeRegistration),
-          registration_datetime: new Date(registrationDatetime),
-          signup_size: signupSize,
-          waitlist_size: waitlistSize,
-        }
+            college_registration_datetime: new Date(collegeRegistration),
+            registration_datetime: new Date(registrationDatetime),
+            signup_size: signupSize,
+            waitlist_size: waitlistSize,
+          }
         : {}),
     }
 
@@ -157,12 +162,6 @@ export default function Edit(props) {
 
   return (
     <div id="form">
-      <Head>
-        <title>Edit Event Form</title>
-        <meta name="eventedit" content="Form for editting existing event" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
       <main className="bg-[#F5F5F5s]">
         <h1 className="mx-3 text-2xl normal-case leading-[3rem] font-family: inter font-bold">
           Edit {name}
@@ -278,12 +277,16 @@ export default function Edit(props) {
                   <span className="label-text-alt">Description</span>
                 </label>
               </div>
-              <input type="file" onChange={(e) => {
-                const files = e.target.files
-                if (files && files.length > 0) {
-                  setUploadImg(files[0])
-                }
-              }} className="file-input file-input-bordered file-input-primary w-full max-w-xs" />
+              <input
+                type="file"
+                onChange={(e) => {
+                  const files = e.target.files
+                  if (files && files.length > 0) {
+                    setUploadImg(files[0])
+                  }
+                }}
+                className="file-input file-input-bordered file-input-primary w-full max-w-xs"
+              />
             </div>
             <div className="sm:flex">
               <div className="form-control">

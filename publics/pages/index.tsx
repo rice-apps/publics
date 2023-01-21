@@ -1,8 +1,7 @@
-import type { AppProps } from "next/app"
 import Auth from "../components/Auth"
-import Account from "../components/Account"
-import { Session } from "@supabase/auth-helpers-react"
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
+import { Session } from "@supabase/auth-helpers-react"
+import type { AppProps } from "next/app"
 
 export default function Home(pageProps: AppProps<{ initialSession: Session }>) {
   return (
