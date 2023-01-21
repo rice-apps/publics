@@ -1,124 +1,157 @@
-import Head from "next/head";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
-import React from "react";
+import Head from "next/head"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/router"
+import React from "react"
 import {
   SupabaseClient,
   createServerSupabaseClient,
-} from "@supabase/auth-helpers-nextjs";
-import { authorize } from "../../../utils/admin";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
+} from "@supabase/auth-helpers-nextjs"
+import { authorize } from "../../../utils/admin"
+import { useSupabaseClient } from "@supabase/auth-helpers-react"
 
 async function getData(supabase: SupabaseClient, slug: string) {
   const { data, error } = await supabase
     .from("events")
     .select()
     .eq("slug", slug)
-    .single();
+    .single()
 
   if (error) {
-    throw error;
+    throw error
   }
 
-  return data;
+  return data
 }
 
 async function getOrgs(supabase: SupabaseClient, userId: string) {
   const { data: orgs, error } = await supabase
     .from("organizations_admins")
     .select("organization ( id, name )")
-    .eq("profile", userId);
+    .eq("profile", userId)
   if (error) {
-    throw error;
+    throw error
   }
 
-  return orgs;
+  return orgs
 }
 
 export default function Edit(props) {
-  const router = useRouter();
-  const supabase = useSupabaseClient();
+  const router = useRouter()
+  const supabase = useSupabaseClient()
 
-  const [name, setName] = useState(String);
-  const [slug, setSlug] = useState(String);
-  const [origSlug] = useState(String);
-  const [eventDateTime, setEventDateTime] = useState(Date);
-  const [host, setHost] = useState<String>(props.orgs[0].organization.id);
-  const [location, setLocation] = useState(String);
-  const [capacity, setCapacity] = useState(Number);
-  const [description, setDescription] = useState(String);
+  const [name, setName] = useState(String)
+  const [slug, setSlug] = useState(String)
+  const [eventDateTime, setEventDateTime] = useState(Date)
+  const [host, setHost] = useState<String>(props.orgs[0].organization.id)
+  const [location, setLocation] = useState(String)
+  const [capacity, setCapacity] = useState(Number)
+  const [description, setDescription] = useState(String)
 
-  const [registration, setRegistration] = useState(Boolean);
-  const [collegeRegistration, setCollegeRegistration] = useState(Date);
-  const [registrationDatetime, setRegistrationDatetime] = useState(Date);
-  const [signupSize, setSignupSize] = useState(Number);
-  const [waitlistSize, setWaitlistSize] = useState(Number);
+  const [registration, setRegistration] = useState(Boolean)
+  const [collegeRegistration, setCollegeRegistration] = useState(Date)
+  const [registrationDatetime, setRegistrationDatetime] = useState(Date)
+  const [signupSize, setSignupSize] = useState(Number)
+  const [waitlistSize, setWaitlistSize] = useState(Number)
 
-  const [orgs] = useState<any[]>(props.orgs);
+  const [orgs] = useState<any[]>(props.orgs)
+  const [uploadImg, setUploadImg] = useState<File>()
+  const [imgUrl, setImgUrl] = useState(String)
 
   function format_date(date: string) {
     if (date === null) {
-      return "purposely-nonformatted-date";
+      return "purposely-nonformatted-date"
     }
-    let eventDate = new Date(date).toISOString();
-    return eventDate.slice(0, eventDate.indexOf("+"));
+    let eventDate = new Date(date).toISOString()
+    return eventDate.slice(0, eventDate.indexOf("+"))
   }
 
   async function setData(data) {
-    setName(data.name);
-    setSlug(data.slug);
-    setEventDateTime(format_date(data.event_datetime));
-    setHost(data.organization);
-    setLocation(data.location);
-    setCapacity(data.capacity);
-    setDescription(data.description);
-    setRegistration(data.registration);
+    setName(data.name)
+    setSlug(data.slug)
+    setEventDateTime(format_date(data.event_datetime))
+    setHost(data.organization)
+    setLocation(data.location)
+    setCapacity(data.capacity)
+    setDescription(data.description)
+    setRegistration(data.registration)
+    setImgUrl(data.img_url)
+
     if (data.registration) {
-      setCollegeRegistration(format_date(data.college_registration_datetime));
-      setRegistrationDatetime(format_date(data.registration_datetime));
-      setSignupSize(data.signup_size);
-      setWaitlistSize(data.waitlist_size);
+      setCollegeRegistration(format_date(data.college_registration_datetime))
+      setRegistrationDatetime(format_date(data.registration_datetime))
+      setSignupSize(data.signup_size)
+      setWaitlistSize(data.waitlist_size)
     } else {
-      setCollegeRegistration("purposely-nonformatted-date");
-      setRegistrationDatetime("purposely-nonformatted-date");
-      setSignupSize(0);
-      setWaitlistSize(0);
+      setCollegeRegistration("purposely-nonformatted-date")
+      setRegistrationDatetime("purposely-nonformatted-date")
+      setSignupSize(0)
+      setWaitlistSize(0)
     }
   }
 
   useEffect(() => {
-    setData(props.data);
+    setData(props.data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [])
 
-  async function update() {
+  async function update(event) {
+
+    event.preventDefault()
+    let newImgUrl = imgUrl
+
+    if (uploadImg) {
+      const fileExt = uploadImg.name.split('.').pop()
+      const fileName = `cover_image.${fileExt}`
+
+      let { error: uploadError } = await supabase.storage.from('images/' + slug).upload(fileName, uploadImg, {
+        upsert: true
+      })
+
+      if (uploadError) {
+        alert(uploadError.message)
+      }
+
+      // if (updateError) {
+      //   // might not be able to update due to different extensions
+      //   // try upload the img instead
+
+      //   let { error: uploadError } = await supabase.storage.from('images/' + slug).upload(fileName, uploadImg)
+      //   if (uploadError) {
+      //     alert(uploadError.message)
+      //   }
+      // }
+      newImgUrl = "https://rgdrbnbynqacsbkzofyf.supabase.co/storage/v1/object/public/images/" + slug + "/" + fileName
+    }
+
     const insert = {
       name,
       slug,
-      event_datetime: eventDateTime,
+      event_datetime: new Date(eventDateTime),
       organization: host,
       location,
       capacity,
       description,
+      img_url: newImgUrl,
       registration,
       ...(registration
         ? {
-            college_registration_datetime: collegeRegistration,
-            registration_datetime: registrationDatetime,
-            signup_size: signupSize,
-            waitlist_size: waitlistSize,
-          }
+          college_registration_datetime: new Date(collegeRegistration),
+          registration_datetime: new Date(registrationDatetime),
+          signup_size: signupSize,
+          waitlist_size: waitlistSize,
+        }
         : {}),
-    };
+    }
 
     const { error } = await supabase
       .from("events")
       .update(insert)
-      .eq("slug", origSlug);
+      .eq("slug", props.data.slug)
     if (error) {
-      alert(error.message);
+      alert(error.message)
     } else {
-      router.push(`/events/${slug}`);
+      router.push(`/events/${slug}`)
+      return
     }
   }
 
@@ -185,7 +218,7 @@ export default function Edit(props) {
                 <select
                   className="select select-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
                   onChange={(e) => {
-                    setHost(e.target.value);
+                    setHost(e.target.value)
                   }}
                 >
                   {orgs.length > 0 ? (
@@ -245,9 +278,12 @@ export default function Edit(props) {
                   <span className="label-text-alt">Description</span>
                 </label>
               </div>
-              <div>
-                <button className="btn normal-case">Upload Cover Photo</button>
-              </div>
+              <input type="file" onChange={(e) => {
+                const files = e.target.files
+                if (files && files.length > 0) {
+                  setUploadImg(files[0])
+                }
+              }} className="file-input file-input-bordered file-input-primary w-full max-w-xs" />
             </div>
             <div className="sm:flex">
               <div className="form-control">
@@ -330,23 +366,23 @@ export default function Edit(props) {
               <input
                 type="submit"
                 value="Update"
-                className="btn sm:float-right normal-case border-0 focus:outline-none focus:ring"
+                className="btn btn-primary sm:float-right normal-case border-0 focus:outline-none focus:ring"
               />
             </div>
           </div>
         </form>
       </main>
     </div>
-  );
+  )
 }
 
 export const getServerSideProps = async (ctx) => {
   // Create authenticated Supabase Client
-  const supabase = createServerSupabaseClient(ctx);
+  const supabase = createServerSupabaseClient(ctx)
   // Check if we have a session
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = await supabase.auth.getSession()
 
   if (!session) {
     //navigate to account page
@@ -355,7 +391,7 @@ export const getServerSideProps = async (ctx) => {
         destination: `http://${ctx.req.headers.host}/account`,
         permanent: false,
       },
-    };
+    }
   }
 
   //Check if user is admin
@@ -363,7 +399,7 @@ export const getServerSideProps = async (ctx) => {
     supabase,
     ctx.params.slug,
     session.user.id
-  );
+  )
 
   //If not admin, redirect to event page
   if (!admin_status) {
@@ -372,12 +408,12 @@ export const getServerSideProps = async (ctx) => {
         destination: `http://${ctx.req.headers.host}/events/${ctx.params.slug}`,
         permanent: false,
       },
-    };
+    }
   }
   //Get event data
-  const data = await getData(supabase, ctx.params.slug);
+  const data = await getData(supabase, ctx.params.slug)
 
-  const orgs = await getOrgs(supabase, session.user.id);
+  const orgs = await getOrgs(supabase, session.user.id)
 
   return {
     props: {
@@ -386,5 +422,5 @@ export const getServerSideProps = async (ctx) => {
       data,
       params: ctx.params,
     },
-  };
-};
+  }
+}

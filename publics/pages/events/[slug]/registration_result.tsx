@@ -1,44 +1,48 @@
-import { useEffect, useState } from "react";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useEffect, useState } from "react"
+import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import {
   SupabaseClient,
   createServerSupabaseClient,
-} from "@supabase/auth-helpers-nextjs";
-import { getPagination } from "../../../utils/registration";
+} from "@supabase/auth-helpers-nextjs"
+import { getPagination } from "../../../utils/registration"
+import SuccessMsg from "../../../components/SuccessMsg"
+import ErrorMsg from "../../../components/ErrorMsg"
+import MoveRegistrationsModal from "../../../components/registrations/MoveRegistrationsModal"
 /**
  * Simple type containing a friendly name for an event, and the UUID of the event
  */
 type EventDetails = {
   //friendly name
-  eventName: string;
+  eventName: string
   //uuid of event
-  eventID: string; //Using string as unsure what UUID type is in TS
-  organization: string; //Organization ID overseeing this event
-};
+  eventID: string //Using string as unsure what UUID type is in TS
+  organization: string //Organization ID overseeing this event
+  capacity: number //Capacity of this event
+}
 
 /**
  * Simple interface containing values stored within a row in the table of registrations presented to the userp
  */
 type rowObject = {
   //uuid of person
-  person_id: string;
+  person_id: string
   //date this registration was created
-  created_at: string;
+  created_at: string
   //first name of registered person
-  first_name: string;
+  first_name: string
   //last name of registered person
-  last_name: string;
+  last_name: string
   //email of registered person
-  email: string;
+  email: string
   //netid of registered
-  netid: string;
+  netid: string
   //residential college that that registered person is contained within
-  college: string;
+  college: string
   //Has this person picked up the wristband
-  picked_up_wristband: boolean;
+  picked_up_wristband: boolean
   //Is this person on the waitlist?
-  waitlist: boolean;
-};
+  waitlist: boolean
+}
 
 /**
  * Checks if the user trying to look at this page is an admin of the associated event (and thus has the permission to look at this page)
@@ -53,15 +57,13 @@ async function isAdminUser(
   let { data, error } = await supabase
     .from("organizations_admins")
     .select("organization")
-    .eq("profile", userId);
+    .eq("profile", userId)
 
   if (error || data === null) {
-    return false;
+    return false
   }
 
-  return data.some(
-    (event) => event.organization === event_detail!.organization
-  );
+  return data.some((event) => event.organization === event_detail!.organization)
 }
 /**
  * Gets the event that this user is an admin of, if they are one
@@ -73,23 +75,25 @@ async function getEvent(
 ): Promise<EventDetails> {
   const { data, error } = await supabase
     .from("events")
-    .select("id, name, organization")
+    .select("id, name, organization, capacity")
     .eq("slug", slug)
-    .single();
+    .single()
 
   if (error) {
     return {
       eventName: "Error",
       eventID: "Error",
       organization: "Error",
-    };
+      capacity: 0,
+    }
   }
 
   return {
     eventName: data.name,
     eventID: data.id,
     organization: data.organization,
-  };
+    capacity: data.capacity,
+  }
 }
 
 /**
@@ -123,21 +127,21 @@ async function getRegistrations(
     `
     )
     .eq("event", event_detail.eventID)
-    .like("profiles.netid", `%${search}%`);
+    .like("profiles.netid", `%${search}%`)
 
   //Holds data reformatted as array of rowobjects
-  let formatted_data: rowObject[] = [];
+  let formatted_data: rowObject[] = []
 
   if (error) {
-    return formatted_data;
+    return formatted_data
   }
 
   for (var i = 0; i < data.length; i++) {
-    let current_object = data[i];
-    let profiles = current_object["profiles"] as Object;
+    let current_object = data[i]
+    let profiles = current_object["profiles"] as Object
 
     if (profiles == null) {
-      return [];
+      return []
     }
 
     let formatted_object = {
@@ -150,12 +154,12 @@ async function getRegistrations(
       college: profiles["organizations"].name,
       picked_up_wristband: current_object["picked_up_wristband"],
       waitlist: current_object["waitlist"],
-    };
+    }
 
-    formatted_data[i] = formatted_object;
+    formatted_data[i] = formatted_object
   }
 
-  return formatted_data;
+  return formatted_data
 }
 
 /**
@@ -166,11 +170,11 @@ async function getRegistrations(
  */
 export const getServerSideProps = async (ctx) => {
   // Create authenticated Supabase Client
-  const supabase = createServerSupabaseClient(ctx);
+  const supabase = createServerSupabaseClient(ctx)
   // Check if we have a session
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = await supabase.auth.getSession()
 
   if (!session) {
     //navigate to account page
@@ -179,25 +183,25 @@ export const getServerSideProps = async (ctx) => {
         destination: `http://${ctx.req.headers.host}/account`,
         permanent: false,
       },
-    };
+    }
   }
 
   //Get event details
-  const event_detail = await getEvent(supabase, ctx.params.slug);
+  const event_detail = await getEvent(supabase, ctx.params.slug)
   if (event_detail.eventName === "Error") {
     return {
       redirect: {
         destination: `http://${ctx.req.headers.host}/events/${ctx.params.slug}`,
         permanent: false,
       },
-    };
+    }
   }
   //Get admin status
   const admin_status = await isAdminUser(
     supabase,
     event_detail,
     session.user.id
-  );
+  )
   //If not admin, redirect to 404 page
   if (!admin_status) {
     return {
@@ -205,11 +209,11 @@ export const getServerSideProps = async (ctx) => {
         destination: `http://${ctx.req.headers.host}/events/${ctx.params.slug}`,
         permanent: false,
       },
-    };
+    }
   }
   //Get registrations for that event
-  const page = +ctx.query.page || 0;
-  const registrations = await getRegistrations(supabase, event_detail);
+  const page = +ctx.query.page || 0
+  const registrations = await getRegistrations(supabase, event_detail)
 
   return {
     props: {
@@ -220,31 +224,37 @@ export const getServerSideProps = async (ctx) => {
       event_detail,
       page: page,
     },
-  };
-};
+  }
+}
 
 /**
  * Page holding registration results. Check figma for design source
  */
 function ResultPage(props) {
-  const supabase = useSupabaseClient();
+  const supabase = useSupabaseClient()
   //Array of registration entries formatted as an array of row objects
   const [registration, setRegistration] = useState<rowObject[]>(
     props.registrations
-  );
+  )
   //Event details for this page
-  const [eventDetails] = useState<EventDetails>(props.event_detail);
+  const [eventDetails] = useState<EventDetails>(props.event_detail)
   //netID of user to add to registration table, used with the add attendee button
-  const [netID, setNetID] = useState("");
+  const [netID, setNetID] = useState("")
   //boolean values that we use to filter registrations by when displaying them to the screen
-  const [filterByAll, setFilterByAll] = useState(true); //starts as true as we want to start by initially showing the admin the entire set of registered users
-  const [filterByWristband, setFilterByWristband] = useState(false);
-  const [filterByWaitlist, setFilterByWaitlist] = useState(false);
+  const [filterByAll, setFilterByAll] = useState(true) //starts as true as we want to start by initially showing the admin the entire set of registered users
+  const [filterByWristband, setFilterByWristband] = useState(false)
+  const [filterByRegistered, setFilterByRegistered] = useState(false)
   //Search bar value
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState("")
   // Pagination
-  const [page, setPage] = useState(props.page);
-  const { from, to } = getPagination(page, 50);
+  const [page, setPage] = useState(props.page)
+  const { from, to } = getPagination(page, 50)
+
+  //Confirmation Message
+  const [resultError, setResultError] = useState(false)
+  const [resultSuccess, setResultSuccess] = useState(false)
+  const [copiedEmails, setCopiedEmails] = useState(false)
+  const [action, setAction] = useState("")
 
   // Setup realtime for updates to registration table
   useEffect(() => {
@@ -261,35 +271,39 @@ function ResultPage(props) {
                   ...item,
                   picked_up_wristband: payload.new.picked_up_wristband,
                   waitlist: payload.new.waitlist,
-                };
+                }
               }
-              return item;
-            });
-            return new_arr;
-          });
+              return item
+            })
+            return new_arr
+          })
         }
       )
-      .subscribe();
+      .subscribe()
     return () => {
-      supabase.removeChannel(channel);
-    };
+      supabase.removeChannel(channel)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [])
 
   useEffect(() => {
-    window.history.pushState(null, "", `?page=${page}`);
-  }, [page]);
+    window.history.pushState(null, "", `?page=${page}`)
+  }, [page])
 
   /**
    * Copies set of emails to clipboard
    */
   function copyEmails() {
-    let emails: string[] = [];
+    let emails: string[] = []
     //Filtering by what we currently are showing to the screen
-    filterRegistrations().forEach((row) => emails.push(row.email));
+    filterRegistrations().forEach((row) => emails.push(row.email))
 
     //Writing to clipboard
-    navigator.clipboard.writeText(emails!.join(" "));
+    navigator.clipboard.writeText(emails!.join(", "))
+    setCopiedEmails(true)
+    setTimeout(() => {
+      setCopiedEmails(false)
+    }, 2000)
   }
 
   /**
@@ -302,23 +316,32 @@ function ResultPage(props) {
       .from("profiles")
       .select("id")
       .eq("netid", netID)
-      .single();
+      .single()
 
     if (!error) {
-      let personID = data!.id;
+      let personID = data!.id
 
       //ERROR: Runs into Row level security error here
       //Insert person into registrations table for this event
       const { data: regData } = await supabase
         .from("registrations")
         .insert({ event: eventDetails!.eventID, person: personID })
-        .select();
+        .select()
+      setResultSuccess(true)
+      setResultError(false)
+      setAction(netID + " was successfully added.")
+      setTimeout(() => {
+        setResultSuccess(false)
+      }, 2000)
 
       //refresh page
-      setRegistration(await getRegistrations(supabase, eventDetails, search));
+      setRegistration(await getRegistrations(supabase, eventDetails, search))
     } else {
-      console.log("Got error");
-      console.log(error);
+      setResultSuccess(false)
+      setResultError(true)
+      setTimeout(() => {
+        setResultError(false)
+      }, 2000)
     }
   }
 
@@ -332,15 +355,24 @@ function ResultPage(props) {
       .delete()
       .eq("event", eventDetails?.eventID)
       .eq("person", user_id)
-      .select();
+      .select()
 
     if (!res) {
-      console.log("ERROR in removing attendee");
-      console.log(res);
+      setResultError(true)
+      setResultSuccess(false)
+      setTimeout(() => {
+        setResultError(false)
+      }, 2000)
     }
 
+    setResultError(false)
+    setResultSuccess(true)
+    setAction("User successfully removed.")
+    setTimeout(() => {
+      setResultSuccess(false)
+    }, 2000)
     //refresh page
-    setRegistration(registration.filter((v, i) => v.person_id !== user_id));
+    setRegistration(registration.filter((v, i) => v.person_id !== user_id))
   }
 
   /**
@@ -353,10 +385,10 @@ function ResultPage(props) {
       .update({ picked_up_wristband: !row["picked_up_wristband"] })
       //Ensuring we only update the person who is registered for this event
       .eq("event", eventDetails?.eventID)
-      .eq("person", row["person_id"]);
+      .eq("person", row["person_id"])
 
     if (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -366,40 +398,32 @@ function ResultPage(props) {
       .update({ waitlist: !row["waitlist"] })
       //Ensuring we only update the person who is registered for this event
       .eq("event", eventDetails?.eventID)
-      .eq("person", row["person_id"]);
+      .eq("person", row["person_id"])
 
     if (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
-  const registrationFilter = registration.filter((row) => {
-    return (
-      filterByAll ||
-      (row.picked_up_wristband == filterByWristband &&
-        row.waitlist == filterByWaitlist)
-    );
-  });
-
   async function handleSearch() {
-    setRegistration(await getRegistrations(supabase, eventDetails, search));
-    setPage(0);
+    setRegistration(await getRegistrations(supabase, eventDetails, search))
+    setPage(0)
   }
 
   function handleKeyPress(event) {
     if (event.key === "Enter") {
-      handleSearch();
+      handleSearch()
     }
   }
 
   async function handlePageIncrement() {
-    setPage(page + 1);
-    setRegistration(await getRegistrations(supabase, eventDetails, search));
+    setPage(page + 1)
+    setRegistration(await getRegistrations(supabase, eventDetails, search))
   }
 
   async function handlePageDeincrement() {
-    setPage(page - 1);
-    setRegistration(await getRegistrations(supabase, eventDetails, search));
+    setPage(page - 1)
+    setRegistration(await getRegistrations(supabase, eventDetails, search))
   }
 
   function filterRegistrations() {
@@ -407,18 +431,27 @@ function ResultPage(props) {
       return (
         filterByAll ||
         (row.picked_up_wristband == filterByWristband &&
-          row.waitlist == filterByWaitlist)
-      );
-    });
+          row.waitlist !== filterByRegistered)
+      )
+    })
   }
 
   return (
     <div key="registration_results_page" className="mx-auto mx-4 space-y-4">
+      <div className={resultSuccess ? "block" : "hidden"}>
+        <SuccessMsg message={`${action}`} />
+      </div>
+      <div className={resultError ? "block" : "hidden"}>
+        <ErrorMsg message={"Error! User doesn't exist "} />
+      </div>
+      <div className={copiedEmails ? "block" : "hidden"}>
+        <SuccessMsg message={`Emails copied to clipboard`} />
+      </div>
       <div key="event_title">
         <h1>{eventDetails!.eventName}: Registration Results</h1>
       </div>
 
-      <div className="flex justify-between gap-4">
+      <div className="flex justify-between gap-4 flex-wrap">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
             <svg
@@ -472,58 +505,96 @@ function ResultPage(props) {
           </div>
         </div>
         <div className="flex justify-end gap-4">
-          <div className="dropdown">
-            <label tabIndex={0} className="btn">
-              Filter Options
-            </label>
-            <ul
-              tabIndex={0}
-              className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
-            >
-              <div className="AllCheckbox">
-                <label className="label cursor-pointer">
-                  <span className="label-text">Show All</span>
-                  <input
-                    type="checkbox"
-                    defaultChecked={filterByAll}
-                    onClick={() => {
-                      setFilterByAll(!filterByAll);
-                    }}
-                    className="checkbox"
-                  />
-                </label>
-              </div>
-              <div className="WristbandCheckbox">
-                <label className="label cursor-pointer">
-                  <span className="label-text">Wristband</span>
-                  <input
-                    type="checkbox"
-                    defaultChecked={filterByWristband}
-                    onClick={() => {
-                      setFilterByWristband(!filterByWristband);
-                    }}
-                    className="checkbox"
-                  />
-                </label>
-              </div>
-              <div className="WaitlistCheckbox">
-                <label className="label cursor-pointer">
-                  <span className="label-text">Waitlist</span>
-                  <input
-                    type="checkbox"
-                    defaultChecked={filterByWaitlist}
-                    onClick={() => {
-                      setFilterByWaitlist(!filterByWaitlist);
-                    }}
-                    className="checkbox"
-                  />
-                </label>
-              </div>
-            </ul>
+          <div className="tooltip" data-tip="Copy Emails">
+            <button className="btn btn-circle btn-outline" onClick={copyEmails}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 32 32"
+                stroke="currentColor"
+              >
+                <path
+                  d="M27.845 7.385l-5.384-5.384h-11.845v4.307h-6.461v23.69h17.229v-4.307h6.461v-18.306zM22.461 3.524l3.861 3.861h-3.861v-3.861zM5.232 28.922v-21.537h9.692v5.384h5.384v16.153h-15.076zM16 7.831l3.861 3.861h-3.861v-3.861zM21.384 24.615v-12.922l-5.384-5.384h-4.307v-3.231h9.692v5.384h5.384v16.153h-5.384z"
+                  fill="#000000"
+                />
+              </svg>
+            </button>
           </div>
-          <button className="btn btn-outline btn-primary" onClick={copyEmails}>
-            Copy Emails
-          </button>
+          <div className="tooltip" data-tip="Filter Results">
+            <div className="dropdown">
+              <label tabIndex={0} className="btn btn-circle btn-outline">
+                <svg
+                  fill="#000000"
+                  className="h-8 w-8"
+                  stroke="currentColor"
+                  viewBox="-5.5 0 32 32"
+                  version="1.1"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                  <g
+                    id="SVGRepo_tracerCarrier"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  ></g>
+                  <g id="SVGRepo_iconCarrier">
+                    {" "}
+                    <title>filter</title>{" "}
+                    <path d="M8.48 25.72c-0.16 0-0.32-0.040-0.44-0.12-0.24-0.16-0.4-0.44-0.4-0.72v-8.72l-7.48-8.48c-0.2-0.24-0.28-0.6-0.12-0.88s0.44-0.48 0.76-0.48h19.8c0.32 0 0.64 0.2 0.76 0.48 0.12 0.32 0.080 0.64-0.12 0.92l-7.8 8.8v6.32c0 0.32-0.2 0.6-0.48 0.76l-4.080 2c-0.080 0.080-0.24 0.12-0.4 0.12zM2.64 7.96l6.48 7.32c0.12 0.16 0.2 0.36 0.2 0.56v7.64l2.4-1.2v-6.080c0-0.2 0.080-0.4 0.2-0.56l6.8-7.68c0.040 0-16.080 0-16.080 0z"></path>{" "}
+                  </g>
+                </svg>
+              </label>
+              <ul
+                tabIndex={0}
+                className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
+              >
+                <div className="AllCheckbox">
+                  <label className="label cursor-pointer">
+                    <span className="label-text">Show All</span>
+                    <input
+                      type="checkbox"
+                      defaultChecked={filterByAll}
+                      onClick={() => {
+                        setFilterByAll(!filterByAll)
+                      }}
+                      className="checkbox"
+                    />
+                  </label>
+                </div>
+                <div className="WristbandCheckbox">
+                  <label className="label cursor-pointer">
+                    <span className="label-text">Wristband</span>
+                    <input
+                      type="checkbox"
+                      defaultChecked={filterByWristband}
+                      onClick={() => {
+                        setFilterByWristband(!filterByWristband)
+                      }}
+                      className="checkbox"
+                    />
+                  </label>
+                </div>
+                <div className="WaitlistCheckbox">
+                  <label className="label cursor-pointer">
+                    <span className="label-text">Registered</span>
+                    <input
+                      type="checkbox"
+                      defaultChecked={filterByRegistered}
+                      onClick={() => {
+                        setFilterByRegistered(!filterByRegistered)
+                      }}
+                      className="checkbox"
+                    />
+                  </label>
+                </div>
+              </ul>
+            </div>
+          </div>
+          <MoveRegistrationsModal
+            eventId={eventDetails.eventID}
+            capacity={eventDetails.capacity}
+          />
           <label htmlFor="add-modal" className="btn btn-primary">
             Add Attendee
           </label>
@@ -532,15 +603,15 @@ function ResultPage(props) {
             <div className="modal-box">
               <h3 className="font-bold text-lg">Add attendee</h3>
               <div className="form-control w-full max-w-xs">
+                <label className="label">
+                  <span className="label-text">netID</span>
+                </label>
                 <input
                   type="text"
                   placeholder="Type here"
                   className="input input-bordered w-full max-w-xs"
                   onChange={(event) => setNetID(event.target.value)}
                 />
-                <label className="label">
-                  <span className="label-text-alt">netID</span>
-                </label>
               </div>
               <div className="modal-action">
                 <label
@@ -553,7 +624,7 @@ function ResultPage(props) {
                   htmlFor="add-modal"
                   className="btn btn-primary"
                   onClick={() => {
-                    addAttendee(netID);
+                    addAttendee(netID)
                   }}
                 >
                   Add
@@ -575,8 +646,8 @@ function ResultPage(props) {
               <th>Email Address</th>
               <th>NetID</th>
               <th>Residential College</th>
+              <th>Registered?</th>
               <th>Wristband?</th>
-              <th>Waitlist?</th>
             </tr>
           </thead>
           <tbody>
@@ -585,8 +656,8 @@ function ResultPage(props) {
               filterRegistrations()
                 .splice(from, to)
                 .map((row, index) => {
-                  let isChecked = row["picked_up_wristband"];
-                  let isWaitlist = row["waitlist"];
+                  let isChecked = row["picked_up_wristband"]
+                  let isRegistered = !row["waitlist"]
                   return (
                     <tr key={index}>
                       <th></th>
@@ -650,20 +721,20 @@ function ResultPage(props) {
                         <input
                           type="checkbox"
                           className="checkbox"
-                          checked={isChecked}
-                          onChange={(e) => updateWristband(row)}
+                          checked={isRegistered}
+                          onChange={(e) => updateWaitlist(row)}
                         />
                       </td>
                       <td>
                         <input
                           type="checkbox"
                           className="checkbox"
-                          checked={isWaitlist}
-                          onChange={(e) => updateWaitlist(row)}
+                          checked={isChecked}
+                          onChange={(e) => updateWristband(row)}
                         />
                       </td>
                     </tr>
-                  );
+                  )
                 })
             }
           </tbody>
@@ -672,11 +743,22 @@ function ResultPage(props) {
         {/* center following div */}
         <div className="flex justify-center mt-4">
           <div className="btn-group">
-            <button className="btn" onClick={handlePageDeincrement}>
+            <button
+              className="btn"
+              disabled={page < 1}
+              onClick={handlePageDeincrement}
+            >
               «
             </button>
             <button className="btn">Page {page}</button>
-            <button className="btn" onClick={handlePageIncrement}>
+            <button
+              className="btn"
+              disabled={
+                filterRegistrations().splice(from, to).length !== 50 ||
+                page > 100
+              }
+              onClick={handlePageIncrement}
+            >
               »
             </button>
           </div>
@@ -689,7 +771,7 @@ function ResultPage(props) {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default ResultPage;
+export default ResultPage

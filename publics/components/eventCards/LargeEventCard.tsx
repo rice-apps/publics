@@ -1,16 +1,16 @@
-import Link from "next/link";
-import { registrationOpen } from "../../utils/registration";
-import { ListEvent } from "../../utils/types";
-import { eventCardDate } from "./cardDate";
+import Link from "next/link"
+import { registrationOpen } from "../../utils/registration"
+import { ListEvent } from "../../utils/types"
+import { eventCardDate } from "./cardDate"
 
 type Props = {
-  event: ListEvent;
-  registration_status?: string;
-  type: string;
-};
+  event: ListEvent
+  registration_status?: string
+  type: string
+}
 
 const LargeEventCard = (props: Props) => {
-  const link = "/events/" + props.event.slug;
+  const link = "/events/" + props.event.slug
   const setButtons = () => {
     if (props.type === "hosting") {
       return (
@@ -18,10 +18,11 @@ const LargeEventCard = (props: Props) => {
           <Link href={`${link}/registration_result`}>
             <button className="btn btn-primary">Registration Results</button>
           </Link>
-
-          <button className="btn btn-primary btn-outline">Volunteers</button>
+          <Link href={`${link}/shifts`}>
+            <button className="btn btn-primary btn-outline">Volunteers</button>
+          </Link>
         </div>
-      );
+      )
     } else if (props.type === "volunteering") {
       return (
         <div className="card-actions sm:justify-end">
@@ -33,7 +34,7 @@ const LargeEventCard = (props: Props) => {
             </button>
           </Link>
         </div>
-      );
+      )
     } else {
       return (
         <div className="card-actions sm:justify-end">
@@ -41,13 +42,21 @@ const LargeEventCard = (props: Props) => {
             <button className="btn btn-primary">Event Details</button>
           </Link>
         </div>
-      );
+      )
     }
-  };
+  }
   return (
-    <div className="card lg:card-side bg-base-100 shadow-xl max-w-4xl">
-      <figure>
-        <img src="https://placeimg.com/400/400/arch" alt="Album" />
+    <div className="card lg:card-side bg-base-100 shadow-xl max-w-4xl max-h-[600px]">
+      <figure className="max-w-sm max-h-sm">
+        <img
+          className="aspect-square"
+          src={
+            props.event.img_url
+              ? props.event.img_url
+              : "https://placeimg.com/400/400/arch"
+          }
+          alt="Event Image"
+        />
       </figure>
       <div className="card-body">
         <div className="flex justify-between">
@@ -76,6 +85,8 @@ const LargeEventCard = (props: Props) => {
           <p className="font-medium text-primary">
             {!props.event.registration
               ? "No registration required"
+              : props.event.registration_closed
+              ? `Registration closed`
               : registrationOpen(props.event)
               ? "Registration open!"
               : `Registration opens: ${eventCardDate(
@@ -87,7 +98,7 @@ const LargeEventCard = (props: Props) => {
         {setButtons()}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default LargeEventCard;
+export default LargeEventCard

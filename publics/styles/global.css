@@ -3,21 +3,21 @@
 @tailwind utilities;
 
 h1 {
-    @apply text-4xl;
-    @apply font-bold;
+  @apply text-4xl;
+  @apply font-bold;
 }
 
 h2 {
-    @apply text-3xl;
-    @apply font-bold;
+  @apply text-3xl;
+  @apply font-bold;
 }
 
 h3 {
-    @apply text-2xl;
-    @apply font-semibold;
+  @apply text-2xl;
+  @apply font-semibold;
 }
 
 h4 {
-    @apply text-xl;
-    @apply font-semibold;
+  @apply text-xl;
+  @apply font-semibold;
 }

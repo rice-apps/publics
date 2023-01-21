@@ -1,16 +1,32 @@
-import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
+import { useState, useEffect } from "react"
+import { useRouter } from "next/router"
 import {
   SupabaseClient,
-  createBrowserSupabaseClient,
   createServerSupabaseClient,
-} from "@supabase/auth-helpers-nextjs";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
+} from "@supabase/auth-helpers-nextjs"
+import { useSupabaseClient } from "@supabase/auth-helpers-react"
 
 interface Volunteer {
-  name: string;
-  id: string;
-  count: number;
+  name: string
+  id: string
+  count: number
+}
+
+interface Event {
+  id: string
+  capacity: number
+  organization: string
+}
+
+interface Props {
+  authorized: boolean
+  volunteers: Volunteer[]
+  count: number
+  myCount: number
+  event: Event
+  capacity: number
+  organization: string
+  volunteer: Volunteer
 }
 
 const fetchCounts = async (
@@ -18,34 +34,43 @@ const fetchCounts = async (
   slug: string,
   userId: string
 ) => {
-  const { data } = await supabase
-    .from("counts")
-    .select("*, event!inner(*), volunteer(id, profile(first_name))")
-    .eq("event.slug", slug);
   const { data: eventData } = await supabase
     .from("events")
-    .select("id")
+    .select("id, capacity, organization")
     .eq("slug", slug)
-    .single();
+    .single()
+
+  if (!eventData) {
+    return { authorized: false }
+  }
+
+  const { data } = await supabase
+    .from("counts")
+    .select("inout, volunteer, volunteer(id, profile(first_name))")
+    .eq("event", eventData.id)
+
+  if (!data) {
+    return { authorized: false }
+  }
   const { data: volunteer } = await supabase
     .from("volunteers")
-    .select("id, event(slug)")
-    .eq("profile", userId)
-    .single();
+    .select("id, event")
+    .match({
+      profile: userId,
+      event: eventData.id,
+      is_counter: true,
+      checked_in: true,
+      checked_out: false,
+    })
+    .single()
+
   const { data: volunteers } = await supabase
     .from("volunteers")
-    .select("id, profile(first_name), event!inner(slug)")
-    .eq("event.slug", slug);
+    .select("id, profile(first_name)")
+    .match({ event: eventData.id, is_counter: true, checked_in: true })
 
-  if (
-    !data ||
-    !eventData ||
-    !volunteer ||
-    !volunteers ||
-    !volunteer.event ||
-    volunteer.event["slug"] !== slug
-  ) {
-    return { authorized: false };
+  if (!volunteer || !volunteers || !volunteer.event) {
+    return { authorized: false }
   }
 
   const volunteerCountArray = volunteers.map((volunteer) => {
@@ -59,13 +84,13 @@ const fetchCounts = async (
         data.filter(
           (count) => count.volunteer.id === volunteer.id && !count.inout
         ).length,
-    };
-  });
+    }
+  })
 
   return {
     authorized: true,
-    volunteer: volunteer.id,
-    event: eventData.id,
+    volunteer: volunteer?.id,
+    event: eventData,
     volunteers: volunteerCountArray,
     count:
       data.filter((row) => row.inout).length -
@@ -75,35 +100,35 @@ const fetchCounts = async (
         .length -
       data.filter((row) => row.volunteer.id === volunteer?.id && !row.inout)
         .length,
-  };
-};
+  }
+}
 
-const Counter = (props) => {
-  const supabase = useSupabaseClient();
-  const router = useRouter() || { query: { slug: "" } };
-  const query = router.query;
-  const [count, setCount] = useState(0);
-  const [myCount, setMyCount] = useState(0);
-  const [allVolunteers, setAllVolunteers] = useState<Volunteer[]>([]);
+const Counter = (props: Props) => {
+  const supabase = useSupabaseClient()
+  const router = useRouter() || { query: { slug: "" } }
+  const query = router.query
+  const [count, setCount] = useState(0)
+  const [myCount, setMyCount] = useState(0)
+  const [allVolunteers, setAllVolunteers] = useState<Volunteer[]>([])
 
   useEffect(() => {
     if (!props) {
-      return;
+      return
     }
-    setCount(props.count);
-    setMyCount(props.myCount);
-    setAllVolunteers(props.volunteers);
-  }, [props]);
+    setCount(props.count)
+    setMyCount(props.myCount)
+    setAllVolunteers(props.volunteers)
+  }, [props])
 
   useEffect(() => {
-    const channel = supabase.channel(`count:${query.slug}`);
+    const channel = supabase.channel(`count:${query.slug}`)
 
     channel.on(
       "postgres_changes",
       { event: "INSERT", schema: "public", table: "counts" },
       (payload: any) => {
         //set count and my count
-        setCount((count) => count + (payload.new.inout ? 1 : -1));
+        setCount((count) => count + (payload.new.inout ? 1 : -1))
         //update count in allVolunteers
         setAllVolunteers((volunteers) => {
           return volunteers.map((volunteer) => {
@@ -111,36 +136,38 @@ const Counter = (props) => {
               return {
                 ...volunteer,
                 count: volunteer.count + (payload.new.inout ? 1 : -1),
-              };
+              }
             }
-            return volunteer;
-          });
-        });
+            return volunteer
+          })
+        })
       }
-    );
-    channel.subscribe();
+    )
+    channel.subscribe()
 
     return () => {
-      supabase.removeChannel(channel);
-    };
+      supabase.removeChannel(channel)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [])
 
   const updateCount = async (inout) => {
     await supabase.from("counts").insert([
       {
         inout: inout,
         volunteer: props.volunteer,
-        event: props.event,
+        event: props.event.id,
       },
-    ]);
-    setMyCount((count) => count + (inout ? 1 : -1));
-  };
+    ])
+    setMyCount((count) => count + (inout ? 1 : -1))
+  }
   return (
     <div className="flex flex-col h-screen">
       <div className="flex flex-row justify-center mt-8">
-        <h1>{myCount}</h1>
-        <h1 className="text-primary">/{count}</h1>
+        <h1 className={count > props.event.capacity ? "text-red-700" : ""}>
+          {count}
+        </h1>
+        <h1 className="text-primary">/{props.event.capacity}</h1>
       </div>
       <p className="text-sm grid place-items-center">total count</p>
       <div className="grid grid-cols-3 gap-4 place-items-center mt-8">
@@ -153,14 +180,14 @@ const Counter = (props) => {
               <div className="badge badge-lg">{v.count}</div>
               <h4>{v.name}</h4>
             </div>
-          );
+          )
         })}
       </div>
       <div className="flex flex-grow justify-center space-x-10 items-center">
         <button
           className="btn btn-circle h-24 w-24"
           onClick={() => {
-            updateCount(false);
+            updateCount(false)
           }}
         >
           <svg
@@ -181,7 +208,7 @@ const Counter = (props) => {
         <button
           className="btn btn-circle h-24 w-24"
           onClick={() => {
-            updateCount(true);
+            updateCount(true)
           }}
         >
           <svg
@@ -201,16 +228,16 @@ const Counter = (props) => {
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
 export const getServerSideProps = async (ctx) => {
   // Create authenticated Supabase Client
-  const supabase = createServerSupabaseClient(ctx);
+  const supabase = createServerSupabaseClient(ctx)
   // Check if we have a session
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = await supabase.auth.getSession()
 
   if (!session) {
     //navigate to account page
@@ -219,11 +246,11 @@ export const getServerSideProps = async (ctx) => {
         destination: `http://${ctx.req.headers.host}/account`,
         permanent: false,
       },
-    };
+    }
   }
 
   const { authorized, volunteer, event, volunteers, count, myCount } =
-    await fetchCounts(supabase, ctx.query.slug, session.user.id);
+    await fetchCounts(supabase, ctx.query.slug, session.user.id)
 
   if (!authorized) {
     return {
@@ -231,7 +258,7 @@ export const getServerSideProps = async (ctx) => {
         destination: `http://${ctx.req.headers.host}/404`,
         permanent: false,
       },
-    };
+    }
   }
 
   return {
@@ -243,7 +270,7 @@ export const getServerSideProps = async (ctx) => {
       count: count,
       myCount: myCount,
     },
-  };
-};
+  }
+}
 
-export default Counter;
+export default Counter
