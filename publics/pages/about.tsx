@@ -86,7 +86,7 @@ const About = () => {
             </div>
                 <div className="px-4 md:px-20 grid grid-cols-2 md:grid-cols-4 gap-4 ">
                     {teamMembers.map((member) => 
-                    <Headshot member={member} />)}
+                    <Headshot key={member.name} member={member} />)}
                 </div>
                 
             </div>
