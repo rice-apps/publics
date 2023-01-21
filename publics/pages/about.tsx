@@ -1,5 +1,7 @@
 
 import Headshot from "../components/Headshot";
+import Image from 'next/image'
+
 
 const About = () => {
     
@@ -55,7 +57,7 @@ const About = () => {
         title : "Developer",
         college : "Lovett College",
         },
-        {image_url : "/headshots/shivam.jpg",
+        {image_url : "/headshots/shivam.JPG",
         name : "Shivam Pathak",
         title : "Developer",
         college : "Sid Richardson College",
