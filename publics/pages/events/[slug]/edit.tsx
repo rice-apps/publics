@@ -51,7 +51,7 @@ export default function Edit(props) {
   const [collegeRegistration, setCollegeRegistration] = useState(Date)
   const [registrationDatetime, setRegistrationDatetime] = useState(Date)
   const [signupSize, setSignupSize] = useState(Number)
-  const [waitlistSize, setWaitlistSize] = useState(Number)
+  const [registrationMode, setRegistrationMode] = useState(String)
 
   const [orgs] = useState<any[]>(props.orgs)
   const [uploadImg, setUploadImg] = useState<File>()
@@ -75,17 +75,16 @@ export default function Edit(props) {
     setDescription(data.description)
     setRegistration(data.registration)
     setImgUrl(data.img_url)
+    setRegistrationMode(data.registration_mode)
 
     if (data.registration) {
       setCollegeRegistration(format_date(data.college_registration_datetime))
       setRegistrationDatetime(format_date(data.registration_datetime))
       setSignupSize(data.signup_size)
-      setWaitlistSize(data.waitlist_size)
     } else {
       setCollegeRegistration("purposely-nonformatted-date")
       setRegistrationDatetime("purposely-nonformatted-date")
       setSignupSize(0)
-      setWaitlistSize(0)
     }
   }
 
@@ -110,16 +109,6 @@ export default function Edit(props) {
       if (uploadError) {
         alert(uploadError.message)
       }
-
-      // if (updateError) {
-      //   // might not be able to update due to different extensions
-      //   // try upload the img instead
-
-      //   let { error: uploadError } = await supabase.storage.from('images/' + slug).upload(fileName, uploadImg)
-      //   if (uploadError) {
-      //     alert(uploadError.message)
-      //   }
-      // }
       newImgUrl = "https://rgdrbnbynqacsbkzofyf.supabase.co/storage/v1/object/public/images/" + slug + "/" + fileName
     }
 
@@ -133,12 +122,12 @@ export default function Edit(props) {
       description,
       img_url: newImgUrl,
       registration,
+      registration_mode: registrationMode,
       ...(registration
         ? {
           college_registration_datetime: new Date(collegeRegistration),
           registration_datetime: new Date(registrationDatetime),
           signup_size: signupSize,
-          waitlist_size: waitlistSize,
         }
         : {}),
     }
@@ -188,7 +177,7 @@ export default function Edit(props) {
                   <span className="label-text-alt">Name of event</span>
                 </label>
               </div>
-              <div className="form-control w-full max-w-xs mr-2">
+              {/* <div className="form-control w-full max-w-xs mr-2">
                 <input
                   value={slug}
                   onChange={(e) => setSlug(e.target.value)}
@@ -199,8 +188,8 @@ export default function Edit(props) {
                 <label className="label">
                   <span className="label-text-alt">Slug</span>
                 </label>
-              </div>
-              <div className="form-control w-full max-w-xs">
+              </div> */}
+              <div className="form-control w-full max-w-xs mr-2">
                 <input
                   value={eventDateTime}
                   onChange={(e) => setEventDateTime(e.target.value)}
@@ -212,9 +201,8 @@ export default function Edit(props) {
                   <span className="label-text-alt">Date</span>
                 </label>
               </div>
-            </div>
-            <div className="sm:flex">
-              <div className="form-control w-full max-w-xs mr-2">
+
+              <div className="form-control w-full max-w-xs">
                 <select
                   className="select select-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
                   onChange={(e) => {
@@ -242,6 +230,9 @@ export default function Edit(props) {
                   </span>
                 </label>
               </div>
+            </div>
+
+            <div className="sm:flex">
               <div className="form-control w-full max-w-xs mr-2">
                 <input
                   value={location}
@@ -349,15 +340,18 @@ export default function Edit(props) {
                   </label>
                 </div>
                 <div className="form-control w-full max-w-xs">
-                  <input
-                    value={waitlistSize}
-                    onChange={(e) => setWaitlistSize(e.target.valueAsNumber)}
-                    required={registration}
-                    type="number"
-                    className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
-                  />
+                  <select
+                    className="select select-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
+                    value={registrationMode}
+                    onChange={(e) => {
+                      setRegistrationMode(e.target.value)
+                    }}
+                  >
+                    <option>Random</option>
+                    <option>First come first serve</option>
+                  </select>
                   <label className="label">
-                    <span className="label-text-alt">Waitlist Maximum</span>
+                    <span className="label-text-alt">Registration Type</span>
                   </label>
                 </div>
               </div>
