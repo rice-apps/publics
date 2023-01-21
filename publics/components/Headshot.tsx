@@ -12,12 +12,11 @@ const Headshot = (props: Props) =>{
             <div className="card-body">
                 <figure className = "object-fill">
                 <img src= {props.member.image_url} className="rounded object-fill" /> </figure>
-                <h2 className="card-title">{props.member.name}</h2>
-                <p className="font-medium text-primary" >{props.member.title}</p>
-                <p>{props.member.college}</p>
+                <h2 className="card-title text-sm md:text-lg">{props.member.name}</h2>
+                <p className="font-medium text-primary text-sm sm:text-base" >{props.member.title}</p>
+                <p className = "text-sm sm:text-base">{props.member.college}</p>
             </div>
         </div>
-        
     )
     
 }
