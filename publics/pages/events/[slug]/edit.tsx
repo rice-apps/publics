@@ -57,6 +57,7 @@ export default function Edit(props) {
   const [uploadImg, setUploadImg] = useState<File>()
   const [imgUrl, setImgUrl] = useState(String)
 
+  // TODO: find easier way of formatting
   function format_date(date: string) {
     if (date === null) {
       return "purposely-nonformatted-date"
