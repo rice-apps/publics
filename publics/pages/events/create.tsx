@@ -51,7 +51,7 @@ export default function Create(props) {
   const [collegeRegistration, setCollegeRegistration] = useState(Date)
   const [registrationDatetime, setRegistrationDatetime] = useState(Date)
   const [signupSize, setSignupSize] = useState(Number)
-  const [waitlistSize, setWaitlistSize] = useState(Number)
+  const [registrationMode, setRegistrationMode] = useState(String)
   const [uploadImg, setUploadImg] = useState<File>()
 
   const supabase = useSupabaseClient()
@@ -89,6 +89,7 @@ export default function Create(props) {
       description: description,
       registration: registration,
       img_url: url == "" ? null : url,
+      registration_mode: registrationMode,
     }
 
     let insert2 = {}
@@ -97,7 +98,6 @@ export default function Create(props) {
         college_registration_datetime: new Date(collegeRegistration),
         registration_datetime: new Date(registrationDatetime),
         signup_size: signupSize,
-        waitlist_size: waitlistSize,
       }
     }
 
@@ -320,15 +320,18 @@ export default function Create(props) {
                   </label>
                 </div>
                 <div className="form-control w-full max-w-xs">
-                  <input
-                    value={waitlistSize}
-                    onChange={(e) => setWaitlistSize(e.target.valueAsNumber)}
-                    required={registration}
-                    type="number"
-                    className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
-                  />
+                  <select
+                    className="select select-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
+                    value={registrationMode}
+                    onChange={(e) => {
+                      setRegistrationMode(e.target.value)
+                    }}
+                  >
+                    <option>Random</option>
+                    <option>First come first serve</option>
+                  </select>
                   <label className="label">
-                    <span className="label-text-alt">Waitlist Maximum</span>
+                    <span className="label-text-alt">Registration Mode</span>
                   </label>
                 </div>
               </div>
