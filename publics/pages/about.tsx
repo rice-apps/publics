@@ -68,25 +68,23 @@ const About = () => {
     ]
     return(
         <div>
-            <div className = "px-28 pt-10">
+            <div className = "md:px-28 px-12 pt-10">
                 <article className = "prose">
-                <h1 className = "title pb-7">About Publics</h1>
+                <h1 className = "title pb-7">About PartyOwl</h1>
                 <div className = "max-w-screen-md">
-                <p>RiceApps designed and developed the 
-                    Publics application to streamline the public party 
-                    registration and volunteer management process at Rice.
+                <p>RiceApps designed and developed the PartyOwl application to streamline the public party registration and volunteer management process at Rice.
                 </p>
                 </div>
                 </article>
             </div>
             
             <div>
-            <div className = "pt-10 pl-28">
+            <div className = "md:px-28 px-12 pt-10">
                 <article className = "prose">
                     <h4>Meet the Team</h4>
                 </article>
             </div>
-                <div className="px-20 grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="px-4 md:px-20 grid grid-cols-2 md:grid-cols-4 gap-4 ">
                     {teamMembers.map((member) => 
                     <Headshot member={member} />)}
                 </div>

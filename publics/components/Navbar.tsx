@@ -6,10 +6,11 @@ export default function Navbar() {
     useEffect(() => {
         themeChange(false)
     }, [])
-    const themes: string[] = ["publics", "light", "dark", "cupcake", "bumblebee", "emerald", "corporate", "synthwave", "retro", "cyberpunk", "valentine", "halloween", "garden", "forest", "aqua", "lofi", "pastel", "fantasy", "wireframe", "black", "luxury", "dracula", "cmyk", "autumn", "business", "acid", "lemonade", "night", "coffee", "winter"];
+    const themes: string[] = ["light", "dark", "cupcake", "bumblebee", "emerald", "corporate", "synthwave", "retro", "cyberpunk", "valentine", "halloween", "garden", "forest", "aqua", "lofi", "pastel", "fantasy", "wireframe", "black", "luxury", "dracula", "cmyk", "autumn", "business", "acid", "lemonade", "night", "coffee", "winter"];
 
-    const navbar_content = (<><li><Link href="/events">Events</Link></li>
-    <li><Link href="mailto:awj3@rice.edu">Contact</Link></li>
+    const navbar_content = (<>
+     <li><Link href="/about">About</Link></li>
+    <li><Link href="/events">Events</Link></li>
         <li tabIndex={0}>
             <a className="justify-between">
                 Parent
@@ -23,7 +24,7 @@ export default function Navbar() {
         <li><a>Item 3</a></li></>)
 
     return (
-        <div className="navbar bg-base-100 min-h-fit">
+        <div className="navbar bg-base-100">
             <div className="navbar-start">
                 <div className="dropdown">
                     <label tabIndex={0} className="btn btn-ghost lg:hidden">
