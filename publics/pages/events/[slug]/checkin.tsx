@@ -24,9 +24,13 @@ export default function CheckIn(props) {
     const [shift] = useState<any[]>(props.shift)
     const [instructions, setInstructions] = useState<string>(props.shift.volunteer_instructions)
     const [authorizedVolunteer] = useState<boolean>(props.volunteer_status)
+    const [userID] = useState<string>(props.userID)
 
     const shift_start = new Date(shift.start)
     const shift_end = new Date(shift.end)
+
+    const minutes_start = Math.abs(Math.floor((new Date().getTime() - shift_start.getTime()) / 60000));
+    const minutes_end = Math.abs(Math.floor((new Date().getTime() - shift_end.getTime()) / 60000));
 
     function parse_time(date: Date) {
         let time = date.toLocaleTimeString()
@@ -36,19 +40,17 @@ export default function CheckIn(props) {
     }
 
     async function update() {
-
-        const { data: { user } } = await supabase.auth.getUser()
-
+        const minutes_start1 = Math.abs(Math.floor((new Date().getTime() - shift_start.getTime()) / 60000));
+        const minutes_end1 = Math.abs(Math.floor((new Date().getTime() - shift_end.getTime()) / 60000));
         if (!checked_in) {
-            const minutes = Math.abs(Math.floor((new Date().getTime() - shift_start.getTime()) / 60000));
-            if (minutes <= 15) {
+            if (minutes_start1 <= 15) {
                 if (codeword === entered_cw) {
                     setCorrectCWEntered(true)
                     setCheckIn(true)
                     const { error } = await supabase
                         .from('volunteers')
                         .update({checked_in: true, start_shift: new Date()})
-                        .eq('profile', user?.id)
+                        .eq('profile', userID)
                         .eq('event', eventID)
                     if (error) {
                         throw error
@@ -61,13 +63,12 @@ export default function CheckIn(props) {
                 alert("Cannot check in now")
             }
         } else {
-            const minutes = Math.abs(Math.floor((new Date().getTime() - shift_end.getTime()) / 60000));
-            if (minutes <= 15) {
+            if (minutes_end1 <= 15) {
                 setCheckOut(true)
                 const { error } = await supabase
                     .from('volunteers')
                     .update({checked_out: true, end_shift: new Date()})
-                    .eq('profile', user?.id)
+                    .eq('profile', userID)
                     .eq('event', eventID)
                 if (error) {
                     throw error
@@ -163,8 +164,10 @@ export default function CheckIn(props) {
                         </label>
                     </div>
                 )}
-                {!checked_in && !checked_out && (<button className='mx-3 mt-8 btn btn-primary' onClick={update}>Check In</button>)}
-                {checked_in && !checked_out && (<button className='mx-3 mt-8 btn btn-primary' onClick={update}>Check Out</button>)}
+                {minutes_start > 15 && !checked_in && !checked_out && (<button className='mx-3 mt-8 btn btn-disabled' onClick={update}>Check In</button>)}
+                {minutes_start <= 15 && !checked_in && !checked_out && (<button className='mx-3 mt-8 btn btn-primary' onClick={update}>Check In</button>)}
+                {minutes_end <= 15 && checked_in && !checked_out && (<button className='mx-3 mt-8 btn btn-primary' onClick={update}>Check Out</button>)}
+                {minutes_end > 15 && checked_in && !checked_out && (<button className='mx-3 mt-8 btn btn-disabled' onClick={update}>Check Out</button>)}
             </main>
         </div>
     )
@@ -202,6 +205,8 @@ export const getServerSideProps = async (ctx) => {
     const checked_in = volunteer[0].checked_in
     const checked_out = volunteer[0].checked_out
 
+    const userID = session.user.id
+
     //If not admin, redirect to event page
     if (!volunteer_status) {
         return {
@@ -228,6 +233,7 @@ export const getServerSideProps = async (ctx) => {
             checked_out: checked_out,
             volunteer_status: volunteer_status,
             shift: shift.data[0].shift,
+            userID: userID,
             params: ctx.params,
         },
     };
