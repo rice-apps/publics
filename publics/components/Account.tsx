@@ -102,7 +102,7 @@ export default function Account({ session }) {
       
 
       <div className="card bg-base-100 px-10 py-5 max-w-md">
-        <div className="flex place-content-start space-x-4 py-1">
+        <div className="flex place-content-center space-x-4 py-1">
           <div>
             <p className="font-medium"> Name: </p>
           </div>
@@ -110,7 +110,7 @@ export default function Account({ session }) {
             <p className="text-slate-500"> {profile?.first_name} {profile?.last_name} </p>
           </div>
         </div>
-        <div className="flex place-content-start space-x-4 py-1">
+        <div className="flex place-content-center space-x-4 py-1">
           <div>
             <p className="font-medium"> Email: </p>
           </div>
@@ -118,7 +118,7 @@ export default function Account({ session }) {
             <p className="text-slate-500"> {session.user.email} </p>
           </div>
         </div>
-        <div className="flex place-content-start space-x-4 py-1">
+        <div className="flex place-content-center space-x-4 py-1">
           <div>
             <p className="font-medium"> Net ID: </p>
           </div>
@@ -126,7 +126,7 @@ export default function Account({ session }) {
             <p className="text-slate-500"> {profile?.netid} </p>
           </div>
         </div>
-        <div className="flex place-content-start space-x-4 py-1">
+        <div className="flex place-content-center space-x-4 py-1">
           <div>
             <p className="font-medium inline"> Admin: </p>
           </div>
@@ -157,7 +157,7 @@ export default function Account({ session }) {
       </div>
 
       <div>
-        <p className="text-xs text-slate-500"> Notice: Please contact the Office of the Registrar to change your preffered name</p>
+        <p className="text-xs text-slate-500"> Notice: Please contact the Office of the Registrar to change your preferred name</p>
       </div>
 
     </div>
