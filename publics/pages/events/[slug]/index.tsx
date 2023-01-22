@@ -1,5 +1,6 @@
 import { eventCardDate } from "../../../components/eventCards/cardDate"
 import { authorize } from "../../../utils/admin"
+import { redirect_url } from "../../../utils/admin"
 import { registrationOpen } from "../../../utils/registration"
 import { ListEvent } from "../../../utils/types"
 import {
@@ -22,7 +23,7 @@ export async function getServerSideProps(ctx) {
   if (!session) {
     return {
       redirect: {
-        destination: `http://${ctx.req.headers.host}/account`,
+        destination: `http://${ctx.req.headers.host}${redirect_url}`,
         permanent: false,
       },
     }

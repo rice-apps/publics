@@ -1,4 +1,5 @@
 import { authorize } from "../../../utils/admin"
+import { redirect_url } from "../../../utils/admin"
 import {
   SupabaseClient,
   createServerSupabaseClient,
@@ -7,7 +8,6 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import Head from "next/head"
 import { useRouter } from "next/router"
 import { useState, useEffect } from "react"
-import React from "react"
 
 async function getData(supabase: SupabaseClient, slug: string) {
   const { data, error } = await supabase
@@ -388,7 +388,7 @@ export const getServerSideProps = async (ctx) => {
     //navigate to account page
     return {
       redirect: {
-        destination: `http://${ctx.req.headers.host}/account`,
+        destination: `http://${ctx.req.headers.host}${redirect_url}`,
         permanent: false,
       },
     }

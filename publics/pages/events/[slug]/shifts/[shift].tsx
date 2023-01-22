@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react"
-import { useSupabaseClient } from "@supabase/auth-helpers-react"
+import { redirect_url } from "../../../../utils/admin"
 import {
   SupabaseClient,
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs"
+import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import { useRouter } from "next/router"
+import { useEffect, useState } from "react"
 
 /**
  * Simple type containing a friendly name for an event, and the UUID of the event
@@ -209,7 +210,7 @@ export async function getServerSideProps(context) {
     //navigate to account page
     return {
       redirect: {
-        destination: `http://${context.req.headers.host}/account`,
+        destination: `http://${ctx.req.headers.host}${redirect_url}`,
         permanent: false,
       },
     }

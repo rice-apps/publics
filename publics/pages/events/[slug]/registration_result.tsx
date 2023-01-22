@@ -1,13 +1,15 @@
-import { useEffect, useState } from "react"
-import { useSupabaseClient } from "@supabase/auth-helpers-react"
+import ErrorMsg from "../../../components/ErrorMsg"
+import SuccessMsg from "../../../components/SuccessMsg"
+import MoveRegistrationsModal from "../../../components/registrations/MoveRegistrationsModal"
+import { redirect_url } from "../../../utils/admin"
+import { getPagination } from "../../../utils/registration"
 import {
   SupabaseClient,
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs"
-import { getPagination } from "../../../utils/registration"
-import SuccessMsg from "../../../components/SuccessMsg"
-import ErrorMsg from "../../../components/ErrorMsg"
-import MoveRegistrationsModal from "../../../components/registrations/MoveRegistrationsModal"
+import { useSupabaseClient } from "@supabase/auth-helpers-react"
+import { useEffect, useState } from "react"
+
 /**
  * Simple type containing a friendly name for an event, and the UUID of the event
  */
@@ -160,71 +162,6 @@ async function getRegistrations(
   }
 
   return formatted_data
-}
-
-/**
- * Used to reliably get slug and avoid first render problems
- * Will probably be used later for loading other data
- * @param context - default paramater for server side props
- * @returns props holding the slug
- */
-export const getServerSideProps = async (ctx) => {
-  // Create authenticated Supabase Client
-  const supabase = createServerSupabaseClient(ctx)
-  // Check if we have a session
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-
-  if (!session) {
-    //navigate to account page
-    return {
-      redirect: {
-        destination: `http://${ctx.req.headers.host}/account`,
-        permanent: false,
-      },
-    }
-  }
-
-  //Get event details
-  const event_detail = await getEvent(supabase, ctx.params.slug)
-  if (event_detail.eventName === "Error") {
-    return {
-      redirect: {
-        destination: `http://${ctx.req.headers.host}/events/${ctx.params.slug}`,
-        permanent: false,
-      },
-    }
-  }
-  //Get admin status
-  const admin_status = await isAdminUser(
-    supabase,
-    event_detail,
-    session.user.id
-  )
-  //If not admin, redirect to 404 page
-  if (!admin_status) {
-    return {
-      redirect: {
-        destination: `http://${ctx.req.headers.host}/events/${ctx.params.slug}`,
-        permanent: false,
-      },
-    }
-  }
-  //Get registrations for that event
-  const page = +ctx.query.page || 0
-  const registrations = await getRegistrations(supabase, event_detail)
-
-  return {
-    props: {
-      initialSession: session,
-      user: session.user,
-      params: ctx.params,
-      registrations,
-      event_detail,
-      page: page,
-    },
-  }
 }
 
 /**
@@ -772,6 +709,71 @@ function ResultPage(props) {
       </div>
     </div>
   )
+}
+
+/**
+ * Used to reliably get slug and avoid first render problems
+ * Will probably be used later for loading other data
+ * @param context - default paramater for server side props
+ * @returns props holding the slug
+ */
+export const getServerSideProps = async (ctx) => {
+  // Create authenticated Supabase Client
+  const supabase = createServerSupabaseClient(ctx)
+  // Check if we have a session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  if (!session) {
+    //navigate to account page
+    return {
+      redirect: {
+        destination: `http://${ctx.req.headers.host}${redirect_url}`,
+        permanent: false,
+      },
+    }
+  }
+
+  //Get event details
+  const event_detail = await getEvent(supabase, ctx.params.slug)
+  if (event_detail.eventName === "Error") {
+    return {
+      redirect: {
+        destination: `http://${ctx.req.headers.host}/events/${ctx.params.slug}`,
+        permanent: false,
+      },
+    }
+  }
+  //Get admin status
+  const admin_status = await isAdminUser(
+    supabase,
+    event_detail,
+    session.user.id
+  )
+  //If not admin, redirect to 404 page
+  if (!admin_status) {
+    return {
+      redirect: {
+        destination: `http://${ctx.req.headers.host}/events/${ctx.params.slug}`,
+        permanent: false,
+      },
+    }
+  }
+  //Get registrations for that event
+  const page = +ctx.query.page || 0
+  const registrations = await getRegistrations(supabase, event_detail)
+
+  return {
+    props: {
+      initialSession: session,
+      user: session.user,
+      params: ctx.params,
+      registrations,
+      event_detail,
+      page: page,
+    },
+  }
 }
 
 export default ResultPage

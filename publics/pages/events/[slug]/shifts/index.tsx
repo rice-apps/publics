@@ -1,7 +1,8 @@
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
-import ShiftCard from "../../../../components/shifts/ShiftCard"
-import { useSession } from "@supabase/auth-helpers-react"
 import AddShiftModal from "../../../../components/shifts/AddShiftModal"
+import ShiftCard from "../../../../components/shifts/ShiftCard"
+import { redirect_url } from "../../../../utils/admin"
+import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
+import { useSession } from "@supabase/auth-helpers-react"
 
 export default function Shifts({ shifts, event }) {
   const session = useSession()
@@ -83,7 +84,7 @@ export const getServerSideProps = async (ctx) => {
     //navigate to account page
     return {
       redirect: {
-        destination: `http://${ctx.req.headers.host}/account`,
+        destination: `http://${ctx.req.headers.host}${redirect_url}`,
         permanent: false,
       },
     }
