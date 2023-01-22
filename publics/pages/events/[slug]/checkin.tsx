@@ -52,7 +52,7 @@ export default function CheckIn(props) {
             alert("Already checked out")
         }
 
-        if (!checked_in && !checked_out) {
+        if (!checked_in) {
             if (codeword === entered_cw) {
                 setCorrectCWEntered(true)
                 setCheckIn(true)
@@ -68,7 +68,7 @@ export default function CheckIn(props) {
                 setCorrectCWEntered(false)
                 setEnteredCW("")
             }
-        } else if (checked_in && !checked_out) {
+        } else if (checked_in) {
             setCheckOut(true)
             const { error } = await supabase
                 .from('volunteers')
@@ -93,24 +93,24 @@ export default function CheckIn(props) {
                 <link rel="icon" href="/favicon.ico"/>
             </Head>
             <main>
-                <h1 className = "mx-3 text-2xl normal-case leading-[3rem] font-family: inter font-bold">
+                <h1 className = "mx-3 text-2xl leading-[3rem] font-bold">
                     Volunteer Check In
                 </h1>
-                <div className='leading-[1rem]'>
-                    <h2 className = "mx-3 text-lg leading-[2rem] normal-case font-family-inter font-medium">
+                <div>
+                    <h2 className = "mx-3 text-lg font-medium">
                         Shift Details
                     </h2>
-                    <div className="mx-3 divider leading-[1px]"></div>
+                    <div className="mx-3 divider"></div>
                 </div>
                 <div className="mx-3 mt-3">
-                    <p className="text-lg normal-case font-family-inter font-medium">Your shift: {shift.name}</p>
+                    <p className="text-lg font-medium">Your shift: {shift.name}</p>
                 </div>
                 <div className='mx-3 mt-3'>
-                    <p className="text-lg normal-case font-family-inter font-medium">{parse_time(shift_start)} to {parse_time(shift_end)}</p>
+                    <p className="text-lg font-medium">{parse_time(shift_start)} to {parse_time(shift_end)}</p>
                 </div>
                 {!checked_in && !checked_out && (
                     <div className='mx-3 mt-3'>
-                        <p className="text-lg text-[#AC1FB8] normal-case font-family-inter font-medium">Status: Not checked in</p>
+                        <p className="text-lg text-primary font-medium">Status: Not checked in</p>
                     </div>
                 )}
                 {checked_in && !checked_out && (
@@ -124,27 +124,34 @@ export default function CheckIn(props) {
                     </div>
                 )}
                 <div className='mx-3 mt-8'>
-                    <p className="text-lg normal-case font-family-inter font-medium">Volunteer Instructions:</p>
+                    <p className="text-lg font-medium">Volunteer Instructions:</p>
                 </div>
                 <div className='mx-3 mt-3'>
-                    <p className="text-lg normal-case font-family-inter font-normal">{instructions}</p>
+                    <p className="text-lg font-normal">{instructions}</p>
                 </div>
                 {!checked_in && !checked_out && (
                     <div className='mx-3 mt-8'>
-                        <p className="text-lg normal-case font-family-inter font-bold">You can check in any time within 15 minutes of your shift&apos;s start.</p>
+                        <p className="text-lg font-bold">You can check in any time within 15 minutes of your shift&apos;s start.</p>
                     </div>
                 )}
                 {checked_in && !checked_out && (
                     <div className='mx-3 mt-8'>
-                        <p className="text-lg normal-case font-family-inter font-bold">You can check out any time within 15 minutes of your shift&apos;s end.</p>
+                        <p className="text-lg font-bold">You can check out any time within 15 minutes of your shift&apos;s end.</p>
                     </div>
                 )}
                 {checked_in && checked_out && (
                     <div className='mx-3 mt-8'>
-                        <p className="text-lg normal-case font-family-inter font-normal">Codeword: {codeword}</p>
-                    </div> &&
+                        <p className="text-lg font-normal">Codeword: {codeword}</p>
+                    </div>
+                )}
+                {checked_in && checked_out && (
                     <div className='mx-3 mt-8'>
-                        <p className="text-lg normal-case font-family-inter font-bold">You have checked out of your shift. You may exit the page.</p>
+                        <p className="text-lg font-bold">You have checked out of your shift. You may exit the page.</p>
+                    </div>
+                )}
+                {correct_cw_entered && !checked_in && (
+                    <div className='mx-3 mt-8'>
+                        <p className="text-lg font-normal">Enter code word</p>
                     </div>
                 )}
                 {correct_cw_entered && !checked_in && (
@@ -153,9 +160,11 @@ export default function CheckIn(props) {
                             value = {entered_cw}
                             onChange = {(e) => setEnteredCW(e.target.value)} 
                             type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
-                        <label className="label">
-                            <span className="label-text-alt">Code word</span>
-                        </label>
+                    </div>
+                )}
+                {!correct_cw_entered && !checked_in && (
+                    <div className='mx-3 mt-8'>
+                        <p className="text-lg font-normal text-error">Incorrect code word entered</p>
                     </div>
                 )}
                 {!correct_cw_entered && !checked_in && (
@@ -164,9 +173,6 @@ export default function CheckIn(props) {
                             value = {entered_cw}
                             onChange = {(e) => setEnteredCW(e.target.value)}  
                             type="text" placeholder="Type here" className="input input-bordered border-4 input-error w-full max-w-xs" />
-                        <label className="label">
-                            <span className="label-text-alt text-error">Incorrect code word</span>
-                        </label>
                     </div>
                 )}
                 {minutes_start > 15 && !checked_in && !checked_out && (<button className='mx-3 mt-8 btn btn-disabled' onClick={update}>Check In</button>)}
