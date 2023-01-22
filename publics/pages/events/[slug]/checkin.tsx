@@ -142,9 +142,7 @@ export default function CheckIn(props) {
                 {checked_in && checked_out && (
                     <div className='mx-3 mt-8'>
                         <p className="text-lg normal-case font-family-inter font-normal">Codeword: {codeword}</p>
-                    </div>
-                )}
-                {checked_in && checked_out && (
+                    </div> &&
                     <div className='mx-3 mt-8'>
                         <p className="text-lg normal-case font-family-inter font-bold">You have checked out of your shift. You may exit the page.</p>
                     </div>
