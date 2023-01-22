@@ -12,6 +12,22 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "placeimg.com",
+        port: "",
+        pathname: "/*/*/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+        port: "",
+        pathname: "/**/*",
+      },
+    ],
+  },
 }
 
 module.exports = nextConfig
