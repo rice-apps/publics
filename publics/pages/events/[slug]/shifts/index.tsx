@@ -32,13 +32,13 @@ export default function Shifts({ shifts, event }) {
               total={shift.count}
             />
           ))}
-        {shifts.filter((shift) => shift.name == "Security").length > 0 && (
+        {shifts.filter((shift) => shift.name == "Server").length > 0 && (
           <div className="md:col-span-3">
-            <h2>Security</h2>
+            <h2>Server</h2>
           </div>
         )}
         {shifts
-          .filter((shift) => shift.name == "Security")
+          .filter((shift) => shift.name == "Server")
           .map((shift) => (
             <ShiftCard
               key={shift.id}

@@ -57,7 +57,7 @@ function AddShiftModal(props) {
                     Type
                   </option>
                   <option>Capacity Counter</option>
-                  <option>Security</option>
+                  <option>Server</option>
                   <option>Caregiver</option>
                 </select>
               </div>

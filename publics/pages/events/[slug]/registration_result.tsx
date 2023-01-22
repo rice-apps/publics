@@ -243,7 +243,7 @@ function ResultPage(props) {
   //boolean values that we use to filter registrations by when displaying them to the screen
   const [filterByAll, setFilterByAll] = useState(true) //starts as true as we want to start by initially showing the admin the entire set of registered users
   const [filterByWristband, setFilterByWristband] = useState(false)
-  const [filterByWaitlist, setFilterByWaitlist] = useState(false)
+  const [filterByRegistered, setFilterByRegistered] = useState(false)
   //Search bar value
   const [search, setSearch] = useState("")
   // Pagination
@@ -405,17 +405,6 @@ function ResultPage(props) {
     }
   }
 
-  const registrationFilter = registration.filter((row) => {
-    if (filterByAll) {
-      return true
-    }
-    if (filterByWristband) {
-      return row.picked_up_wristband
-    }
-    if (filterByWaitlist) {
-      return row.waitlist
-    }
-  })
   async function handleSearch() {
     setRegistration(await getRegistrations(supabase, eventDetails, search))
     setPage(0)
@@ -442,7 +431,7 @@ function ResultPage(props) {
       return (
         filterByAll ||
         (row.picked_up_wristband == filterByWristband &&
-          row.waitlist == filterByWaitlist)
+          row.waitlist !== filterByRegistered)
       )
     })
   }
@@ -538,15 +527,16 @@ function ResultPage(props) {
                 <svg
                   fill="#000000"
                   className="h-8 w-8"
+                  stroke="currentColor"
                   viewBox="-5.5 0 32 32"
                   version="1.1"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
                   <g
                     id="SVGRepo_tracerCarrier"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   ></g>
                   <g id="SVGRepo_iconCarrier">
                     {" "}
@@ -587,12 +577,12 @@ function ResultPage(props) {
                 </div>
                 <div className="WaitlistCheckbox">
                   <label className="label cursor-pointer">
-                    <span className="label-text">Waitlist</span>
+                    <span className="label-text">Registered</span>
                     <input
                       type="checkbox"
-                      defaultChecked={filterByWaitlist}
+                      defaultChecked={filterByRegistered}
                       onClick={() => {
-                        setFilterByWaitlist(!filterByWaitlist)
+                        setFilterByRegistered(!filterByRegistered)
                       }}
                       className="checkbox"
                     />
@@ -656,8 +646,8 @@ function ResultPage(props) {
               <th>Email Address</th>
               <th>NetID</th>
               <th>Residential College</th>
+              <th>Registered?</th>
               <th>Wristband?</th>
-              <th>Waitlist?</th>
             </tr>
           </thead>
           <tbody>
@@ -667,7 +657,7 @@ function ResultPage(props) {
                 .splice(from, to)
                 .map((row, index) => {
                   let isChecked = row["picked_up_wristband"]
-                  let isWaitlist = row["waitlist"]
+                  let isRegistered = !row["waitlist"]
                   return (
                     <tr key={index}>
                       <th></th>
@@ -731,16 +721,16 @@ function ResultPage(props) {
                         <input
                           type="checkbox"
                           className="checkbox"
-                          checked={isChecked}
-                          onChange={(e) => updateWristband(row)}
+                          checked={isRegistered}
+                          onChange={(e) => updateWaitlist(row)}
                         />
                       </td>
                       <td>
                         <input
                           type="checkbox"
                           className="checkbox"
-                          checked={isWaitlist}
-                          onChange={(e) => updateWaitlist(row)}
+                          checked={isChecked}
+                          onChange={(e) => updateWristband(row)}
                         />
                       </td>
                     </tr>
@@ -753,11 +743,22 @@ function ResultPage(props) {
         {/* center following div */}
         <div className="flex justify-center mt-4">
           <div className="btn-group">
-            <button className="btn" onClick={handlePageDeincrement}>
+            <button
+              className="btn"
+              disabled={page < 1}
+              onClick={handlePageDeincrement}
+            >
               «
             </button>
             <button className="btn">Page {page}</button>
-            <button className="btn" onClick={handlePageIncrement}>
+            <button
+              className="btn"
+              disabled={
+                filterRegistrations().splice(from, to).length !== 50 ||
+                page > 100
+              }
+              onClick={handlePageIncrement}
+            >
               »
             </button>
           </div>

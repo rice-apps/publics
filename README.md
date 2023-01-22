@@ -1,4 +1,4 @@
-# Publics
+# PartyOwl
 
 ## Testing
 

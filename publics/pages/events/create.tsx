@@ -1,12 +1,12 @@
-import Head from "next/head"
-import { useState, useEffect } from "react"
-import { useRouter } from "next/router"
-import React from "react"
 import {
   SupabaseClient,
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
+import Head from "next/head"
+import { useRouter } from "next/router"
+import { useState, useEffect } from "react"
+import React from "react"
 
 async function authorize(supabase: SupabaseClient, userId: string) {
   const { data, error } = await supabase
@@ -62,15 +62,21 @@ export default function Create(props) {
     var url = ""
 
     if (uploadImg) {
-      const fileExt = uploadImg.name.split('.').pop()
+      const fileExt = uploadImg.name.split(".").pop()
       const fileName = `cover_image.${fileExt}`
 
-      let { error: uploadError } = await supabase.storage.from('images/' + slug).upload(fileName, uploadImg)
+      let { error: uploadError } = await supabase.storage
+        .from("images/" + slug)
+        .upload(fileName, uploadImg)
 
       if (uploadError) {
         alert(uploadError.message)
       }
-      url = "https://rgdrbnbynqacsbkzofyf.supabase.co/storage/v1/object/public/images/" + slug + "/" + fileName;
+      url =
+        "https://rgdrbnbynqacsbkzofyf.supabase.co/storage/v1/object/public/images/" +
+        slug +
+        "/" +
+        fileName
     }
 
     let insert1 = {
@@ -82,7 +88,7 @@ export default function Create(props) {
       capacity: capacity,
       description: description,
       registration: registration,
-      img_url: (url == "" ? null : url)
+      img_url: url == "" ? null : url,
     }
 
     let insert2 = {}
@@ -106,12 +112,6 @@ export default function Create(props) {
 
   return (
     <div id="form">
-      <Head>
-        <title>Create Event Form</title>
-        <meta name="eventcreate" content="Form for creating new event" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
       <main>
         <h1 className="mx-3 text-2xl normal-case leading-[3rem] font-family: inter font-bold">
           Create an Event
@@ -210,7 +210,6 @@ export default function Create(props) {
                   type="number"
                   onInput={(e) => {
                     if (e.target.value < 1) {
-                      console.log("here")
                       e.target.setCustomValidity(
                         "The capacity must be greater than 0."
                       )
@@ -239,12 +238,16 @@ export default function Create(props) {
                 </label>
               </div>
               <div>
-                <input type="file" onChange={(e) => {
-                  const files = e.target.files
-                  if (files && files.length > 0) {
-                    setUploadImg(files[0])
-                  }
-                }} className="file-input file-input-bordered file-input-primary w-full max-w-xs" />
+                <input
+                  type="file"
+                  onChange={(e) => {
+                    const files = e.target.files
+                    if (files && files.length > 0) {
+                      setUploadImg(files[0])
+                    }
+                  }}
+                  className="file-input file-input-bordered file-input-primary w-full max-w-xs"
+                />
               </div>
             </div>
             <div className="sm:flex">
@@ -265,7 +268,7 @@ export default function Create(props) {
                 <h2 className="text-lg leading-10 normal-case font-family: inter font-medium">
                   Registration Details
                 </h2>
-                <div className="mx-3 divider leading-[1px] h-[0.5px] w-[950px]"></div>
+                <div className="mx-3 divider"></div>
               </div>
               <div className={`sm:flex`}>
                 <div className="form-control w-full max-w-xs mr-2">
