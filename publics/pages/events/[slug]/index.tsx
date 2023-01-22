@@ -9,6 +9,7 @@ import {
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import { NextSeo } from "next-seo"
 import Head from "next/head"
+import Image from "next/image"
 import { useRouter } from "next/router"
 import { useState } from "react"
 
@@ -237,7 +238,9 @@ const Details = (props: Props) => {
                   <p>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      className="rounded h-5 w-5 inline object-center"
+                      width={24}
+                      height={24}
+                      className="rounded inline object-center mr-1"
                       src={event.organization.photo}
                       alt="Organization"
                     />
