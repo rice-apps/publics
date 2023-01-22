@@ -215,13 +215,13 @@ export default function Create(props) {
                   onChange={(e) => setCapacity(e.target.valueAsNumber)}
                   type="number"
                   onInput={(e) => {
-                    if (e.target.value < 1) {
-                      e.target.setCustomValidity(
+                    if (parseInt((e.target as HTMLInputElement).value) < 1) {
+                      ;(e.target as HTMLInputElement).setCustomValidity(
                         "The capacity must be greater than 0."
                       )
                     } else {
                       // input is fine -- reset the error message
-                      e.target.setCustomValidity("")
+                      ;(e.target as HTMLInputElement).setCustomValidity("")
                     }
                   }}
                   required
