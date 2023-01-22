@@ -11,6 +11,7 @@ const LoginRedirect = () => {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === "SIGNED_IN") {
+          authListener.subscription.unsubscribe()
           router.push("/events")
         }
       }
