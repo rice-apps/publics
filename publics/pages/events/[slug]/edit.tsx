@@ -65,7 +65,7 @@ export default function Edit(props) {
     let eventDate = new Date(date)
     let tzoffset = new Date().getTimezoneOffset() * 60000
     let localISOTime = new Date(eventDate.getTime() - tzoffset).toISOString()
-    return localISOTime.slice(0, localISOTime.indexOf('Z'))
+    return localISOTime.slice(0, localISOTime.indexOf("Z"))
   }
 
   async function setData(data) {
@@ -124,11 +124,8 @@ export default function Edit(props) {
       //     alert(uploadError.message)
       //   }
       // }
-      newImgUrl =
-        "https://rgdrbnbynqacsbkzofyf.supabase.co/storage/v1/object/public/images/" +
-        slug +
-        "/" +
-        fileName
+      newImgUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      "/storage/v1/object/public/images/" + slug + "/" + fileName
     }
 
     const insert = {
