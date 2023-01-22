@@ -7,7 +7,6 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import Head from "next/head"
 import { useRouter } from "next/router"
 import { useState, useEffect } from "react"
-import React from "react"
 
 async function getData(supabase: SupabaseClient, slug: string) {
   const { data, error } = await supabase
@@ -124,6 +123,9 @@ export default function Edit(props) {
       //     alert(uploadError.message)
       //   }
       // }
+      if (process.env.NEXT_PUBLIC_SUPABASE_URL === undefined) {
+        throw new Error("NEXT_PUBLIC_SUPABASE_URL is undefined")
+      }
       newImgUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
       "/storage/v1/object/public/images/" + slug + "/" + fileName
     }

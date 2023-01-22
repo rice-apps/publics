@@ -72,6 +72,9 @@ export default function Create(props) {
       if (uploadError) {
         alert(uploadError.message)
       }
+      if (process.env.NEXT_PUBLIC_SUPABASE_URL == undefined) {
+        throw new Error("NEXT_PUBLIC_SUPABASE_URL is undefined")
+      }
       url = process.env.NEXT_PUBLIC_SUPABASE_URL
       "/storage/v1/object/public/images/" + slug + "/" + fileName
     }
