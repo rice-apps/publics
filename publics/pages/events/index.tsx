@@ -132,8 +132,6 @@ function Events(props: Props) {
     }
   }, [])
 
-  console.log(tabs)
-
   function handleClick(tab: number) {
     setOpenTab(tab)
     history.pushState(null, "", `?tab=${tab}`)
