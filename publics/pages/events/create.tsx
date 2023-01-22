@@ -137,7 +137,7 @@ export default function Create(props) {
                   onChange={(e) => setName(e.target.value)}
                   type="text"
                   required
-                  className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
+                  className="input input-bordered w-full max-w-xs hover:border-primary-content focus:outline-none focus:ring focus:ring-primary-focus"
                 />
                 <label className="label">
                   <span className="label-text-alt">Name of event</span>
@@ -149,7 +149,7 @@ export default function Create(props) {
                   onChange={(e) => setSlug(e.target.value)}
                   type="text"
                   required
-                  className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
+                  className="input input-bordered w-full max-w-xs hover:border-primary-content focus:outline-none focus:ring focus:ring-primary-focus"
                 />
                 <label className="label">
                   <span className="label-text-alt">Slug</span>
@@ -161,7 +161,7 @@ export default function Create(props) {
                   onChange={(e) => setEventDateTime(e.target.value)}
                   type="datetime-local"
                   required
-                  className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
+                  className="input input-bordered w-full max-w-xs hover:border-primary-content focus:outline-none focus:ring focus:ring-primary-focus"
                 />
                 <label className="label">
                   <span className="label-text-alt">Date</span>
@@ -171,7 +171,7 @@ export default function Create(props) {
             <div className="sm:flex">
               <div className="form-control w-full max-w-xs mr-2">
                 <select
-                  className="select select-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
+                  className="select select-bordered w-full max-w-xs hover:border-primary-content focus:outline-none focus:ring focus:ring-primary-focus"
                   onChange={(e) => {
                     setHost(e.target.value)
                   }}
@@ -192,7 +192,7 @@ export default function Create(props) {
                   )}
                 </select>
                 <label className="label">
-                  <span className="label-text-alt hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700">
+                  <span className="label-text-alt hover:border-primary-content focus:outline-none focus:ring focus:ring-primary-focus">
                     Host
                   </span>
                 </label>
@@ -203,7 +203,7 @@ export default function Create(props) {
                   onChange={(e) => setLocation(e.target.value)}
                   type="text"
                   required
-                  className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
+                  className="input input-bordered w-full max-w-xs hover:border-primary-content focus:outline-none focus:ring focus:ring-primary-focus"
                 />
                 <label className="label">
                   <span className="label-text-alt">Location</span>
@@ -225,7 +225,7 @@ export default function Create(props) {
                     }
                   }}
                   required
-                  className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
+                  className="input input-bordered w-full max-w-xs hover:border-primary-content focus:outline-none focus:ring focus:ring-primary-focus"
                 />
                 <label className="label">
                   <span className="label-text-alt">Capacity</span>
@@ -237,7 +237,7 @@ export default function Create(props) {
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="textarea textarea-bordered max-w-xs h-24 hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
+                  className="textarea textarea-bordered max-w-xs h-24 hover:border-primary-content focus:outline-none focus:ring focus:ring-primary-focus"
                 ></textarea>
                 <label className="label">
                   <span className="label-text-alt">Description</span>
@@ -264,7 +264,7 @@ export default function Create(props) {
                     checked={registration}
                     onChange={(e) => setRegistration(e.target.checked)}
                     type="checkbox"
-                    className="h-5 w-5 accent-fuchsia-700 border-fuchsia-100 dark:focus:ring-fuchsia-700 focus:ring-2 dark:bg-fuchsia-100 dark:border-fuchsia-900 checked:dark:bg-fuchsia-100"
+                    className="h-5 w-5 accent-primary-focus border-primary-focus dark:focus:ring-primary-focus focus:ring-2 dark:bg-primary-focus dark:border-primary-focus checked:dark:bg-primary-focus"
                   />
                 </label>
               </div>
@@ -283,7 +283,7 @@ export default function Create(props) {
                     onChange={(e) => setCollegeRegistration(e.target.value)}
                     required={registration}
                     type="datetime-local"
-                    className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
+                    className="input input-bordered w-full max-w-xs hover:border-primary-content focus:outline-none focus:ring focus:ring-primary-focus"
                   />
                   <label className="label">
                     <span className="label-text-alt">
@@ -299,7 +299,7 @@ export default function Create(props) {
                     onChange={(e) => setRegistrationDatetime(e.target.value)}
                     required={registration}
                     type="datetime-local"
-                    className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
+                    className="input input-bordered w-full max-w-xs hover:border-primary-content focus:outline-none focus:ring focus:ring-primary-focus"
                   />
                   <label className="label">
                     <span className="label-text-alt">
@@ -313,7 +313,7 @@ export default function Create(props) {
                     onChange={(e) => setSignupSize(e.target.valueAsNumber)}
                     required={registration}
                     type="number"
-                    className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
+                    className="input input-bordered w-full max-w-xs hover:border-primary-content focus:outline-none focus:ring focus:ring-primary-focus"
                   />
                   <label className="label">
                     <span className="label-text-alt">Registration Maximum</span>
@@ -325,7 +325,7 @@ export default function Create(props) {
                     onChange={(e) => setWaitlistSize(e.target.valueAsNumber)}
                     required={registration}
                     type="number"
-                    className="input input-bordered w-full max-w-xs hover:border-fuchsia-100 focus:outline-none focus:ring focus:ring-fuchsia-700"
+                    className="input input-bordered w-full max-w-xs hover:border-primary-content focus:outline-none focus:ring focus:ring-primary-focus"
                   />
                   <label className="label">
                     <span className="label-text-alt">Waitlist Maximum</span>
