@@ -1,16 +1,17 @@
-import { useRouter } from "next/router"
-import Head from "next/head"
+import { eventCardDate } from "../../../components/eventCards/cardDate"
+import { authorize } from "../../../utils/admin"
+import { registrationOpen } from "../../../utils/registration"
+import { ListEvent } from "../../../utils/types"
 import {
   SupabaseClient,
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
-import { authorize } from "../../../utils/admin"
+import { NextSeo } from "next-seo"
+import Head from "next/head"
+import Image from "next/image"
+import { useRouter } from "next/router"
 import { useState } from "react"
-import React from "react"
-import { registrationOpen } from "../../../utils/registration"
-import { eventCardDate } from "../../../components/eventCards/cardDate"
-import { ListEvent } from "../../../utils/types"
 
 export async function getServerSideProps(ctx) {
   const supabase = createServerSupabaseClient(ctx)
@@ -194,92 +195,107 @@ const Details = (props: Props) => {
   )
 
   return (
-    <div id="index">
-      <Head>
-        <title>Main event page</title>
-        <meta name="eventindex" content="Page for displaying info for event" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <main>
-        <div className="hero min-h-[60vh] object-left-top">
-          <div className="hero-content flex-col lg:flex-row min-w-[70vw]">
-            <img
-              src={
-                event.img_url
-                  ? event.img_url
-                  : "https://placeimg.com/400/400/arch"
-              }
-              className="object-cover min-w-md sm:max-w-lg min-h-sm rounded-lg shadow-2xl"
-              alt="Event"
-            />
-            <div className="flex flex-col space-y-4">
-              <h1 className="text-5xl font-bold">{event.name}</h1>
-              <p className="text-xl">
-                {weekday[event_datetime.getDay()] +
-                  ", " +
-                  month[event_datetime.getMonth()] +
-                  " " +
-                  event_datetime.getDate()}{" "}
-              </p>
-              <span>
-                <p>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    className="rounded h-5 w-5 inline object-center"
-                    src={event.organization.photo}
-                    alt="Organization"
-                  />
-                  Hosted by {event.organization.name}
+    <>
+      <NextSeo
+        title={event.name}
+        description={event.description}
+        openGraph={{
+          title: event.name,
+          description: event.description,
+          images: [
+            {
+              url: event.img_url,
+              width: 800,
+              height: 600,
+              alt: "Event Image",
+            },
+          ],
+        }}
+      />
+      <div id="index">
+        <main>
+          <div className="hero min-h-[60vh] object-left-top">
+            <div className="hero-content flex-col lg:flex-row min-w-[70vw]">
+              <img
+                src={
+                  event.img_url
+                    ? event.img_url
+                    : "https://placeimg.com/400/400/arch"
+                }
+                className="object-cover min-w-md sm:max-w-lg min-h-sm rounded-lg shadow-2xl"
+                alt="Event"
+              />
+              <div className="flex flex-col space-y-4">
+                <h1 className="text-5xl font-bold">{event.name}</h1>
+                <p className="text-xl">
+                  {weekday[event_datetime.getDay()] +
+                    ", " +
+                    month[event_datetime.getMonth()] +
+                    " " +
+                    event_datetime.getDate()}{" "}
                 </p>
-              </span>
-              <p className="">{event.description}</p>
+                <span>
+                  <p>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      width={24}
+                      height={24}
+                      className="rounded inline object-center mr-1"
+                      src={event.organization.photo}
+                      alt="Organization"
+                    />
+                    Hosted by {event.organization.name}
+                  </p>
+                </span>
+                <p className="">{event.description}</p>
 
-              <p className="font-medium text-primary">
-                {!event.registration
-                  ? "No registration required"
-                  : event.registration_closed
-                  ? `Registration closed`
-                  : registrationOpen(event)
-                  ? "Registration open!"
-                  : collCheck
-                  ? `Registration opens for ${
-                      event.organization.name
-                    }: ${eventCardDate(
-                      event.college_registration_datetime,
-                      true
-                    )}`
-                  : `Registration opens: ${eventCardDate(
-                      event.registration_datetime,
-                      true
-                    )}`}
-              </p>
-              {props.authorized && (
-                <button
-                  className="btn btn-primary"
-                  onClick={() => router.push(`${router.asPath}/edit`)}
-                >
-                  Edit event
-                </button>
-              )}
+                <p className="font-medium text-primary">
+                  {!event.registration
+                    ? "No registration required"
+                    : event.registration_closed
+                    ? `Registration closed`
+                    : registrationOpen(event)
+                    ? "Registration open!"
+                    : collCheck
+                    ? `Registration opens for ${
+                        event.organization.name
+                      }: ${eventCardDate(
+                        event.college_registration_datetime,
+                        true
+                      )}`
+                    : `Registration opens: ${eventCardDate(
+                        event.registration_datetime,
+                        true
+                      )}`}
+                </p>
+                {props.authorized && (
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => router.push(`${router.asPath}/edit`)}
+                  >
+                    Edit event
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-        <div className="divider"></div>
-        <div className="flex-col ml-4 sm:ml-8 md:ml-24">
-          <h2 className="mb-2">Register for Event</h2>
-          {loading ? (
-            <button className="btn btn-loading">loading</button>
-          ) : (
-            <button
-              onClick={register}
-              className={enabled ? "btn btn-primary" : "btn btn-disabled"}
-            >
-              Register
-            </button>
-          )}
-        </div>
-      </main>
-    </div>
+          <div className="divider"></div>
+          <div className="flex-col ml-4 sm:ml-8 md:ml-24">
+            <h2 className="mb-2">Register for Event</h2>
+            {loading ? (
+              <button className="btn btn-loading">loading</button>
+            ) : (
+              <button
+                onClick={register}
+                className={enabled ? "btn btn-primary" : "btn btn-disabled"}
+              >
+                Register
+              </button>
+            )}
+          </div>
+        </main>
+      </div>
+    </>
   )
 }
 

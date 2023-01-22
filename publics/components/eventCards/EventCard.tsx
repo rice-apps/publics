@@ -1,7 +1,8 @@
-import type { ListEvent } from "../../utils/types"
-import Link from "next/link"
 import { registrationOpen } from "../../utils/registration"
+import type { ListEvent } from "../../utils/types"
 import { eventCardDate } from "./cardDate"
+import Image from "next/image"
+import Link from "next/link"
 
 type Props = {
   event: ListEvent
@@ -14,7 +15,9 @@ export default function EventCard(props: Props) {
         <h2 className="card-title">{props.event.name}</h2>
         <p>{`${eventCardDate(props.event.event_datetime, false)}`} </p>
         <p className="font-medium flex items-center">
-          <img
+          <Image
+            width={32}
+            height={32}
             className="avatar w-8 bg-opacity-0 mr-2"
             src={props.event.organization.photo}
             alt={props.event.organization.name}

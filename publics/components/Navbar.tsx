@@ -1,6 +1,7 @@
-import Link from "next/link"
-import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react"
 import { handleLogin } from "../utils/login"
+import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react"
+import Image from "next/image"
+import Link from "next/link"
 
 export default function Navbar() {
   const supabaseClient = useSupabaseClient()
@@ -45,7 +46,12 @@ export default function Navbar() {
           </ul>
         </div>
         <span className="btn btn-ghost normal-case text-xl">
-          <Link href="/">Publics</Link>
+          <Link href="/">
+            PartyOwl
+            <span className="inline-block ml-2 align-middle">
+              <Image src="/owl.png" alt="Owl" width={30} height={42} />
+            </span>
+          </Link>
         </span>
       </div>
       <div className="navbar-center hidden lg:flex">

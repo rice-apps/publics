@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react"
-import { useRouter } from "next/router"
 import {
   SupabaseClient,
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
+import { useRouter } from "next/router"
+import { useState, useEffect } from "react"
 
 interface Volunteer {
   name: string
@@ -164,7 +164,7 @@ const Counter = (props: Props) => {
   return (
     <div className="flex flex-col h-screen">
       <div className="flex flex-row justify-center mt-8">
-        <h1 className={count > props.event.capacity ? "text-red-700" : ""}>
+        <h1 className={count > props.event.capacity ? "text-red-600" : ""}>
           {count}
         </h1>
         <h1 className="text-primary">/{props.event.capacity}</h1>
