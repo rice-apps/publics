@@ -12,7 +12,7 @@ module.exports = {
   daisyui: {
     themes: [
       {
-        publics: {
+        partyowl: {
           "color-scheme": "light",
           primary: "#AC1FB8",
           secondary: "#E9498C",
