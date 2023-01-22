@@ -14,7 +14,7 @@ export default function CheckIn(props) {
     const [eventID] = useState<string>(props.eventID)
     const [codeword] = useState<string>(props.codeword)
     const [entered_cw, setEnteredCW] = useState(String)
-    const [correct_cw_entered, setCorrectCWEntered] = useState(Boolean)
+    var correct_cw_entered = true
     const [checked_in, setCheckIn] = useState<boolean>(props.checked_in)
     const [checked_out, setCheckOut] = useState<boolean>(props.checked_out)
     const [shift] = useState<any[]>(props.shift)
@@ -54,7 +54,7 @@ export default function CheckIn(props) {
 
         if (!checked_in) {
             if (codeword === entered_cw) {
-                setCorrectCWEntered(true)
+                correct_cw_entered = true
                 setCheckIn(true)
                 const { error } = await supabase
                     .from('volunteers')
@@ -65,7 +65,7 @@ export default function CheckIn(props) {
                     throw error
                 }
             } else {
-                setCorrectCWEntered(false)
+                correct_cw_entered = false
                 setEnteredCW("")
             }
         } else if (checked_in) {
@@ -80,10 +80,6 @@ export default function CheckIn(props) {
             }
         }
     }
-
-    useEffect(() => {
-        setCorrectCWEntered(true)
-    }, [])
 
     return (
         <div id="checkin">
