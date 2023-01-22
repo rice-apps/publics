@@ -7,7 +7,7 @@ import ThemeChange from './ThemeChange'
 export default function Account({ session }) {
   const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [adminOrgs, setAdminOrgs] = useState("No Admin Orgs")
+  const [adminOrgs, setAdminOrgs] = useState("Not an organization admin")
   const [avatarUrl, setAvatarUrl] = useState("https://t4.ftcdn.net/jpg/04/08/24/43/360_F_408244382_Ex6k7k8XYzTbiXLNJgIL8gssebpLLBZQ.jpg")
   const supabaseClient = useSupabaseClient();
   const router = useRouter();
