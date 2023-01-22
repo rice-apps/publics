@@ -72,11 +72,8 @@ export default function Create(props) {
       if (uploadError) {
         alert(uploadError.message)
       }
-      url =
-        "https://rgdrbnbynqacsbkzofyf.supabase.co/storage/v1/object/public/images/" +
-        slug +
-        "/" +
-        fileName
+      url = process.env.NEXT_PUBLIC_SUPABASE_URL
+      "/storage/v1/object/public/images/" + slug + "/" + fileName
     }
 
     let insert1 = {
@@ -102,11 +99,12 @@ export default function Create(props) {
     }
 
     let insert = Object.assign({}, insert1, insert2)
-    const { error } = await supabase.from("events").insert(insert).single()
+    const { error } = await supabase.from("events").insert(insert)
     if (error) {
       alert(error.message)
     } else {
-      router.push(slug)
+      router.push(`/events/${slug}`)
+      return
     }
   }
 
