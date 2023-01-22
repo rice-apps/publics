@@ -24,6 +24,12 @@ export default function CheckIn(props) {
     const shift_start = new Date(shift.start)
     const shift_end = new Date(shift.end)
 
+    /* gets current time (in milliseconds from the epoch) and subtracts that from the shift's start or end time,
+     * which is also found in milliseconds from the epoch;
+     * divides their difference by 60000 to obtain the difference in minutes, which is floored to only account
+     * for minutes, and then absolute value is taken so give a window of time that is anywhere between 15 minutes
+     * before and after the shift's start/end
+     */
     const minutes_start = Math.abs(Math.floor((new Date().getTime() - shift_start.getTime()) / 60000));
     const minutes_end = Math.abs(Math.floor((new Date().getTime() - shift_end.getTime()) / 60000));
 
@@ -37,39 +43,40 @@ export default function CheckIn(props) {
     async function update() {
         const minutes_start1 = Math.abs(Math.floor((new Date().getTime() - shift_start.getTime()) / 60000));
         const minutes_end1 = Math.abs(Math.floor((new Date().getTime() - shift_end.getTime()) / 60000));
-        if (!checked_in) {
-            if (minutes_start1 <= 15) {
-                if (codeword === entered_cw) {
-                    setCorrectCWEntered(true)
-                    setCheckIn(true)
-                    const { error } = await supabase
-                        .from('volunteers')
-                        .update({checked_in: true, start_shift: new Date()})
-                        .eq('profile', userID)
-                        .eq('event', eventID)
-                    if (error) {
-                        throw error
-                    }
-                } else {
-                    setCorrectCWEntered(false)
-                    setEnteredCW("")
-                }
-            } else {
-                alert("Cannot check in now")
-            }
-        } else {
-            if (minutes_end1 <= 15) {
-                setCheckOut(true)
+
+        if (!checked_in && !checked_out && minutes_start1 > 15) {
+            alert("Cannot check in now")
+        } else if (checked_in && !checked_out && minutes_end1 > 15) {
+            alert("Cannot check in now")
+        } else if (checked_in && checked_out) {
+            alert("Already checked out")
+        }
+
+        if (!checked_in && !checked_out) {
+            if (codeword === entered_cw) {
+                setCorrectCWEntered(true)
+                setCheckIn(true)
                 const { error } = await supabase
                     .from('volunteers')
-                    .update({checked_out: true, end_shift: new Date()})
+                    .update({checked_in: true, start_shift: new Date()})
                     .eq('profile', userID)
                     .eq('event', eventID)
                 if (error) {
                     throw error
                 }
             } else {
-                alert("Cannot check out now")
+                setCorrectCWEntered(false)
+                setEnteredCW("")
+            }
+        } else if (checked_in && !checked_out) {
+            setCheckOut(true)
+            const { error } = await supabase
+                .from('volunteers')
+                .update({checked_out: true, end_shift: new Date()})
+                .eq('profile', userID)
+                .eq('event', eventID)
+            if (error) {
+                throw error
             }
         }
     }
@@ -130,6 +137,11 @@ export default function CheckIn(props) {
                 {checked_in && !checked_out && (
                     <div className='mx-3 mt-8'>
                         <p className="text-lg normal-case font-family-inter font-bold">You can check out any time within 15 minutes of your shift&apos;s end.</p>
+                    </div>
+                )}
+                {checked_in && checked_out && (
+                    <div className='mx-3 mt-8'>
+                        <p className="text-lg normal-case font-family-inter font-normal">Codeword: {codeword}</p>
                     </div>
                 )}
                 {checked_in && checked_out && (
