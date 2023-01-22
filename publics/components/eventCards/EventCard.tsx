@@ -19,7 +19,7 @@ export default function EventCard(props: Props) {
             width={32}
             height={32}
             className="avatar w-8 bg-opacity-0 mr-2"
-            src={organizationPhotos[props.event.organization.name]}
+            src={props.event.organization.photo}
             alt={props.event.organization.name}
           />
           {props.event.organization.name}
