@@ -52,7 +52,7 @@ export default function CheckIn(props) {
     if (!checked_in && !checked_out && minutes_start1 > 15) {
       alert("Cannot check in now")
     } else if (checked_in && !checked_out && minutes_end1 > 15) {
-      alert("Cannot check in now")
+      alert("Cannot check out now")
     } else if (checked_in && checked_out) {
       alert("Already checked out")
     }
@@ -112,32 +112,33 @@ export default function CheckIn(props) {
         <div className="mx-3 mt-3">
           <p className="text-lg text-primary font-medium">
             Status:{" "}
-            {checked_in
-              ? "Checked in"
+            {!checked_in
+              ? "Not checked in"
               : checked_out
               ? "Checked out"
-              : "Not checked in"}
+              : "Checked in"}
           </p>
         </div>
         <div className="mx-3 mt-8">
           <p className="text-lg font-medium">Volunteer Instructions:</p>
           <p className="text-lg font-normal">{instructions}</p>
         </div>
-        {checked_in ? (
-          <div className="mx-3 mt-8">
-            <p className="text-lg font-bold">
-              You can check out any time within 15 minutes of your shift&apos;s
-              end.
-            </p>
-          </div>
-        ) : (
-          <div className="mx-3 mt-8">
-            <p className="text-lg font-bold">
-              You can check in any time within 15 minutes of your shift&apos;s
-              start.
-            </p>
-          </div>
-        )}
+        {!checked_out &&
+          (checked_in ? (
+            <div className="mx-3 mt-8">
+              <p className="text-lg font-bold">
+                You can check out any time within 15 minutes of your
+                shift&apos;s end.
+              </p>
+            </div>
+          ) : (
+            <div className="mx-3 mt-8">
+              <p className="text-lg font-bold">
+                You can check in any time within 15 minutes of your shift&apos;s
+                start.
+              </p>
+            </div>
+          ))}
         {checked_out && (
           <div className="mx-3 mt-8">
             <p className="text-lg font-normal">Codeword: {codeword}</p>
@@ -146,39 +147,40 @@ export default function CheckIn(props) {
             </p>
           </div>
         )}
-        {correct_cw_entered ? (
-          <div>
-            <div className="mx-3 mt-8">
-              <p className="text-lg font-normal">Enter code word</p>
+        {!checked_in &&
+          (correct_cw_entered ? (
+            <div>
+              <div className="mx-3 mt-8">
+                <p className="text-lg font-normal">Enter code word</p>
+              </div>
+              <div className="mx-3 mt-3 form-control w-full max-w-xs">
+                <input
+                  value={entered_cw}
+                  onChange={(e) => setEnteredCW(e.target.value)}
+                  type="text"
+                  placeholder="Type here"
+                  className="input input-bordered w-full max-w-xs"
+                />
+              </div>
             </div>
-            <div className="mx-3 mt-3 form-control w-full max-w-xs">
-              <input
-                value={entered_cw}
-                onChange={(e) => setEnteredCW(e.target.value)}
-                type="text"
-                placeholder="Type here"
-                className="input input-bordered w-full max-w-xs"
-              />
+          ) : (
+            <div>
+              <div className="mx-3 mt-8">
+                <p className="text-lg font-normal text-error">
+                  Incorrect code word entered
+                </p>
+              </div>
+              <div className="mx-3 mt-3 form-control w-full max-w-xs">
+                <input
+                  value={entered_cw}
+                  onChange={(e) => setEnteredCW(e.target.value)}
+                  type="text"
+                  placeholder="Type here"
+                  className="input input-bordered border-4 input-error w-full max-w-xs"
+                />
+              </div>
             </div>
-          </div>
-        ) : (
-          <div>
-            <div className="mx-3 mt-8">
-              <p className="text-lg font-normal text-error">
-                Incorrect code word entered
-              </p>
-            </div>
-            <div className="mx-3 mt-3 form-control w-full max-w-xs">
-              <input
-                value={entered_cw}
-                onChange={(e) => setEnteredCW(e.target.value)}
-                type="text"
-                placeholder="Type here"
-                className="input input-bordered border-4 input-error w-full max-w-xs"
-              />
-            </div>
-          </div>
-        )}
+          ))}
         {minutes_start > 15 && !checked_in && !checked_out && (
           <button className="mx-3 mt-8 btn btn-disabled">Check In</button>
         )}
