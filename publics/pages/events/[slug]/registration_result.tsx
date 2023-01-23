@@ -19,7 +19,7 @@ type EventDetails = {
   //uuid of event
   eventID: string //Using string as unsure what UUID type is in TS
   organization: string //Organization ID overseeing this event
-  capacity: number //Capacity of this event
+  signup_size: number //Sign up size of this event
 }
 
 /**
@@ -77,7 +77,7 @@ async function getEvent(
 ): Promise<EventDetails> {
   const { data, error } = await supabase
     .from("events")
-    .select("id, name, organization, capacity")
+    .select("id, name, organization, signup_size")
     .eq("slug", slug)
     .single()
 
@@ -86,7 +86,7 @@ async function getEvent(
       eventName: "Error",
       eventID: "Error",
       organization: "Error",
-      capacity: 0,
+      signup_size: 0,
     }
   }
 
@@ -94,7 +94,7 @@ async function getEvent(
     eventName: data.name,
     eventID: data.id,
     organization: data.organization,
-    capacity: data.capacity,
+    signup_size: data.signup_size,
   }
 }
 
@@ -530,7 +530,7 @@ function ResultPage(props) {
           </div>
           <MoveRegistrationsModal
             eventId={eventDetails.eventID}
-            capacity={eventDetails.capacity}
+            signup_size={eventDetails.signup_size}
           />
           <label htmlFor="add-modal" className="btn btn-primary">
             Add Attendee
