@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react"
+import ThemeChange from "./ThemeChange"
+import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
-import { useRouter } from 'next/router'
-import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
-import ThemeChange from './ThemeChange'
+import { useRouter } from "next/router"
+import { useState, useEffect } from "react"
 
 export default function Account({ session }) {
   const [loading, setLoading] = useState(true)
@@ -37,14 +37,14 @@ export default function Account({ session }) {
       let response = await supabaseClient
         .from("organizations_admins")
         .select(`organization(name)`)
-        .eq("profile", session.user.id);
+        .eq("profile", session.user.id)
 
       if (response.error) {
-        throw error;
+        throw error
       } else {
         let orgs = response.data.map((org) => {
           if (org.organization && !Array.isArray(org.organization)) {
-            return org.organization.name;
+            return org.organization.name
           }
         });
         if(orgs.length > 0){
@@ -52,7 +52,6 @@ export default function Account({ session }) {
         }
         
       }
-
     } catch (error) {
       if (error instanceof Error) {
         alert(error.message)
@@ -149,7 +148,7 @@ export default function Account({ session }) {
         <button className="btn btn-primary"
           onClick={async () => {
             await supabaseClient.auth.signOut();
-            router.push('/account')
+            router.push('/')
           }}
         >
           Sign Out

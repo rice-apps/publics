@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react"
-import { useRouter } from "next/router"
+import { redirect_url } from "../../../utils/admin"
 import {
   SupabaseClient,
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
+import { useRouter } from "next/router"
+import { useState, useEffect } from "react"
 
 interface Volunteer {
   name: string
@@ -243,7 +244,7 @@ export const getServerSideProps = async (ctx) => {
     //navigate to account page
     return {
       redirect: {
-        destination: `http://${ctx.req.headers.host}/account`,
+        destination: `http://${ctx.req.headers.host}${redirect_url}`,
         permanent: false,
       },
     }

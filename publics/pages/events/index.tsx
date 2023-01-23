@@ -1,5 +1,6 @@
 import EventCard from "../../components/eventCards/EventCard"
 import LargeEventCard from "../../components/eventCards/LargeEventCard"
+import { redirect_url } from "../../utils/admin"
 import type { ListEvent } from "../../utils/types"
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
 import { SupabaseClient } from "@supabase/supabase-js"
@@ -226,6 +227,7 @@ function Events(props: Props) {
 // This gets called on every request
 export async function getServerSideProps(ctx) {
   const supabase = createServerSupabaseClient(ctx)
+
   const {
     data: { session },
   } = await supabase.auth.getSession()
@@ -233,7 +235,7 @@ export async function getServerSideProps(ctx) {
   if (!session)
     return {
       redirect: {
-        destination: `http://${ctx.req.headers.host}/account`,
+        destination: `http://${ctx.req.headers.host}${redirect_url}`,
         permanent: false,
       },
     }

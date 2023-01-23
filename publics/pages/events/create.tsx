@@ -1,3 +1,4 @@
+import { redirect_url } from "../../utils/admin"
 import {
   SupabaseClient,
   createServerSupabaseClient,
@@ -343,7 +344,7 @@ export async function getServerSideProps(ctx) {
   if (!session)
     return {
       redirect: {
-        destination: `http://${ctx.req.headers.host}/account`,
+        destination: `http://${ctx.req.headers.host}${redirect_url}`,
         permanent: false,
       },
     }
