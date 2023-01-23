@@ -180,9 +180,7 @@ export default function CheckIn(props) {
           </div>
         )}
         {minutes_start > 15 && !checked_in && !checked_out && (
-          <button className="mx-3 mt-8 btn btn-disabled" onClick={update}>
-            Check In
-          </button>
+          <button className="mx-3 mt-8 btn btn-disabled">Check In</button>
         )}
         {minutes_start <= 15 && !checked_in && !checked_out && (
           <button className="mx-3 mt-8 btn btn-primary" onClick={update}>
@@ -195,9 +193,7 @@ export default function CheckIn(props) {
           </button>
         )}
         {minutes_end > 15 && checked_in && !checked_out && (
-          <button className="mx-3 mt-8 btn btn-disabled" onClick={update}>
-            Check Out
-          </button>
+          <button className="mx-3 mt-8 btn btn-disabled">Check Out</button>
         )}
       </main>
     </div>

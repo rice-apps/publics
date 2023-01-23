@@ -3,16 +3,11 @@ import { authorize } from "../../../utils/admin"
 import { redirect_url } from "../../../utils/admin"
 import { registrationOpen } from "../../../utils/registration"
 import { ListEvent } from "../../../utils/types"
-import {
-  SupabaseClient,
-  createServerSupabaseClient,
-} from "@supabase/auth-helpers-nextjs"
+import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import { NextSeo } from "next-seo"
-import Head from "next/head"
-import Image from "next/image"
 import { useRouter } from "next/router"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export async function getServerSideProps(ctx) {
   const supabase = createServerSupabaseClient(ctx)
@@ -80,19 +75,28 @@ export async function getServerSideProps(ctx) {
   }
 
   // check if registered already
-  var userRegistered = false
+  let userRegistered = false
+  let waitlist = false
   const { data: check_user, error: error2 } = await supabase
     .from("registrations")
-    .select()
+    .select("id, waitlist")
     .match({ person: session.user.id, event: collData.id })
     .single()
 
   if (check_user !== null) {
     userRegistered = true
+    waitlist = check_user.waitlist
   }
 
   return {
-    props: { collData, authorized, sameCollege, userid, userRegistered },
+    props: {
+      collData,
+      authorized,
+      sameCollege,
+      userid,
+      userRegistered,
+      waitlist: waitlist,
+    },
   }
 }
 
@@ -107,6 +111,7 @@ type Props = {
   sameCollege: boolean
   userid: string
   userRegistered: boolean
+  waitlist: boolean
 }
 
 const Details = (props: Props) => {
@@ -114,6 +119,7 @@ const Details = (props: Props) => {
   const router = useRouter()
 
   const [loading, setLoading] = useState(false)
+  const [text, setText] = useState("")
 
   const event = props.collData
   const collCheck = props.sameCollege
@@ -143,12 +149,11 @@ const Details = (props: Props) => {
     if (error) {
       alert(error.message)
     } else {
-      alert(
-        "Your registration request has been processed. You will be notified via email about your registration status shortly"
+      setText(
+        "Your registration request has been processed. You will be notified via email about your registration status shortly."
       )
       setEnabled(false)
     }
-
     setLoading(false)
   }
 
@@ -194,6 +199,22 @@ const Details = (props: Props) => {
       !event.registration_closed &&
       reg_time.getTime() < curr_date.getTime()
   )
+
+  useEffect(() => {
+    if (reg_time.getTime() > curr_date.getTime()) {
+      setText("Registration is not open yet")
+    } else if (props.waitlist) {
+      setText(
+        "Your registration request has been processed. You will be notified via email about your registration status shortly."
+      )
+    } else if (props.userRegistered) {
+      setText(
+        "You are successfully registered for this event! You will receive an email shortly containing more details about the event."
+      )
+    } else if (event.registration_closed) {
+      setText("Event registration has already closed.")
+    }
+  }, [props.waitlist, props.userRegistered, event.registration_closed])
 
   return (
     <>
@@ -281,19 +302,24 @@ const Details = (props: Props) => {
             </div>
           </div>
           <div className="divider"></div>
-          <div className="flex-col ml-4 sm:ml-8 md:ml-24">
-            <h2 className="mb-2">Register for Event</h2>
-            {loading ? (
-              <button className="btn btn-loading">loading</button>
-            ) : (
-              <button
-                onClick={register}
-                className={enabled ? "btn btn-primary" : "btn btn-disabled"}
-              >
-                Register
-              </button>
-            )}
-          </div>
+          {enabled ? (
+            <div className="flex-col ml-4 sm:ml-8 md:ml-24">
+              <h2 className="mb-2">Register for Event</h2>
+              {loading ? (
+                <button className="btn btn-loading">loading</button>
+              ) : (
+                <button onClick={register} className={"btn btn-primary"}>
+                  Register
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-row justify-center">
+              <div className="bg-base-100 h-16 w-11/12 flex items-center justify-center">
+                <p>{text}</p>
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </>
