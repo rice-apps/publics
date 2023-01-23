@@ -21,5 +21,6 @@ export const handleLogin = async (
       redirectTo: getURL(),
     },
   })
-  // console.log(res)
+  console.log(res)
+  console.log(Object.keys(res.data))
 }

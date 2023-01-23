@@ -124,6 +124,9 @@ export default function Edit(props) {
       //     alert(uploadError.message)
       //   }
       // }
+      if (process.env.NEXT_PUBLIC_SUPABASE_URL === undefined) {
+        throw new Error("NEXT_PUBLIC_SUPABASE_URL is undefined")
+      }
       newImgUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
       "/storage/v1/object/public/images/" + slug + "/" + fileName
     }

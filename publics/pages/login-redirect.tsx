@@ -23,7 +23,7 @@ const LoginRedirect = () => {
       <div role="status">
         <svg
           aria-hidden="true"
-          className="mr-2 w-16 h-16 text-gray-300 animate-spin fill-blue-600"
+          className="mr-2 w-24 h-24 text-base-300 animate-spin fill-primary"
           viewBox="0 0 100 101"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
