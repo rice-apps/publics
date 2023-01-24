@@ -50,7 +50,7 @@ const MoveRegistrationsModal = (props) => {
       <input type="checkbox" id="move-modal" className="modal-toggle" />
       <div className="modal">
         <div className="modal-box">
-          <h3 className="font-bold text-lg">{`This action will move the first ${props.capacity} registrants from the waitlist and close registration. Proceed?`}</h3>
+          <h3 className="font-bold text-lg">{`This action will move the first ${props.signup_size} registrants from the waitlist and close registration. Proceed?`}</h3>
 
           <div className="modal-action">
             <label htmlFor="move-modal" className="btn btn-outline btn-primary">
