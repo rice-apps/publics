@@ -148,7 +148,7 @@ async function getRegistrations(
 
     let formatted_object = {
       person_id: current_object["person"],
-      created_at: new Date(current_object["created_at"]!).toLocaleString(),
+      created_at: current_object["created_at"],
       first_name: profiles["first_name"],
       last_name: profiles["last_name"],
       email: profiles["netid"] + "@rice.edu",
@@ -650,7 +650,7 @@ function ResultPage(props) {
                           </div>
                         </div>
                       </td>
-                      <td>{row["created_at"]}</td>
+                      <td>{new Date(row["created_at"]).toLocaleString()}</td>
                       <td>{row["first_name"]}</td>
                       <td>{row["last_name"]}</td>
                       <td>{row["email"]}</td>

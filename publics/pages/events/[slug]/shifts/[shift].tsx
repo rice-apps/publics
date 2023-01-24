@@ -155,14 +155,14 @@ async function getVolunteers(
 
     let formatted_object = {
       person_id: current_object["profile"],
-      created_at: new Date(current_object["created_at"]!).toLocaleString(),
+      created_at: current_object["created_at"],
       first_name: profiles["first_name"],
       last_name: profiles["last_name"],
       email: profiles["netid"] + "@rice.edu",
       netid: profiles["netid"],
       college: profiles["organizations"].name,
-      start_time: new Date(shifts["start"]).toLocaleString(),
-      end_time: new Date(shifts["end"]).toLocaleString(),
+      start_time: shifts["start"],
+      end_time: shifts["end"],
       checked_in: current_object["checked_in"],
       is_counter: current_object["is_counter"],
     }
@@ -661,8 +661,16 @@ function VolunteerPage(props) {
                       <td>{row["email"]}</td>
                       <td>{row["netid"]}</td>
                       <td>{row["college"]}</td>
-                      <td>{row["start_time"]}</td>
-                      <td>{row["end_time"]}</td>
+                      <td>
+                        {new Date(row["start_time"]).toLocaleString("en-US", {
+                          timeZone: "CST",
+                        })}
+                      </td>
+                      <td>
+                        {new Date(row["end_time"]).toLocaleString("en-US", {
+                          timeZone: "CST",
+                        })}
+                      </td>
                       <td>
                         <input
                           type="checkbox"
