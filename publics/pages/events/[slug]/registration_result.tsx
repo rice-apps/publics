@@ -8,6 +8,7 @@ import {
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
+import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 
 /**
@@ -193,6 +194,8 @@ function ResultPage(props) {
   const [copiedEmails, setCopiedEmails] = useState(false)
   const [action, setAction] = useState("")
 
+  const router = useRouter()
+
   // Setup realtime for updates to registration table
   useEffect(() => {
     const channel = supabase
@@ -224,7 +227,11 @@ function ResultPage(props) {
   }, [])
 
   useEffect(() => {
-    window.history.pushState(null, "", `?page=${page}`)
+    router.push(
+      `/events/${props.params.slug}/registration_result/?page=${page}`,
+      undefined,
+      { shallow: true }
+    )
   }, [page])
 
   /**
@@ -474,13 +481,12 @@ function ResultPage(props) {
                     strokeLinejoin="round"
                   ></g>
                   <g id="SVGRepo_iconCarrier">
-                    {" "}
                     <path
                       d="M11 12L6 7V6L19 6L19 7L14 12V17L11 19V12Z"
                       stroke="currentColor"
-                      stroke-width="1.2"
+                      strokeWidth="1.2"
                       strokeLinecap="square"
-                    ></path>{" "}
+                    ></path>
                   </g>
                 </svg>
               </label>

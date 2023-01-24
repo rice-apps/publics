@@ -135,7 +135,8 @@ function Events(props: Props) {
 
   function handleClick(tab: number) {
     setOpenTab(tab)
-    history.pushState(null, "", `?tab=${tab}`)
+    // add ?tab=${tab} to the url
+    router.push(`/events?tab=${tab}`, undefined, { shallow: true })
   }
 
   return (
