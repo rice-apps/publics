@@ -347,9 +347,9 @@ function VolunteerPage(props) {
     //check if volunteer is already in table
     const { data: inTable } = await supabase
       .from("volunteers")
-      .select("id")
+      .select("id, profile!inner(netid)")
       .eq("event", eventDetails!.eventID)
-      .eq("profile", props.user.id)
+      .eq("profile.netid", netID)
       .eq("shift", shift)
       .single()
 
