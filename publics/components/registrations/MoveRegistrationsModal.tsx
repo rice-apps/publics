@@ -1,6 +1,11 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 
-const MoveRegistrationsModal = (props) => {
+interface Props {
+  eventId: string
+  signup_size: number
+}
+
+const MoveRegistrationsModal = (props: Props) => {
   const supabase = useSupabaseClient()
 
   const updateRegistrations = async (eventId: string) => {
