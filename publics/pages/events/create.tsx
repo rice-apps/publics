@@ -1,3 +1,4 @@
+import { redirect_url } from "../../utils/admin"
 import {
   SupabaseClient,
   createServerSupabaseClient,
@@ -72,8 +73,15 @@ export default function Create(props) {
       if (uploadError) {
         alert(uploadError.message)
       }
-      url = process.env.NEXT_PUBLIC_SUPABASE_URL
-      "/storage/v1/object/public/images/" + slug + "/" + fileName
+      if (process.env.NEXT_PUBLIC_SUPABASE_URL == undefined) {
+        throw new Error("NEXT_PUBLIC_SUPABASE_URL is undefined")
+      }
+      url =
+        process.env.NEXT_PUBLIC_SUPABASE_URL +
+        "/storage/v1/object/public/images/" +
+        slug +
+        "/" +
+        fileName
     }
 
     let insert1 = {
@@ -346,7 +354,7 @@ export async function getServerSideProps(ctx) {
   if (!session)
     return {
       redirect: {
-        destination: `http://${ctx.req.headers.host}/account`,
+        destination: `http://${ctx.req.headers.host}${redirect_url}`,
         permanent: false,
       },
     }

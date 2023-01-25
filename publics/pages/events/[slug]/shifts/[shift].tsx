@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react"
-import { useSupabaseClient } from "@supabase/auth-helpers-react"
+import { redirect_url } from "../../../../utils/admin"
 import {
   SupabaseClient,
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs"
+import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import { useRouter } from "next/router"
+import { useEffect, useState } from "react"
 
 /**
  * Simple type containing a friendly name for an event, and the UUID of the event
@@ -154,14 +155,14 @@ async function getVolunteers(
 
     let formatted_object = {
       person_id: current_object["profile"],
-      created_at: new Date(current_object["created_at"]!).toLocaleString(),
+      created_at: current_object["created_at"],
       first_name: profiles["first_name"],
       last_name: profiles["last_name"],
       email: profiles["netid"] + "@rice.edu",
       netid: profiles["netid"],
       college: profiles["organizations"].name,
-      start_time: new Date(shifts["start"]).toLocaleString(),
-      end_time: new Date(shifts["end"]).toLocaleString(),
+      start_time: shifts["start"],
+      end_time: shifts["end"],
       checked_in: current_object["checked_in"],
       is_counter: current_object["is_counter"],
     }
@@ -209,7 +210,7 @@ export async function getServerSideProps(context) {
     //navigate to account page
     return {
       redirect: {
-        destination: `http://${context.req.headers.host}/account`,
+        destination: `http://${ctx.req.headers.host}${redirect_url}`,
         permanent: false,
       },
     }
@@ -346,9 +347,9 @@ function VolunteerPage(props) {
     //check if volunteer is already in table
     const { data: inTable } = await supabase
       .from("volunteers")
-      .select("id")
+      .select("id, profile!inner(netid)")
       .eq("event", eventDetails!.eventID)
-      .eq("profile", props.user.id)
+      .eq("profile.netid", netID)
       .eq("shift", shift)
       .single()
 
@@ -465,23 +466,24 @@ function VolunteerPage(props) {
           <div className="dropdown">
             <label tabIndex={0} className="btn btn-circle btn-outline">
               <svg
-                fill="#000000"
                 className="h-8 w-8"
-                viewBox="-5.5 0 32 32"
-                version="1.1"
-                stroke="currentColor"
+                viewBox="0 0 25 25"
+                fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                 <g
                   id="SVGRepo_tracerCarrier"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 ></g>
                 <g id="SVGRepo_iconCarrier">
-                  {" "}
-                  <title>filter</title>{" "}
-                  <path d="M8.48 25.72c-0.16 0-0.32-0.040-0.44-0.12-0.24-0.16-0.4-0.44-0.4-0.72v-8.72l-7.48-8.48c-0.2-0.24-0.28-0.6-0.12-0.88s0.44-0.48 0.76-0.48h19.8c0.32 0 0.64 0.2 0.76 0.48 0.12 0.32 0.080 0.64-0.12 0.92l-7.8 8.8v6.32c0 0.32-0.2 0.6-0.48 0.76l-4.080 2c-0.080 0.080-0.24 0.12-0.4 0.12zM2.64 7.96l6.48 7.32c0.12 0.16 0.2 0.36 0.2 0.56v7.64l2.4-1.2v-6.080c0-0.2 0.080-0.4 0.2-0.56l6.8-7.68c0.040 0-16.080 0-16.080 0z"></path>{" "}
+                  <path
+                    d="M11 12L6 7V6L19 6L19 7L14 12V17L11 19V12Z"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                    strokeLinecap="square"
+                  ></path>
                 </g>
               </svg>
             </label>
@@ -660,8 +662,16 @@ function VolunteerPage(props) {
                       <td>{row["email"]}</td>
                       <td>{row["netid"]}</td>
                       <td>{row["college"]}</td>
-                      <td>{row["start_time"]}</td>
-                      <td>{row["end_time"]}</td>
+                      <td>
+                        {new Date(row["start_time"]).toLocaleString("en-US", {
+                          timeZone: "CST",
+                        })}
+                      </td>
+                      <td>
+                        {new Date(row["end_time"]).toLocaleString("en-US", {
+                          timeZone: "CST",
+                        })}
+                      </td>
                       <td>
                         <input
                           type="checkbox"

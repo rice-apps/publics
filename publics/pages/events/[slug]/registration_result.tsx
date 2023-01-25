@@ -1,13 +1,16 @@
-import { useEffect, useState } from "react"
-import { useSupabaseClient } from "@supabase/auth-helpers-react"
+import ErrorMsg from "../../../components/ErrorMsg"
+import SuccessMsg from "../../../components/SuccessMsg"
+import MoveRegistrationsModal from "../../../components/registrations/MoveRegistrationsModal"
+import { redirect_url } from "../../../utils/admin"
+import { getPagination } from "../../../utils/registration"
 import {
   SupabaseClient,
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs"
-import { getPagination } from "../../../utils/registration"
-import SuccessMsg from "../../../components/SuccessMsg"
-import ErrorMsg from "../../../components/ErrorMsg"
-import MoveRegistrationsModal from "../../../components/registrations/MoveRegistrationsModal"
+import { useSupabaseClient } from "@supabase/auth-helpers-react"
+import { useRouter } from "next/router"
+import { useEffect, useState } from "react"
+
 /**
  * Simple type containing a friendly name for an event, and the UUID of the event
  */
@@ -17,7 +20,7 @@ type EventDetails = {
   //uuid of event
   eventID: string //Using string as unsure what UUID type is in TS
   organization: string //Organization ID overseeing this event
-  capacity: number //Capacity of this event
+  signup_size: number //Sign up size of this event
 }
 
 /**
@@ -75,7 +78,7 @@ async function getEvent(
 ): Promise<EventDetails> {
   const { data, error } = await supabase
     .from("events")
-    .select("id, name, organization, capacity")
+    .select("id, name, organization, signup_size")
     .eq("slug", slug)
     .single()
 
@@ -84,7 +87,7 @@ async function getEvent(
       eventName: "Error",
       eventID: "Error",
       organization: "Error",
-      capacity: 0,
+      signup_size: 0,
     }
   }
 
@@ -92,7 +95,7 @@ async function getEvent(
     eventName: data.name,
     eventID: data.id,
     organization: data.organization,
-    capacity: data.capacity,
+    signup_size: data.signup_size,
   }
 }
 
@@ -146,7 +149,7 @@ async function getRegistrations(
 
     let formatted_object = {
       person_id: current_object["person"],
-      created_at: new Date(current_object["created_at"]!).toLocaleString(),
+      created_at: current_object["created_at"],
       first_name: profiles["first_name"],
       last_name: profiles["last_name"],
       email: profiles["netid"] + "@rice.edu",
@@ -160,71 +163,6 @@ async function getRegistrations(
   }
 
   return formatted_data
-}
-
-/**
- * Used to reliably get slug and avoid first render problems
- * Will probably be used later for loading other data
- * @param context - default paramater for server side props
- * @returns props holding the slug
- */
-export const getServerSideProps = async (ctx) => {
-  // Create authenticated Supabase Client
-  const supabase = createServerSupabaseClient(ctx)
-  // Check if we have a session
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-
-  if (!session) {
-    //navigate to account page
-    return {
-      redirect: {
-        destination: `http://${ctx.req.headers.host}/account`,
-        permanent: false,
-      },
-    }
-  }
-
-  //Get event details
-  const event_detail = await getEvent(supabase, ctx.params.slug)
-  if (event_detail.eventName === "Error") {
-    return {
-      redirect: {
-        destination: `http://${ctx.req.headers.host}/events/${ctx.params.slug}`,
-        permanent: false,
-      },
-    }
-  }
-  //Get admin status
-  const admin_status = await isAdminUser(
-    supabase,
-    event_detail,
-    session.user.id
-  )
-  //If not admin, redirect to 404 page
-  if (!admin_status) {
-    return {
-      redirect: {
-        destination: `http://${ctx.req.headers.host}/events/${ctx.params.slug}`,
-        permanent: false,
-      },
-    }
-  }
-  //Get registrations for that event
-  const page = +ctx.query.page || 0
-  const registrations = await getRegistrations(supabase, event_detail)
-
-  return {
-    props: {
-      initialSession: session,
-      user: session.user,
-      params: ctx.params,
-      registrations,
-      event_detail,
-      page: page,
-    },
-  }
 }
 
 /**
@@ -255,6 +193,8 @@ function ResultPage(props) {
   const [resultSuccess, setResultSuccess] = useState(false)
   const [copiedEmails, setCopiedEmails] = useState(false)
   const [action, setAction] = useState("")
+
+  const router = useRouter()
 
   // Setup realtime for updates to registration table
   useEffect(() => {
@@ -287,7 +227,11 @@ function ResultPage(props) {
   }, [])
 
   useEffect(() => {
-    window.history.pushState(null, "", `?page=${page}`)
+    router.push(
+      `/events/${props.params.slug}/registration_result/?page=${page}`,
+      undefined,
+      { shallow: true }
+    )
   }, [page])
 
   /**
@@ -525,23 +469,24 @@ function ResultPage(props) {
             <div className="dropdown">
               <label tabIndex={0} className="btn btn-circle btn-outline">
                 <svg
-                  fill="#000000"
                   className="h-8 w-8"
-                  stroke="currentColor"
-                  viewBox="-5.5 0 32 32"
-                  version="1.1"
+                  viewBox="0 0 25 25"
+                  fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                   <g
                     id="SVGRepo_tracerCarrier"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   ></g>
                   <g id="SVGRepo_iconCarrier">
-                    {" "}
-                    <title>filter</title>{" "}
-                    <path d="M8.48 25.72c-0.16 0-0.32-0.040-0.44-0.12-0.24-0.16-0.4-0.44-0.4-0.72v-8.72l-7.48-8.48c-0.2-0.24-0.28-0.6-0.12-0.88s0.44-0.48 0.76-0.48h19.8c0.32 0 0.64 0.2 0.76 0.48 0.12 0.32 0.080 0.64-0.12 0.92l-7.8 8.8v6.32c0 0.32-0.2 0.6-0.48 0.76l-4.080 2c-0.080 0.080-0.24 0.12-0.4 0.12zM2.64 7.96l6.48 7.32c0.12 0.16 0.2 0.36 0.2 0.56v7.64l2.4-1.2v-6.080c0-0.2 0.080-0.4 0.2-0.56l6.8-7.68c0.040 0-16.080 0-16.080 0z"></path>{" "}
+                    <path
+                      d="M11 12L6 7V6L19 6L19 7L14 12V17L11 19V12Z"
+                      stroke="currentColor"
+                      strokeWidth="1.2"
+                      strokeLinecap="square"
+                    ></path>
                   </g>
                 </svg>
               </label>
@@ -593,7 +538,7 @@ function ResultPage(props) {
           </div>
           <MoveRegistrationsModal
             eventId={eventDetails.eventID}
-            capacity={eventDetails.capacity}
+            signup_size={eventDetails.signup_size}
           />
           <label htmlFor="add-modal" className="btn btn-primary">
             Add Attendee
@@ -711,7 +656,7 @@ function ResultPage(props) {
                           </div>
                         </div>
                       </td>
-                      <td>{row["created_at"]}</td>
+                      <td>{new Date(row["created_at"]).toLocaleString()}</td>
                       <td>{row["first_name"]}</td>
                       <td>{row["last_name"]}</td>
                       <td>{row["email"]}</td>
@@ -772,6 +717,71 @@ function ResultPage(props) {
       </div>
     </div>
   )
+}
+
+/**
+ * Used to reliably get slug and avoid first render problems
+ * Will probably be used later for loading other data
+ * @param context - default paramater for server side props
+ * @returns props holding the slug
+ */
+export const getServerSideProps = async (ctx) => {
+  // Create authenticated Supabase Client
+  const supabase = createServerSupabaseClient(ctx)
+  // Check if we have a session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  if (!session) {
+    //navigate to account page
+    return {
+      redirect: {
+        destination: `http://${ctx.req.headers.host}${redirect_url}`,
+        permanent: false,
+      },
+    }
+  }
+
+  //Get event details
+  const event_detail = await getEvent(supabase, ctx.params.slug)
+  if (event_detail.eventName === "Error") {
+    return {
+      redirect: {
+        destination: `http://${ctx.req.headers.host}/events/${ctx.params.slug}`,
+        permanent: false,
+      },
+    }
+  }
+  //Get admin status
+  const admin_status = await isAdminUser(
+    supabase,
+    event_detail,
+    session.user.id
+  )
+  //If not admin, redirect to 404 page
+  if (!admin_status) {
+    return {
+      redirect: {
+        destination: `http://${ctx.req.headers.host}/events/${ctx.params.slug}`,
+        permanent: false,
+      },
+    }
+  }
+  //Get registrations for that event
+  const page = +ctx.query.page || 0
+  const registrations = await getRegistrations(supabase, event_detail)
+
+  return {
+    props: {
+      initialSession: session,
+      user: session.user,
+      params: ctx.params,
+      registrations,
+      event_detail,
+      page: page,
+    },
+  }
 }
 
 export default ResultPage

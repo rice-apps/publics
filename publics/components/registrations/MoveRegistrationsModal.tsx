@@ -1,6 +1,11 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 
-const MoveRegistrationsModal = (props) => {
+interface Props {
+  eventId: string
+  signup_size: number
+}
+
+const MoveRegistrationsModal = (props: Props) => {
   const supabase = useSupabaseClient()
 
   const updateRegistrations = async (eventId: string) => {
@@ -20,7 +25,10 @@ const MoveRegistrationsModal = (props) => {
       return
     }
     // move registrations
-    const funcName = event.registration_mode == "Random" ? "update_registrations_random" : "update_registrations"
+    const funcName =
+      event.registration_mode == "Random"
+        ? "update_registrations_random"
+        : "update_registrations"
 
     const { data: _, error } = await supabase.rpc(funcName, {
       event_id: eventId,
@@ -52,7 +60,7 @@ const MoveRegistrationsModal = (props) => {
       <input type="checkbox" id="move-modal" className="modal-toggle" />
       <div className="modal">
         <div className="modal-box">
-          <h3 className="font-bold text-lg">{`This action will move the first ${props.capacity} registrants from the waitlist and close registration. Proceed?`}</h3>
+          <h3 className="font-bold text-lg">{`This action will move the first ${props.signup_size} registrants from the waitlist and close registration. Proceed?`}</h3>
 
           <div className="modal-action">
             <label htmlFor="move-modal" className="btn btn-outline btn-primary">

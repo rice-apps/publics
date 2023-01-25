@@ -26,8 +26,9 @@ const LargeEventCard = (props: Props) => {
     } else if (props.type === "volunteering") {
       return (
         <div className="card-actions sm:justify-end">
-          <button className="btn btn-primary">Check In</button>
-
+          <Link href={`${link}/checkin`} passHref>
+            <button className="btn btn-primary">Check In</button>
+          </Link>
           <Link href={`${link}/counter`} passHref>
             <button className="btn btn-primary btn-outline">
               Capacity Counter
