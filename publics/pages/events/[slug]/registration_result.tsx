@@ -186,15 +186,30 @@ function ResultPage(props) {
   const [search, setSearch] = useState("")
   // Pagination
   const [page, setPage] = useState(props.page)
-  const { from, to } = getPagination(page, 50)
+  const { from, to } = getPagination(page, 25)
 
   //Confirmation Message
   const [resultError, setResultError] = useState(false)
   const [resultSuccess, setResultSuccess] = useState(false)
   const [copiedEmails, setCopiedEmails] = useState(false)
   const [action, setAction] = useState("")
+  const [sortDesc, setSortDesc] = useState(true)
 
   const router = useRouter()
+
+  // this should reverse the sorting each time it is pressed
+  const sortRegistrationsByDate = () => {
+    setRegistration((prev) => {
+      let new_arr = [...prev]
+      new_arr.sort((a, b) => {
+        return sortDesc
+          ? new Date(b.created_at) - new Date(a.created_at)
+          : new Date(a.created_at) - new Date(b.created_at)
+      })
+      return new_arr
+    })
+    setSortDesc(!sortDesc)
+  }
 
   // Setup realtime for updates to registration table
   useEffect(() => {
@@ -349,33 +364,20 @@ function ResultPage(props) {
     }
   }
 
-  async function handleSearch() {
-    setRegistration(await getRegistrations(supabase, eventDetails, search))
-    setPage(0)
-  }
-
-  function handleKeyPress(event) {
-    if (event.key === "Enter") {
-      handleSearch()
-    }
-  }
-
   async function handlePageIncrement() {
     setPage(page + 1)
-    setRegistration(await getRegistrations(supabase, eventDetails, search))
   }
-
-  async function handlePageDeincrement() {
+  async function handlePageDecrement() {
     setPage(page - 1)
-    setRegistration(await getRegistrations(supabase, eventDetails, search))
   }
 
   function filterRegistrations() {
     return registration.filter((row) => {
       return (
-        filterByAll ||
-        (row.picked_up_wristband == filterByWristband &&
-          row.waitlist !== filterByRegistered)
+        (filterByAll ||
+          (row.picked_up_wristband == filterByWristband &&
+            row.waitlist !== filterByRegistered)) &&
+        row.netid.toLowerCase().includes(search.toLowerCase())
       )
     })
   }
@@ -414,12 +416,6 @@ function ResultPage(props) {
               ></path>
             </svg>
           </div>
-          {/* <input
-            type="text"
-            className="block w-full p-4 pl-10 input input-bordered w-full max-w-xs text-sm"
-            placeholder="Search NetIDs"
-            onChange={(e) => setSearch(e.target.value)}
-          /> */}
           <div className="form-control">
             <div className="input-group">
               <input
@@ -427,9 +423,9 @@ function ResultPage(props) {
                 placeholder="Search NetIDs…"
                 className="input input-bordered"
                 onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={handleKeyPress}
+                // onKeyDown={handleKeyPress}
               />
-              <button className="btn btn-square" onClick={handleSearch}>
+              <button className="btn btn-square">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6"
@@ -585,7 +581,21 @@ function ResultPage(props) {
             <tr>
               <th></th>
               <th>Remove?</th>
-              <th>Date and Time</th>
+              <th scope="col" className="px-6 py-3">
+                <div className="flex items-center">
+                  Date and Time
+                  <svg
+                    onClick={sortRegistrationsByDate}
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-3 h-3 ml-1"
+                    aria-hidden="true"
+                    fill="currentColor"
+                    viewBox="0 0 320 512"
+                  >
+                    <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                  </svg>
+                </div>
+              </th>
               <th>First Name</th>
               <th>Last Name</th>
               <th>Email Address</th>
@@ -691,7 +701,7 @@ function ResultPage(props) {
             <button
               className="btn"
               disabled={page < 1}
-              onClick={handlePageDeincrement}
+              onClick={handlePageDecrement}
             >
               «
             </button>
@@ -699,7 +709,7 @@ function ResultPage(props) {
             <button
               className="btn"
               disabled={
-                filterRegistrations().splice(from, to).length !== 50 ||
+                filterRegistrations().splice(from, to).length !== 25 ||
                 page > 100
               }
               onClick={handlePageIncrement}

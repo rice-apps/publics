@@ -8,9 +8,11 @@ export default function Account({ session }) {
   const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [adminOrgs, setAdminOrgs] = useState("Not an organization admin")
-  const [avatarUrl, setAvatarUrl] = useState("https://t4.ftcdn.net/jpg/04/08/24/43/360_F_408244382_Ex6k7k8XYzTbiXLNJgIL8gssebpLLBZQ.jpg")
-  const supabaseClient = useSupabaseClient();
-  const router = useRouter();
+  const [avatarUrl, setAvatarUrl] = useState(
+    "https://t4.ftcdn.net/jpg/04/08/24/43/360_F_408244382_Ex6k7k8XYzTbiXLNJgIL8gssebpLLBZQ.jpg"
+  )
+  const supabaseClient = useSupabaseClient()
+  const router = useRouter()
 
   async function getProfile() {
     try {
@@ -46,11 +48,10 @@ export default function Account({ session }) {
           if (org.organization && !Array.isArray(org.organization)) {
             return org.organization.name
           }
-        });
-        if(orgs.length > 0){
-          setAdminOrgs(orgs.join(", "));
+        })
+        if (orgs.length > 0) {
+          setAdminOrgs(orgs.join(", "))
         }
-        
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -60,15 +61,12 @@ export default function Account({ session }) {
     } finally {
       setLoading(false)
     }
-
   }
 
   useEffect(() => {
     if (session) {
-    getProfile()
+      getProfile()
     }
-    
-    
   }, [session])
 
   type Profile = {
@@ -79,26 +77,25 @@ export default function Account({ session }) {
     updated_at?: Date
   }
 
-  
   // console.log()
   return (
     <div className="flex flex-col justify-center items-center space-y-10">
-
       <div className="pt-10">
         <h1 className="text-3xl font-bold">Account Information</h1>
       </div>
 
       <div className="flex items-center space-x-4">
         <div className="avatar">
-        <div className="w-12 rounded-full">
-          <img src={avatarUrl} />
-        </div >
+          <div className="w-12 rounded-full">
+            <img src={avatarUrl} />
+          </div>
         </div>
         <div>
-          <p className="text-lg font-medium"> {profile?.first_name} {profile?.last_name} </p>
+          <p className="text-lg font-medium">
+            {profile?.first_name} {profile?.last_name}
+          </p>
         </div>
       </div>
-      
 
       <div className="card bg-base-100 px-10 py-5 max-w-md">
         <div className="flex place-content-center space-x-4 py-1">
@@ -106,7 +103,9 @@ export default function Account({ session }) {
             <p className="font-medium"> Name: </p>
           </div>
           <div>
-            <p className="text-slate-500"> {profile?.first_name} {profile?.last_name} </p>
+            <p className="text-slate-500">
+              {profile?.first_name} {profile?.last_name}
+            </p>
           </div>
         </div>
         <div className="flex place-content-center space-x-4 py-1">
@@ -145,10 +144,11 @@ export default function Account({ session }) {
       </div>
 
       <div>
-        <button className="btn btn-primary"
+        <button
+          className="btn btn-primary"
           onClick={async () => {
-            await supabaseClient.auth.signOut();
-            router.push('/')
+            await supabaseClient.auth.signOut()
+            router.push("/")
           }}
         >
           Sign Out
@@ -156,10 +156,11 @@ export default function Account({ session }) {
       </div>
 
       <div>
-        <p className="text-xs text-slate-500"> Notice: Please contact the Office of the Registrar to change your preferred name</p>
+        <p className="text-xs text-slate-500">
+          Notice: Please contact the Office of the Registrar to change your
+          preferred name
+        </p>
       </div>
-
     </div>
-      
   )
 }
