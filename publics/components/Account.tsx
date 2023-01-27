@@ -91,10 +91,7 @@ export default function Account({ session }) {
           </div>
         </div>
         <div>
-          <p className="text-lg font-medium">
-            {" "}
-            {profile?.first_name} {profile?.last_name}{" "}
-          </p>
+          <p className="text-lg font-medium">{profile?.first_name} {profile?.last_name}</p>
         </div>
       </div>
 
@@ -104,10 +101,7 @@ export default function Account({ session }) {
             <p className="font-medium"> Name: </p>
           </div>
           <div>
-            <p className="text-slate-500">
-              {" "}
-              {profile?.first_name} {profile?.last_name}{" "}
-            </p>
+            <p className="text-slate-500">{profile?.first_name} {profile?.last_name}</p>
           </div>
         </div>
         <div className="flex place-content-center space-x-4 py-1">
@@ -159,7 +153,6 @@ export default function Account({ session }) {
 
       <div>
         <p className="text-xs text-slate-500">
-          {" "}
           Notice: Please contact the Office of the Registrar to change your
           preferred name
         </p>

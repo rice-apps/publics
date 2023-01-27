@@ -254,7 +254,7 @@ const Details = (props: Props) => {
                     ", " +
                     month[event_datetime.getMonth()] +
                     " " +
-                    event_datetime.getDate()}{" "}
+                    event_datetime.getDate()}
                 </p>
                 <span>
                   <p>

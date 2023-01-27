@@ -19,6 +19,10 @@ function MyApp({
     <>
       <Head>
         <link rel="icon" href="/owl.png" />
+        <meta
+          name="google-site-verification"
+          content="pQJj2FGXHM4uMmvH23WE8XS_7GPJIiCUXMwqc_24wOI"
+        />
       </Head>
       <DefaultSeo
         title="PartyOwl"
