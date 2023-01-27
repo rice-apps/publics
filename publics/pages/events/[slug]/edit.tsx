@@ -51,7 +51,7 @@ export default function Edit(props) {
   const [collegeRegistration, setCollegeRegistration] = useState(Date)
   const [registrationDatetime, setRegistrationDatetime] = useState(Date)
   const [signupSize, setSignupSize] = useState(Number)
-  const [waitlistSize, setWaitlistSize] = useState(Number)
+  const [registrationMode, setRegistrationMode] = useState(String)
 
   const [orgs] = useState<any[]>(props.orgs)
   const [uploadImg, setUploadImg] = useState<File>()
@@ -78,17 +78,16 @@ export default function Edit(props) {
     setDescription(data.description)
     setRegistration(data.registration)
     setImgUrl(data.img_url)
+    setRegistrationMode(data.registration_mode)
 
     if (data.registration) {
       setCollegeRegistration(format_date(data.college_registration_datetime))
       setRegistrationDatetime(format_date(data.registration_datetime))
       setSignupSize(data.signup_size)
-      setWaitlistSize(data.waitlist_size)
     } else {
       setCollegeRegistration("purposely-nonformatted-date")
       setRegistrationDatetime("purposely-nonformatted-date")
       setSignupSize(0)
-      setWaitlistSize(0)
     }
   }
 
@@ -145,12 +144,12 @@ export default function Edit(props) {
       description,
       img_url: newImgUrl,
       registration,
+      registration_mode: registrationMode,
       ...(registration
         ? {
             college_registration_datetime: new Date(collegeRegistration),
             registration_datetime: new Date(registrationDatetime),
             signup_size: signupSize,
-            waitlist_size: waitlistSize,
           }
         : {}),
     }
@@ -189,7 +188,7 @@ export default function Edit(props) {
                 className="input input-bordered w-full max-w-xs hover:border-primary focus:outline-none focus:ring focus:ring-primary-focus"
               />
             </div>
-            <div className="form-control w-full max-w-xs mr-2">
+            {/* <div className="form-control w-full max-w-xs mr-2">
               <label className="label">
                 <span className="label-text">Slug</span>
               </label>
@@ -200,8 +199,8 @@ export default function Edit(props) {
                 required
                 className="input input-bordered w-full max-w-xs hover:border-primary focus:outline-none focus:ring focus:ring-primary-focus"
               />
-            </div>
-            <div className="form-control w-full max-w-xs">
+            </div> */}
+            <div className="form-control w-full max-w-xs mr-2">
               <label className="label">
                 <span className="label-text">Date</span>
               </label>
@@ -213,9 +212,7 @@ export default function Edit(props) {
                 className="input input-bordered w-full max-w-xs hover:border-primary focus:outline-none focus:ring focus:ring-primary-focus"
               />
             </div>
-          </div>
-          <div className="sm:flex">
-            <div className="form-control w-full max-w-xs mr-2">
+            <div className="form-control w-full max-w-xs">
               <label className="label">
                 <span className="label-text hover:border-primary focus:outline-none focus:ring focus:ring-primary-focus">
                   Host
@@ -243,6 +240,8 @@ export default function Edit(props) {
                 )}
               </select>
             </div>
+          </div>
+          <div className="sm:flex">
             <div className="form-control w-full max-w-xs mr-2">
               <label className="label">
                 <span className="label-text">Location</span>
@@ -358,15 +357,18 @@ export default function Edit(props) {
               </div>
               <div className="form-control w-full max-w-xs">
                 <label className="label">
-                  <span className="label-text">Waitlist Maximum</span>
+                  <span className="label-text">Registration Type</span>
                 </label>
-                <input
-                  value={waitlistSize}
-                  onChange={(e) => setWaitlistSize(e.target.valueAsNumber)}
-                  required={registration}
-                  type="number"
-                  className="input input-bordered w-full max-w-xs hover:border-primary focus:outline-none focus:ring focus:ring-primary-focus"
-                />
+                <select
+                  className="select select-bordered w-full max-w-xs hover:border-primary focus:outline-none focus:ring focus:ring-primary-focus"
+                  value={registrationMode}
+                  onChange={(e) => {
+                    setRegistrationMode(e.target.value)
+                  }}
+                >
+                  <option>Random</option>
+                  <option>First come first serve</option>
+                </select>
               </div>
             </div>
           </div>

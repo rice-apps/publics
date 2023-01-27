@@ -1,7 +1,7 @@
-import Link from "next/link"
 import { registrationOpen } from "../../utils/registration"
 import { ListEvent } from "../../utils/types"
 import { eventCardDate } from "./cardDate"
+import Link from "next/link"
 
 type Props = {
   event: ListEvent
@@ -27,9 +27,7 @@ const LargeEventCard = (props: Props) => {
       return (
         <div className="card-actions sm:justify-end">
           <Link href={`${link}/checkin`} passHref>
-            <button className="btn btn-primary">
-              Check In
-            </button>
+            <button className="btn btn-primary">Check In</button>
           </Link>
           <Link href={`${link}/counter`} passHref>
             <button className="btn btn-primary btn-outline">

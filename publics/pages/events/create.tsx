@@ -52,7 +52,7 @@ export default function Create(props) {
   const [collegeRegistration, setCollegeRegistration] = useState(Date)
   const [registrationDatetime, setRegistrationDatetime] = useState(Date)
   const [signupSize, setSignupSize] = useState(Number)
-  const [waitlistSize, setWaitlistSize] = useState(Number)
+  const [registrationMode, setRegistrationMode] = useState(String)
   const [uploadImg, setUploadImg] = useState<File>()
 
   const supabase = useSupabaseClient()
@@ -94,6 +94,7 @@ export default function Create(props) {
       description: description,
       registration: registration,
       img_url: url == "" ? null : url,
+      registration_mode: registrationMode,
     }
 
     let insert2 = {}
@@ -102,7 +103,6 @@ export default function Create(props) {
         college_registration_datetime: new Date(collegeRegistration),
         registration_datetime: new Date(registrationDatetime),
         signup_size: signupSize,
-        waitlist_size: waitlistSize,
       }
     }
 
@@ -317,15 +317,18 @@ export default function Create(props) {
               </div>
               <div className="form-control w-full max-w-xs">
                 <label className="label">
-                  <span className="label-text">Waitlist Maximum</span>
+                  <span className="label-text">Registration Type</span>
                 </label>
-                <input
-                  value={waitlistSize}
-                  onChange={(e) => setWaitlistSize(e.target.valueAsNumber)}
-                  required={registration}
-                  type="number"
-                  className="input input-bordered w-full max-w-xs hover:border-primary focus:outline-none focus:ring focus:ring-primary-focus"
-                />
+                <select
+                  className="select select-bordered w-full max-w-xs hover:border-primary focus:outline-none focus:ring focus:ring-primary-focus"
+                  value={registrationMode}
+                  onChange={(e) => {
+                    setRegistrationMode(e.target.value)
+                  }}
+                >
+                  <option>Random</option>
+                  <option>First come first serve</option>
+                </select>
               </div>
             </div>
           </div>

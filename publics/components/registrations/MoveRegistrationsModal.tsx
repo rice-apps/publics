@@ -12,7 +12,7 @@ const MoveRegistrationsModal = (props: Props) => {
     // check if registration is closed
     const { data: event, error: eventError } = await supabase
       .from("events")
-      .select("registration_closed")
+      .select("registration_closed, registration_mode")
       .eq("id", eventId)
       .single()
     if (eventError) {
@@ -25,7 +25,12 @@ const MoveRegistrationsModal = (props: Props) => {
       return
     }
     // move registrations
-    const { data: _, error } = await supabase.rpc("update_registrations", {
+    const funcName =
+      event.registration_mode == "Random"
+        ? "update_registrations_random"
+        : "update_registrations"
+
+    const { data: _, error } = await supabase.rpc(funcName, {
       event_id: eventId,
     })
     if (error) {
