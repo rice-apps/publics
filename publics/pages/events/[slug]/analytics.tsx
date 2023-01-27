@@ -10,6 +10,13 @@ import { ResponsiveLine } from '@nivo/line';
 import { ResponsivePie } from '@nivo/pie'
 
 /**
+ * TODO:
+ * Get attendance through public data and graph it
+ * Consolidate reused code into single function
+ * Add "Data will be available once the event is concluded"
+ * Style to fit figma
+ */
+/**
  * Simple type containing a friendly name for an event, and the UUID of the event
  */
 type EventDetails = {
@@ -79,6 +86,132 @@ async function getEvent(
   }
 }
 
+/**
+ * Gets registration data for an event given identified by event_id and formats it into nivo-pie chart friendly data
+ * @returns list of {college, count} pairs for each college with non-zero registrations
+ */a
+async function get_registration_data(supabase, event_id) {
+  const registration_response = await supabase
+  .from("registrations")
+  .select(`
+    profiles (
+      organizations (
+        name
+      )
+    )
+  `)  
+  .eq("event", event_id);
+
+  //TODO make this look pretty with some functional goodness
+  if (registration_response.error || registration_response === undefined) {
+    console.log(registration_response.error); 
+  }
+
+  let registration_data = {};
+  
+  registration_response.data?.forEach(datum => {
+    let name = datum.profiles?.organizations.name;
+
+    if (!(name in registration_data)) {
+      registration_data[name] = 0;
+    }
+    registration_data[name] += 1;
+  });
+
+  let formatted_registration_data: nivo_element[] = [];
+
+  for (let datum in registration_data) {
+    formatted_registration_data.push({id : datum, value : registration_data[datum]})
+  }
+
+  return formatted_registration_data;
+
+}
+
+
+/**
+ * Gets registration data for an event given identified by event_id and formats it into nivo-pie chart friendly data
+ * @returns list of {college, count} pairs for each college with non-zero registrations
+ */
+async function get_wristband_data(supabase, event_id) {
+  const wristband_response = await supabase
+  .from("registrations")
+  .select(`
+    profiles (
+      organizations (
+        name
+      )
+    )
+  `)  
+  .eq("event", event_id)
+  .eq("picked_up_wristband", true);
+
+  //TODO make this look pretty with some functional goodness
+  if (wristband_response.error || wristband_response === undefined) {
+    console.log(wristband_response.error); 
+  }
+
+  let wristband_data = {};
+  
+  wristband_response.data?.forEach(datum => {
+    let name = datum.profiles?.organizations.name;
+
+    if (!(name in wristband_data)) {
+      wristband_data[name] = 0;
+    }
+    wristband_data[name] += 1;
+  });
+
+  let formatted_wristband_data: nivo_element[] = [];
+
+  for (let datum in wristband_data) {
+    formatted_wristband_data.push({id : datum, value : wristband_data[datum]})
+  }
+
+  return formatted_wristband_data;
+
+}
+
+/**
+ * Gets registration data for an event given identified by event_id and formats it into nivo-pie chart friendly data
+ * @returns list of {college, count} pairs for each college with non-zero registrations
+ */
+async function get_count_data(supabase, event_id) {
+  const count_response = await supabase
+  .from("registrations")
+  .select(`
+    picked_up_wristband
+  `)  
+  .eq("event", event_id);
+
+  //TODO make this look pretty with some functional goodness
+  if (count_response.error || count_response === undefined) {
+    console.log(count_response.error);
+    return {
+      total_registrants: 0,
+      picked_up_wristband: 0,
+    }
+  }
+
+  let total_registrants = 0;
+  let picked_up_wristband = 0;
+
+  count_response.data.forEach(datum => {
+    total_registrants += 1;
+    if (datum.picked_up_wristband) {
+      picked_up_wristband += 1;
+    }
+  });
+
+  return {
+    total_registrants: total_registrants,
+    picked_up_wristband: picked_up_wristband
+  }
+}
+
+async function get_attendee_data(supabase, event_id) {
+  //TODO
+}
 
 export const getServerSideProps = async (ctx) => {
   // Create authenticated Supabase Client
@@ -124,11 +257,18 @@ export const getServerSideProps = async (ctx) => {
       }
     }
 
+    const registration_data = await get_registration_data(supabase, event_detail.eventID);
+    const wristband_data = await get_wristband_data(supabase, event_detail.eventID);
+    const count_data = await get_count_data(supabase, event_detail.eventID);
+
   return {
     props: {
       InitialSession: session,
       params: ctx.params,
-      event_info: event_detail
+      event_info: event_detail,
+      registration_data: registration_data,
+      wristband_data : wristband_data,
+      count_data: count_data,
     }
   }
 }
@@ -166,8 +306,10 @@ export default function Analytics(props) {
   /*
   state for data
   */
-  const [registration_data, setRegistrationData] = useState<nivo_element[]>([]);
-
+  const [registration_data] = useState<nivo_element[]>(props.registration_data);
+  const [wristband_data] = useState<nivo_element[]>(props.wristband_data);
+  const [total_registrants] = useState<number>(props.count_data.total_registrants);
+  const [picked_up_wristband] = useState<number>(props.count_data.picked_up_wristband);
     // Going to need to calculate:
 
     // 1. Total people counted night of the public
@@ -182,47 +324,6 @@ export default function Analytics(props) {
 
     // 7. [This one depends on some serious checking] caregiving rate in/rate out
 
-    const fetchPosts = async () => {
-        if (!slug) return;
-
-        /*
-        Getting and formatting registration data
-        */
-        const registration_response = await supabase
-        .from("registrations")
-        .select(`
-          profiles (
-            organizations (
-              name
-            )
-          )
-        `)  
-        .eq("event", event_info.eventID);
-
-        //TODO make this look pretty with some functional goodness
-        if (registration_response.error || registration_response === undefined) {
-          console.log(registration_response.error); 
-        }
-
-        let registration_data = {};
-        
-        registration_response.data?.forEach(datum => {
-          let name = datum.profiles?.organizations.name;
-
-          if (!(name in registration_data)) {
-            registration_data[name] = 0;
-          }
-          registration_data[name] += 1;
-        });
-
-        let formatted_registration_data: nivo_element[] = [];
-
-        for (let datum in registration_data) {
-          formatted_registration_data.push({id : datum, value : registration_data[datum]})
-        }
-
-        setRegistrationData(formatted_registration_data);
-    }
         
 
     // Filters data into the format required by the library
@@ -279,14 +380,74 @@ export default function Analytics(props) {
           fill={[]}
           legends={[
               {
-                  anchor: 'bottom',
-                  direction: 'row',
+                  anchor: 'right',
+                  direction: 'column',
                   justify: false,
                   translateX: 0,
                   translateY: 56,
                   itemsSpacing: 0,
                   itemWidth: 100,
-                  itemHeight: 18,
+                  itemHeight: 40,
+                  itemTextColor: '#999',
+                  itemDirection: 'left-to-right',
+                  itemOpacity: 1,
+                  symbolSize: 18,
+                  symbolShape: 'circle',
+                  effects: [
+                      {
+                          on: 'hover',
+                          style: {
+                              itemTextColor: '#000'
+                          }
+                      }
+                  ]
+              }
+          ]}
+      />
+  );
+    const WristBandPieChart = () => (
+      <ResponsivePie
+          data={wristband_data}
+          margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
+          padAngle={0.7}
+          cornerRadius={3}
+          activeOuterRadiusOffset={8}
+          borderWidth={1}
+          borderColor={{
+              from: 'color',
+              modifiers: [
+                  [
+                      'darker',
+                      0.2
+                  ]
+              ]
+          }}
+          arcLinkLabelsSkipAngle={10}
+          arcLinkLabelsTextColor="#333333"
+          arcLinkLabelsThickness={2}
+          arcLinkLabelsColor={{ from: 'color' }}
+          arcLabelsSkipAngle={10}
+          arcLabelsTextColor={{
+              from: 'color',
+              modifiers: [
+                  [
+                      'darker',
+                      2
+                  ]
+              ]
+          }}
+          defs={[]}
+          fill={[]}
+          legends={[
+              {
+                  anchor: 'right',
+                  direction: 'column',
+                  justify: false,
+                  translateX: 0,
+                  translateY: 56,
+                  itemsSpacing: 0,
+                  itemWidth: 100,
+                  itemHeight: 40,
                   itemTextColor: '#999',
                   itemDirection: 'left-to-right',
                   itemOpacity: 1,
@@ -305,7 +466,6 @@ export default function Analytics(props) {
       />
   );
 
-  fetchPosts();
 
   return (
     <div>
@@ -318,8 +478,21 @@ export default function Analytics(props) {
       </div>
       <div className={openTab === 1 ? "block" : "hidden"}><h1>TODO</h1></div> 
       <div className={openTab === 2 ? "block" : "hidden"}>
-        <div className = "h-96">
+        <div>
+          <div className = "text-2xl">
+            Total Registrants <span className = "m-10">{total_registrants}</span>
+          </div>
+          <div className = "text-2xl">
+            Picked Up Wristband <span className = "m-10">{picked_up_wristband}</span>
+          </div>
+        </div>
+        <div className = "h-96 text-center">
+          <h4>Online Registration (Including Transfers)</h4>
           {RegistrationPieChart()}
+        </div>
+        <div className = "h-96 text-center">
+          <h4>Wristband Pickup</h4> 
+          {WristBandPieChart()}
         </div>
       </div> 
     </div>
