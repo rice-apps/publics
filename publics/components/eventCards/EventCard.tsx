@@ -10,7 +10,6 @@ type Props = {
 }
 
 export default function EventCard(props: Props) {
-  console.log(props.sameColl)
   return (
     <div className="card w-full bg-base-100 shadow-xl hover:shadow-md transform hover:-translate-y-1 transition-transform ">
       <div className="card-body">
