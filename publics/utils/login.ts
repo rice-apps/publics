@@ -9,7 +9,7 @@ const getURL = () => {
   url = url.includes("http") ? url : `https://${url}`
   // Make sure to including trailing `/`.
   url = url.charAt(url.length - 1) === "/" ? url : `${url}/`
-  return `${url}events`
+  return url
 }
 
 export const handleLogin = async (
