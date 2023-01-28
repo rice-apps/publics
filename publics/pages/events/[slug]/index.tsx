@@ -30,7 +30,7 @@ export async function getServerSideProps(ctx) {
   const { data: collData, error: eventError } = await supabase
     .from("events")
     .select(
-      `id, name, description, event_datetime, registration_datetime, college_registration_datetime, registration, waitlist_size, registration_closed, img_url, organization (
+      `id, name, description, event_datetime, registration_datetime, college_registration_datetime, location, registration, waitlist_size, registration_closed, img_url, organization (
             id,
             name,
             photo
@@ -125,6 +125,8 @@ const Details = (props: Props) => {
   const collCheck = props.sameCollege
   const user = props.userid
   const userReg = props.userRegistered
+
+  console.log(event)
 
   // Registration function (used when register button is clicked)
   async function register() {
@@ -269,6 +271,7 @@ const Details = (props: Props) => {
                     Hosted by {event.organization.name}
                   </p>
                 </span>
+                <p>Location: {event.location}</p>
                 <p className="">{event.description}</p>
 
                 <p className="font-medium text-primary">
