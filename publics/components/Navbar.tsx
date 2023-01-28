@@ -63,7 +63,7 @@ export default function Navbar() {
       <li>
         <Link href="/events">Events</Link>
       </li>
-      <div className={canCreate ? "block" : "block"}>
+      <div className={canCreate ? "block" : "hidden"}>
         <li>
           <Link href="/events/create">Create Event</Link>
         </li>
@@ -76,6 +76,7 @@ export default function Navbar() {
   )
 
   const session = useSession()
+  //const authorized = await authorize(supabase, session.user.id)
 
   return (
     <div className="navbar bg-base-100 min-h-fit">
@@ -110,9 +111,6 @@ export default function Navbar() {
       </div>
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal p-0">{navbar_content}</ul>
-      </div>
-      <div className={canCreate ? "block" : "hidden"}>
-
       </div>
       <div className="navbar-end">
         {session && session.user && session.user.user_metadata.picture ? (
