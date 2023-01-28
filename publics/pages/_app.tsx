@@ -18,11 +18,11 @@ function MyApp({
   return (
     <>
       <Head>
-        <link rel="icon" href="/owl.png" />
         <meta
           name="google-site-verification"
           content="pQJj2FGXHM4uMmvH23WE8XS_7GPJIiCUXMwqc_24wOI"
         />
+        <link rel="icon" href="/owl.svg" />
       </Head>
       <DefaultSeo
         title="PartyOwl"
@@ -34,7 +34,7 @@ function MyApp({
           siteName: "PartyOwl",
           images: [
             {
-              url: "https://publics.vercel.app/owl.png",
+              url: "https://publics.vercel.app/owl.svg",
               width: 712,
               height: 512,
               alt: "Owl",
