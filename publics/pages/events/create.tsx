@@ -4,7 +4,6 @@ import {
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
-import Head from "next/head"
 import { useRouter } from "next/router"
 import { useState, useEffect } from "react"
 import React from "react"
@@ -47,6 +46,7 @@ export default function Create(props) {
   const [location, setLocation] = useState(String)
   const [capacity, setCapacity] = useState(Number)
   const [description, setDescription] = useState(String)
+  const [codeword, setCodeword] = useState(String)
 
   const [registration, setRegistration] = useState(Boolean)
   const [collegeRegistration, setCollegeRegistration] = useState(Date)
@@ -94,6 +94,7 @@ export default function Create(props) {
       description: description,
       registration: registration,
       img_url: url == "" ? null : url,
+      codeword: codeword,
       registration_mode: registrationMode,
     }
 
@@ -112,7 +113,7 @@ export default function Create(props) {
       alert(error.message)
     } else {
       router.push(`/events/${slug}`)
-      return
+      //return
     }
   }
 
@@ -238,6 +239,20 @@ export default function Create(props) {
                 className="textarea textarea-bordered max-w-xs h-24 hover:border-primary focus:outline-none focus:ring focus:ring-primary-focus"
               ></textarea>
             </div>
+            <div className="form-control w-full max-w-xs mr-2 tooltip tooltip-bottom"
+                 data-tip="This is a secret word (like a password) that volunteers will enter to verify that they checked in">
+              <label className="label">
+                <span className="label-text">Codeword</span>
+              </label>
+              <input
+                value={codeword}
+                onChange={(e) => setCodeword(e.target.value)}
+                type="text"
+                placeholder="Hover over me" 
+                required
+                className="input input-bordered w-full max-w-xs hover:border-primary focus:outline-none focus:ring focus:ring-primary-focus"
+              />
+            </div>
             <div>
               <label className="label">
                 <span className="label-text">Cover Image</span>
@@ -335,7 +350,7 @@ export default function Create(props) {
           <div>
             <input
               type="submit"
-              value="Submit"
+              value="Create Event "
               className="btn btn-primary sm:float-right normal-case border-0"
             />
           </div>
