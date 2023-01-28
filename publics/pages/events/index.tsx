@@ -176,7 +176,11 @@ function Events(props: Props) {
               <LargeEventCard
                 event={reg.event}
                 registration_status={
-                  reg.waitlist ? "Waitlisted" : "You Have a Ticket!"
+                  reg.waitlist
+                    ? reg.event.registration_closed
+                      ? "Waitlisted"
+                      : "Registration Pending"
+                    : "You Have a Ticket!"
                 }
                 key={reg.event.slug}
                 type="my-events"
