@@ -209,7 +209,7 @@ const Details = (props: Props) => {
       )
     } else if (props.userRegistered) {
       setText(
-        "You are successfully registered for this event! You will receive an email shortly containing more details about the event."
+        "You have a ticket for this event! You will receive an email shortly containing more details about the event."
       )
     } else if (event.registration_closed) {
       setText("Event registration has already closed.")
