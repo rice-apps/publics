@@ -1,13 +1,15 @@
 import Link from "next/link"
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react"
 import { handleLogin } from "../utils/login"
+import { useEffect, useState } from "react"
 import {
   SupabaseClient,
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs"
 import CreateEventButton from "./eventCards/CreateEventButton"
 
-async function authorize(supabase: SupabaseClient, userId: string) {
+
+/*async function authorize(supabase: SupabaseClient, userId: string) {
   const { data, error } = await supabase
     .from("organizations_admins")
     .select("organization ( id, name )")
@@ -20,31 +22,56 @@ async function authorize(supabase: SupabaseClient, userId: string) {
   return data.length > 0
 }
 
-async function getOrgs(supabase: SupabaseClient, userId: string) {
-  const { data: orgs, error } = await supabase
-    .from("organizations_admins")
-    .select("organization ( id, name )")
+async function getAuthUsers(supabase: SupabaseClient, userId: string) {
+  const authorized = authorize(supabase, session.user.id)
+  const { data: users, error } = await supabase
+    .from("profiles")
+    .select("can_create_event ( bool )")
     .eq("profile", userId)
+    
   if (error) {
     throw error
   }
-  if (!orgs) {
+  if (!users) {
     return []
   }
+  //setCanCreate(true);
 
-  return orgs
-}
+  return users
+}*/
 
 export default function Navbar() {
   const supabaseClient = useSupabaseClient()
+  const [canCreate, setCanCreate] = useState(false);
+  async function authorize(supabase: SupabaseClient, userId: string) {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("can_create_event ( bool )")
+      .eq("profile", userId)
+  
+    if (error) {
+      throw error
+    }
+    setCanCreate(true);
+  
+    return data.length > 0
+  }
+
+  
   const navbar_content = (
     <>
       <li>
         <Link href="/events">Events</Link>
       </li>
+      <div className={canCreate ? "block" : "block"}>
+        <li>
+          <Link href="/events/create">Create Event</Link>
+        </li>
+      </div>
       <li>
         <Link href="mailto:awj3@rice.edu">Contact</Link>
       </li>
+
     </>
   )
 
@@ -84,8 +111,8 @@ export default function Navbar() {
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal p-0">{navbar_content}</ul>
       </div>
-      <div className={resultSuccess ? "block" : "hidden"}>
-        <SuccessMsg message={`${action}`} />
+      <div className={canCreate ? "block" : "hidden"}>
+
       </div>
       <div className="navbar-end">
         {session && session.user && session.user.user_metadata.picture ? (
@@ -119,7 +146,7 @@ export default function Navbar() {
   )
 }
 
-export async function getServerSideProps(ctx) {
+/*export async function getServerSideProps(ctx) {
   const supabase = createServerSupabaseClient(ctx)
   const {
     data: { session },
@@ -134,17 +161,8 @@ export async function getServerSideProps(ctx) {
     }
 
   const authorized = await authorize(supabase, session.user.id)
-  if (authorized)
-    return {
-      redirect: {
-        destination: `http://${ctx.req.headers.host}/404`,
-        permanent: false,
-      },
-    }
 
-  const orgs = await getOrgs(supabase, session.user.id)
-
-  let props = { orgs }
+  let props = { authorized }
 
   return { props } // will be passed to the page component as props
-}
+}*/
