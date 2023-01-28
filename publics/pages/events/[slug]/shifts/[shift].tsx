@@ -5,6 +5,13 @@ import {
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs"
 import { useRouter } from "next/router"
+import EditShiftModal from "../../../../components/shifts/EditShiftModal"
+
+interface ShiftDetails {
+  name: string
+  start: string
+  end: string
+}
 
 /**
  * Simple type containing a friendly name for an event, and the UUID of the event
@@ -172,23 +179,22 @@ async function getVolunteers(
   return formatted_data
 }
 
-async function getShiftName(
+async function getShiftDetails(
   supabase,
   shift,
   event_detail: EventDetails
-): Promise<String> {
+): Promise<ShiftDetails> {
   const { data, error } = await supabase
     .from("shifts")
-    .select("name")
+    .select("name, start, end")
     .eq("id", shift)
     .single()
 
   if (error) {
     console.log("GOT ERROR:", error.message)
-    return "ERROR"
   }
 
-  return data?.name
+  return {name: data?.name, start: data?.start, end: data?.end}
 }
 
 /**
@@ -250,7 +256,7 @@ export async function getServerSideProps(context) {
 
   const shift_id = context.params.shift
   //get shift name
-  const shift_name = await getShiftName(supabase, shift_id, event_detail)
+  const shift_details = await getShiftDetails(supabase, shift_id, event_detail)
 
   return {
     props: {
@@ -260,7 +266,7 @@ export async function getServerSideProps(context) {
       registrations,
       event_detail,
       shift_id,
-      shift_name,
+      shift_details,
     },
   }
 }
@@ -371,8 +377,8 @@ function VolunteerPage(props) {
 
     let personID = data!.id
 
-    //if props.shift_name is "Capacity Counter" then set is_counter to true, else false
-    let is_counter = props.shift_name == "Capacity Counter" ? true : false
+    //if props.shift_details.name is "Capacity Counter" then set is_counter to true, else false
+    let is_counter = props.shift_details.name == "Capacity Counter" ? true : false
 
     //Insert person into registrations table for this event
     const res = await supabase
@@ -442,8 +448,13 @@ function VolunteerPage(props) {
   return (
     <div key="registration_results_page" className="mx-auto mx-4 space-y-4">
       <div key="event_title">
-        <h1>Volunteers for {props.event_detail.eventName}</h1>
+        {/* <h1>Volunteers for {props.event_detail.eventName}</h1> */}
+        <h1>{props.shift_details.name} | {props.shift_details.start} - {props.shift_details.end}</h1>
+        
       </div>
+
+      <EditShiftModal/>
+
       <div className="flex justify-end gap-4">
         <div className="tooltip" data-tip="Copy Emails">
           <button className="btn btn-circle btn-outline" onClick={copyEmails}>
