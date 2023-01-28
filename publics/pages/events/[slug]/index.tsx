@@ -126,8 +126,6 @@ const Details = (props: Props) => {
   const user = props.userid
   const userReg = props.userRegistered
 
-  console.log(event)
-
   // Registration function (used when register button is clicked)
   async function register() {
     setLoading(true)
