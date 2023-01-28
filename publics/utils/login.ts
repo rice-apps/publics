@@ -9,12 +9,13 @@ const getURL = () => {
   url = url.includes("http") ? url : `https://${url}`
   // Make sure to including trailing `/`.
   url = url.charAt(url.length - 1) === "/" ? url : `${url}/`
-  return `${url}login-redirect/`
+  return url
 }
 
 export const handleLogin = async (
   supabase: SupabaseClient<any, "public", any>
 ) => {
+  console.log(supabase)
   const res = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
@@ -22,5 +23,4 @@ export const handleLogin = async (
     },
   })
   console.log(res)
-  console.log(Object.keys(res.data))
 }

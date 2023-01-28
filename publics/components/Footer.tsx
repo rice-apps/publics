@@ -2,7 +2,7 @@ import Image from "next/image"
 
 export default function Footer() {
   return (
-    <footer className="footer items-center p-4 bg-neutral text-neutral-content">
+    <footer className="footer items-center p-4 bg-base-300 text-neutral-content">
       <div className="items-center grid-flow-col">
         <Image
           width={36}
