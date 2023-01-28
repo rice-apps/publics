@@ -30,7 +30,17 @@ type EventDetails = {
 
 type nivo_element = {
   id: string,
-  value: number,
+  value: number
+}
+
+type coordinate = {
+  x: Date, 
+  y: number
+}
+
+type nivo_line_element = {
+  id: string, //i.e. total, attendees in, attendees out
+  data: coordinate[]
 }
 
 /**
@@ -210,9 +220,19 @@ async function get_count_data(supabase, event_id) {
 }
 
 async function get_attendee_data(supabase, event_id) {
-  return {
-    total_attendees: 0
+  const {data, error} = await supabase
+  .from("counts")
+  .select("created_at, inout")
+  .eq("event", event_id);
+
+  if (error) {
+    console.log(error);
+    return {};
   }
+
+  //data.forEach(element => element.created_at = new Date(element.created_at).toLocaleTimeString().slice(0, 4));
+  //data.forEach(element => element.created_at = new Date(element.created_at).toLocaleTimeString());
+  return data;
 }
 
 function makePieChart(data) {
@@ -276,6 +296,98 @@ function makePieChart(data) {
         ]}
     />
   )
+}
+
+function convert_to_coordinate(data: Object[]) {
+  let arr: coordinate[]= [];
+
+  for (let datum in data) {
+    arr.push({x: datum, y: 1})
+  }
+}
+
+function makeLineGraph(data) {
+  //total = attendees in - attendees outd
+
+  let total_line_graph_data =[...data];
+  let in_line_graph_data = data.filter(elem => elem.inout);
+  let out_line_graph_data = data.filter(elem => !elem.inout);
+  console.log(Array.from(in_line_graph_data).sort());
+
+  let chart_data:nivo_line_element[] = [{id: "Total_In", data: Array.from(in_line_graph_data).sort()}]
+  
+  return (
+    <ResponsiveLine
+        data={chart_data}
+        margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
+        xScale={{ type: 'point' }}
+        yScale={{
+            type: 'linear',
+            min: 'auto',
+            max: 'auto',
+            stacked: true,
+            reverse: false
+        }}
+        yFormat=" >-.2f"
+        axisTop={null}
+        axisRight={null}
+        axisBottom={{
+            orient: 'bottom',
+            tickSize: 5,
+            tickPadding: 5,
+            tickRotation: 0,
+            legend: 'transportation',
+            legendOffset: 36,
+            legendPosition: 'middle'
+        }}
+        axisLeft={{
+            orient: 'left',
+            tickSize: 5,
+            tickPadding: 5,
+            tickRotation: 0,
+            legend: 'count',
+            legendOffset: -40,
+            legendPosition: 'middle'
+        }}
+        pointSize={10}
+        pointColor={{ theme: 'background' }}
+        pointBorderWidth={2}
+        pointBorderColor={{ from: 'serieColor' }}
+        pointLabelYOffset={-12}
+        useMesh={true}
+        legends={[
+            {
+                anchor: 'bottom-right',
+                direction: 'column',
+                justify: false,
+                translateX: 100,
+                translateY: 0,
+                itemsSpacing: 0,
+                itemDirection: 'left-to-right',
+                itemWidth: 80,
+                itemHeight: 20,
+                itemOpacity: 0.75,
+                symbolSize: 12,
+                symbolShape: 'circle',
+                symbolBorderColor: 'rgba(0, 0, 0, .5)',
+                effects: [
+                    {
+                        on: 'hover',
+                        style: {
+                            itemBackground: 'rgba(0, 0, 0, .03)',
+                            itemOpacity: 1
+                        }
+                    }
+                ]
+            }
+        ]}
+    />
+  );
+  //
+  
+  //get timestamptz, then get them on the granularity of minutes
+  //then group by, and create line graph
+  return null;
 }
 
 export const getServerSideProps = async (ctx) => {
@@ -375,13 +487,14 @@ function Analytics(props) {
   */
   const [registration_data] = useState<nivo_element[]>(props.registration_data);
   const [wristband_data] = useState<nivo_element[]>(props.wristband_data);
+  const [attendee_data] = useState<nivo_element[]>(props.attendee_data);
   const [total_registrants] = useState<number>(props.count_data.total_registrants);
-  const [total_attendees] = useState<number>(props.attendee_data.total_attendees);
+  const [total_attendees] = useState<number>(-1);
   const [picked_up_wristband] = useState<number>(props.count_data.picked_up_wristband);
 
   const RegistrationPieChart = makePieChart(registration_data);
   const WristBandPieChart = makePieChart(wristband_data);
-
+  const Attendee_LineGraph = makeLineGraph(attendee_data);
 
   return (
     <div>
@@ -393,7 +506,7 @@ function Analytics(props) {
         <a className={tab2Class} onClick = {() => handleClick(2)}>Registrations</a>
       </div>
       <div className={openTab === 1 ? "block" : "hidden"}>
-        <h1>Total Attendees: {total_attendees}</h1>
+        Total Attendees: {total_attendees}
         </div> 
       <div className={openTab === 2 ? "block" : "hidden"}>
         <div>
