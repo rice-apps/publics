@@ -6,9 +6,11 @@ import Link from "next/link"
 
 type Props = {
   event: ListEvent
+  sameColl: boolean
 }
 
 export default function EventCard(props: Props) {
+  console.log(props.sameColl)
   return (
     <div className="card w-full bg-base-100 shadow-xl hover:shadow-md transform hover:-translate-y-1 transition-transform ">
       <div className="card-body">
@@ -31,6 +33,13 @@ export default function EventCard(props: Props) {
             ? `Registration closed`
             : registrationOpen(props.event)
             ? "Registration open!"
+            : props.sameColl
+            ? `Registration opens for ${
+                props.event.organization.name
+              }: ${eventCardDate(
+                props.event.college_registration_datetime,
+                true
+              )}`
             : `Registration opens: ${eventCardDate(
                 props.event.registration_datetime,
                 true
