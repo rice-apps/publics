@@ -30,7 +30,7 @@ export async function get_volunteer(
     .eq("event", event_id)
     .eq("profile", userId)
 
-  if (volunteerError || !volunteer) {
+  if (volunteerError || volunteer.length === 0) {
     throw volunteerError
   }
 
