@@ -5,29 +5,34 @@ import { SupabaseClient } from "@supabase/supabase-js"
  * @param slug : slug of the page
  * @returns true if the user looking at this page is a volunteer, false otherwise
  */
-export async function volunteer_authorize(
-  supabase: SupabaseClient,
-  slug: string,
-  userId: string
-) {
+export async function get_event(supabase: SupabaseClient, slug: string) {
   const { data: event, error: eventsError } = await supabase
     .from("events")
     .select("id, codeword")
     .eq("slug", slug)
+    .single()
 
-  if (eventsError) {
+  if (eventsError || !event) {
     throw eventsError
   }
 
+  return event
+}
+
+export async function get_volunteer(
+  supabase: SupabaseClient,
+  event_id: string,
+  userId: string
+) {
   const { data: volunteer, error: volunteerError } = await supabase
     .from("volunteers")
-    .select("checked_in, checked_out")
-    .eq("event", event[0].id)
+    .select("shift, checked_in, checked_out")
+    .eq("event", event_id)
     .eq("profile", userId)
 
-  if (volunteerError) {
+  if (volunteerError || !volunteer) {
     throw volunteerError
   }
 
-  return [volunteer, event[0]]
+  return volunteer
 }
