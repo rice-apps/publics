@@ -289,7 +289,7 @@ export const getServerSideProps = async (ctx) => {
   return {
     props: {
       initialSession: session,
-      eventID: eventID,
+      eventID: event.id,
       codeword: event.codeword,
       checked_in: checked_in,
       checked_out: checked_out,
