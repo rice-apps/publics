@@ -421,6 +421,7 @@ function VolunteerPage(props) {
       //Ensuring we only update the person who is registered for this event
       .eq("event", eventDetails?.eventID)
       .eq("profile", row["person_id"])
+      .eq("shift", shift)
 
     if (error) {
       console.log(error)

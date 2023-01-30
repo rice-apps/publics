@@ -1,3 +1,4 @@
+// This page is deprecated. It is no longer used in the app.
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import { useRouter } from "next/router"
