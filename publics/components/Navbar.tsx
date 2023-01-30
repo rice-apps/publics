@@ -58,12 +58,17 @@ export default function Navbar() {
         <ul className="menu menu-horizontal p-0">{navbar_content}</ul>
       </div>
       <div className="navbar-end">
-        {session && session.user && session.user.user_metadata.picture ? (
+        {session && session.user && session.user.user_metadata.avatar_url ? (
           <Link
             href="/account"
-            className="btn btn-outline hover:scale-110 hover:drop-shadow-lg transition-all"
+            className="btn btn-circle hover:scale-110 hover:drop-shadow-lg transition-all"
           >
             <div className="avatar">
+              <div className="w-12 rounded-full">
+                <img src={session.user.user_metadata.avatar_url} />
+              </div>
+            </div>
+            {/* <div className="avatar">
               <div className="w-8 rounded">
                 <img
                   src={session.user.user_metadata.picture}
@@ -71,7 +76,7 @@ export default function Navbar() {
                   className="w-fit"
                 />
               </div>
-            </div>
+            </div> */}
           </Link>
         ) : (
           <button
