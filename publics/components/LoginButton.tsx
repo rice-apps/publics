@@ -1,14 +1,15 @@
+import { supabase } from "../utils/db"
 import { handleLogin } from "../utils/login"
-import { useSupabaseClient } from "@supabase/auth-helpers-react"
+
+// useSupabaseClient was not working
 
 export default function LoginButton() {
-  const supabaseClient = useSupabaseClient()
   return (
     <button
       className="btn btn-primary hover:shadow-lg hover:scale-110"
       onClick={(e) => {
         e.preventDefault()
-        handleLogin(supabaseClient)
+        handleLogin(supabase)
       }}
     >
       Sign in with your Rice ID
