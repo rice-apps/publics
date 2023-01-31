@@ -107,11 +107,12 @@ export default function Create(props) {
     }
 
     let insert = Object.assign({}, insert1, insert2)
-    const { error } = await supabase.from("events").insert(insert)
+    const { data: _, error } = await supabase.from("events").insert(insert)
     if (error) {
       alert(error.message)
+      return
     } else {
-      router.push(`/events/${slug}`)
+      window.location.href = "/events/" + slug
       return
     }
   }
