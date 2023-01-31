@@ -30,7 +30,7 @@ export async function getServerSideProps(ctx) {
   const { data: collData, error: eventError } = await supabase
     .from("events")
     .select(
-      `id, name, description, event_datetime, registration_datetime, college_registration_datetime, registration, waitlist_size, registration_closed, img_url, organization (
+      `id, name, description, event_datetime, registration_datetime, college_registration_datetime, location, registration, waitlist_size, registration_closed, img_url, organization (
             id,
             name,
             photo
@@ -269,6 +269,7 @@ const Details = (props: Props) => {
                     Hosted by {event.organization.name}
                   </p>
                 </span>
+                <p>Location: {event.location}</p>
                 <p className="">{event.description}</p>
 
                 <p className="font-medium text-primary">
