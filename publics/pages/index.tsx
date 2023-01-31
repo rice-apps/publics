@@ -14,7 +14,7 @@ export default function Index(
       style={{
         backgroundImage: `-webkit-image-set(
         url("nod.avif") type("image/avif"),
-        url("nod.jpg") type("image/jpeg"));`,
+        url("nod.jpg") type("image/jpeg"))`,
       }}
     >
       <div className="hero-overlay bg-black opacity-60"></div>
