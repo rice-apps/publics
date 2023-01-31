@@ -1,4 +1,3 @@
-import { handleLogin } from "../utils/login"
 import LoginButton from "./LoginButton"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import Link from "next/link"
