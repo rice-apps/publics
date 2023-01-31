@@ -5,19 +5,14 @@ import { useRouter } from "next/router"
 import { useState, useEffect } from "react"
 
 export default function Account({ session }) {
-  const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [adminOrgs, setAdminOrgs] = useState("Not an organization admin")
-  const [avatarUrl, setAvatarUrl] = useState(
-    "https://t4.ftcdn.net/jpg/04/08/24/43/360_F_408244382_Ex6k7k8XYzTbiXLNJgIL8gssebpLLBZQ.jpg"
-  )
+  const [avatarUrl, setAvatarUrl] = useState("/owl.png")
   const supabaseClient = useSupabaseClient()
   const router = useRouter()
 
   async function getProfile() {
     try {
-      setLoading(true)
-
       let { data, error, status } = await supabaseClient
         .from("profiles")
         .select(`first_name, last_name, netid`)
@@ -58,8 +53,6 @@ export default function Account({ session }) {
         alert(error.message)
         console.log(error.message)
       }
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -91,7 +84,9 @@ export default function Account({ session }) {
           </div>
         </div>
         <div>
-          <p className="text-lg font-medium">{profile?.first_name} {profile?.last_name}</p>
+          <p className="text-lg font-medium">
+            {profile?.first_name} {profile?.last_name}
+          </p>
         </div>
       </div>
 
@@ -101,7 +96,9 @@ export default function Account({ session }) {
             <p className="font-medium"> Name: </p>
           </div>
           <div>
-            <p className="text-slate-500">{profile?.first_name} {profile?.last_name}</p>
+            <p className="text-primary">
+              {profile?.first_name} {profile?.last_name}
+            </p>
           </div>
         </div>
         <div className="flex place-content-center space-x-4 py-1">
@@ -109,7 +106,7 @@ export default function Account({ session }) {
             <p className="font-medium"> Email: </p>
           </div>
           <div>
-            <p className="text-slate-500"> {session.user.email} </p>
+            <p className="text-primary"> {session.user.email} </p>
           </div>
         </div>
         <div className="flex place-content-center space-x-4 py-1">
@@ -117,7 +114,7 @@ export default function Account({ session }) {
             <p className="font-medium"> Net ID: </p>
           </div>
           <div>
-            <p className="text-slate-500"> {profile?.netid} </p>
+            <p className="text-primary"> {profile?.netid} </p>
           </div>
         </div>
         <div className="flex place-content-center space-x-4 py-1">
@@ -125,7 +122,7 @@ export default function Account({ session }) {
             <p className="font-medium inline"> Admin: </p>
           </div>
           <div>
-            <p className="text-slate-500"> {adminOrgs} </p>
+            <p className="text-primary"> {adminOrgs} </p>
           </div>
         </div>
       </div>
@@ -152,7 +149,7 @@ export default function Account({ session }) {
       </div>
 
       <div>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-primary">
           Notice: Please contact the Office of the Registrar to change your
           preferred name
         </p>
