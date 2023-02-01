@@ -12,9 +12,10 @@ export default function Index(
     <div
       className="hero min-h-screen"
       style={{
-        backgroundImage: `-webkit-image-set(
-        url("nod.avif") type("image/avif"),
-        url("nod.jpg") type("image/jpeg"))`,
+        // backgroundImage: `-webkit-image-set(
+        // url("nod.avif") type("image/avif"),
+        // url("nod.jpg") type("image/jpeg"))`,
+        backgroundImage: `url("nod.jpg")`,
       }}
     >
       <div className="hero-overlay bg-black opacity-60"></div>

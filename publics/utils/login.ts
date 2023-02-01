@@ -1,4 +1,4 @@
-import { SupabaseClient } from "@supabase/auth-helpers-react"
+import type { SupabaseClient } from "@supabase/auth-helpers-react"
 
 const getURL = () => {
   let url =
@@ -9,13 +9,12 @@ const getURL = () => {
   url = url.includes("http") ? url : `https://${url}`
   // Make sure to including trailing `/`.
   url = url.charAt(url.length - 1) === "/" ? url : `${url}/`
-  return `${url}events`
+  return `${url}`
 }
 
 export const handleLogin = async (
   supabase: SupabaseClient<any, "public", any>
 ) => {
-  console.log(supabase)
   const res = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
@@ -23,4 +22,5 @@ export const handleLogin = async (
     },
   })
   console.log(res)
+  console.log(res.data)
 }

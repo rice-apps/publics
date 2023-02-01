@@ -1,4 +1,4 @@
-# PartyOwl
+# Party Owl
 
 ## Testing
 

@@ -12,13 +12,13 @@ export default function Seo() {
         />
       </Head>
       <DefaultSeo
-        title="PartyOwl"
-        description="PartyOwl streamlines public parties at Rice University with useful features for attendees, volunteers, and socials."
+        title="Party Owl"
+        description="Party Owl streamlines public parties at Rice University with useful features for attendees, volunteers, and socials."
         openGraph={{
           type: "website",
           locale: "en_uS",
           url: "https://publics.rice.edu/",
-          siteName: "PartyOwl",
+          siteName: "Party Owl",
           images: [
             {
               url: "https://publics.vercel.app/owl.png",
