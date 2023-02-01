@@ -197,11 +197,14 @@ const Details = (props: Props) => {
   const [enabled, setEnabled] = useState(
     !userReg &&
       !event.registration_closed &&
+      event.registration &&
       reg_time.getTime() < curr_date.getTime()
   )
 
   useEffect(() => {
-    if (reg_time.getTime() > curr_date.getTime()) {
+    if (!event.registration) {
+      setText("Registration is not required for this event!")
+    } else if (reg_time.getTime() > curr_date.getTime()) {
       setText("Registration is not open yet")
     } else if (props.waitlist) {
       setText(
@@ -214,7 +217,14 @@ const Details = (props: Props) => {
     } else if (event.registration_closed) {
       setText("Event registration has already closed.")
     }
-  }, [props.waitlist, props.userRegistered, event.registration_closed])
+  }, [
+    props.waitlist,
+    props.userRegistered,
+    event.registration_closed,
+    event.registration,
+    reg_time,
+    curr_date,
+  ])
 
   return (
     <>
