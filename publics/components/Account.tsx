@@ -11,6 +11,20 @@ export default function Account({ session }) {
   const supabaseClient = useSupabaseClient()
   const router = useRouter()
 
+  type Profile = {
+    first_name: string
+    last_name: string
+    netid: string
+    college:
+      | {
+          name: string
+        }
+      | {
+          name: string
+        }[]
+      | null
+  }
+
   async function getProfile() {
     try {
       let { data, error, status } = await supabaseClient
@@ -23,7 +37,7 @@ export default function Account({ session }) {
         throw error
       }
 
-      if (data) {
+      if (data && !Array.isArray(data)) {
         setProfile(data)
       }
 
@@ -62,17 +76,6 @@ export default function Account({ session }) {
     }
   }, [session])
 
-  type Profile = {
-    first_name: string | null
-    last_name: string | null
-    netid: string | null
-    college: {
-      name: string
-    }
-    id?: string
-    updated_at?: Date
-  }
-
   return (
     <div className="flex flex-col justify-center items-center space-y-4">
       <div className="pt-10">
@@ -97,7 +100,13 @@ export default function Account({ session }) {
         </p>
         <p> Email: {session.user.email} </p>
         <p> Net ID: {profile?.netid}</p>
-        <p> College: {profile?.college.name}</p>
+        <p>
+          {" "}
+          College:{" "}
+          {Array.isArray(profile?.college)
+            ? profile?.college[0]?.name
+            : profile?.college?.name}
+        </p>
         {adminOrgs.length > 0 ? (
           <p className="inline"> Admin: {adminOrgs} </p>
         ) : null}
