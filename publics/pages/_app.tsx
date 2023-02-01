@@ -38,5 +38,15 @@ export default function MyApp({
       </>
     ))
 
-  return getLayout(<Component {...pageProps} />)
+  return getLayout(
+    <>
+      <Seo />
+      <SessionContextProvider
+        supabaseClient={supabaseClient}
+        initialSession={pageProps.initialSession}
+      >
+        <Component {...pageProps} />
+      </SessionContextProvider>
+    </>
+  )
 }

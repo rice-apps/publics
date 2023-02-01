@@ -12,7 +12,7 @@ module.exports = {
   daisyui: {
     themes: [
       {
-        partyowl: {
+        "party owl": {
           "color-scheme": "light",
           primary: "#AC1FB8",
           secondary: "#E9498C",
@@ -26,7 +26,7 @@ module.exports = {
         },
       },
       {
-        "nocturnal partyowl": {
+        "nocturnal party owl": {
           "color-scheme": "dark",
           primary: "#AC1FB8",
           secondary: "#E9498C",
@@ -82,6 +82,6 @@ module.exports = {
       "coffee",
       "winter",
     ],
-    darkTheme: "nocturnal partyowl",
+    darkTheme: "nocturnal party owl",
   },
 }
