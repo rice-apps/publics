@@ -1,4 +1,4 @@
-import { SupabaseClient } from "@supabase/auth-helpers-react"
+import type { SupabaseClient } from "@supabase/auth-helpers-react"
 
 const getURL = () => {
   let url =
@@ -9,7 +9,7 @@ const getURL = () => {
   url = url.includes("http") ? url : `https://${url}`
   // Make sure to including trailing `/`.
   url = url.charAt(url.length - 1) === "/" ? url : `${url}/`
-  return url
+  return `${url}`
 }
 
 export const handleLogin = async (
@@ -22,5 +22,5 @@ export const handleLogin = async (
     },
   })
   console.log(res)
-  console.log(Object.keys(res.data))
+  console.log(res.data)
 }

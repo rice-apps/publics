@@ -1,10 +1,9 @@
-import { handleLogin } from "../utils/login"
-import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react"
+import LoginButton from "./LoginButton"
+import { useSession } from "@supabase/auth-helpers-react"
 import Image from "next/image"
 import Link from "next/link"
 
 export default function Navbar() {
-  const supabaseClient = useSupabaseClient()
   const navbar_content = (
     <>
       <li>
@@ -47,7 +46,7 @@ export default function Navbar() {
         </div>
         <span className="btn btn-ghost normal-case text-xl">
           <Link href="/">
-            PartyOwl
+            Party Owl
             <span className="inline-block ml-2 align-middle">
               <Image src="/owl.svg" alt="Owl" width={30} height={42} />
             </span>
@@ -61,7 +60,7 @@ export default function Navbar() {
         {session && session.user && session.user.user_metadata.avatar_url ? (
           <Link
             href="/account"
-            className="btn btn-circle hover:scale-110 hover:drop-shadow-lg transition-all"
+            className="btn btn-circle hover:scale-110 hover:drop-shadow-lg transition-all border-none"
           >
             <div className="avatar">
               <div className="w-12 rounded-full">
@@ -79,15 +78,7 @@ export default function Navbar() {
             </div> */}
           </Link>
         ) : (
-          <button
-            className="btn btn-primary"
-            onClick={(e) => {
-              e.preventDefault()
-              handleLogin(supabaseClient)
-            }}
-          >
-            Sign in
-          </button>
+          <LoginButton />
         )}
       </div>
     </div>

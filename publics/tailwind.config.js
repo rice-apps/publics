@@ -12,7 +12,7 @@ module.exports = {
   daisyui: {
     themes: [
       {
-        partyowl: {
+        party: {
           "color-scheme": "light",
           primary: "#AC1FB8",
           secondary: "#E9498C",
@@ -25,8 +25,35 @@ module.exports = {
           error: "#EA4034",
         },
       },
-      "light",
-      "dark",
+      {
+        "nocturnal party owl": {
+          "color-scheme": "dark",
+          primary: "#AC1FB8",
+          secondary: "#E9498C",
+          accent: "#ede442",
+          neutral: "#914099",
+          "base-100": "#1c1c1c",
+          info: "#4AA8BF",
+          success: "#42ed83",
+          warning: "#EF8234",
+          error: "#EA4034",
+        },
+      },
+      {
+        butter: {
+          "color-scheme": "light",
+          "base-100": "hsl(64, 6%, 14%)",
+          neutral: "#8e8d80",
+          primary: "#c6c3ac",
+          secondary: "#f1edd2",
+          accent: "#578f2f",
+          info: "#96c1da",
+          success: "#8ad89f",
+          warning: "#d8c46c",
+          error: "#d86c6c",
+          default: "#c6c3ac",
+        },
+      },
       "cupcake",
       "bumblebee",
       "emerald",
@@ -55,5 +82,6 @@ module.exports = {
       "coffee",
       "winter",
     ],
+    darkTheme: "nocturnal party owl",
   },
 }

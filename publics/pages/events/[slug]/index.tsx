@@ -258,7 +258,6 @@ const Details = (props: Props) => {
                 </p>
                 <span>
                   <p>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       width={24}
                       height={24}
@@ -316,7 +315,7 @@ const Details = (props: Props) => {
             </div>
           ) : (
             <div className="flex flex-row justify-center">
-              <div className="bg-base-100 h-16 w-11/12 flex items-center justify-center">
+              <div className="bg-base-100 h-16 w-11/12 flex items-center justify-center rounded-md border border-primary">
                 <p>{text}</p>
               </div>
             </div>
