@@ -7,7 +7,7 @@ export default function ThemeChange() {
     themeChange(false)
   }, [])
   const themes: string[] = [
-    "party owl",
+    "party",
     "nocturnal party owl",
     "acid",
     "aqua",
