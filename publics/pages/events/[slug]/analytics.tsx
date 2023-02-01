@@ -34,7 +34,7 @@ type nivo_element = {
 }
 
 type coordinate = {
-  x: Date, 
+  x: string, 
   y: number
 }
 
@@ -298,12 +298,54 @@ function makePieChart(data) {
   )
 }
 
-function convert_to_coordinate(data: Object[]) {
+function groupBy(list, keyGetter) {
+  let map = new Map();
+  list.forEach((item) => {
+       const key = keyGetter(item);
+       const num = map.get(key);
+       if (!num) {
+           map.set(key, 1)
+           console.log(map.get[key])
+       } else {
+         //fix this!
+         let val = map.get(key); 
+         map.set(key, val + 1);
+       }
+  });
+
+  return Array.from(map);
+}
+
+function compare_party_time(a, b) {
+  //figure out if PM comes first
+}
+
+function convert_to_coordinate(data): coordinate[] {
+  //NEED TO GROUP INTO DISCRETE TIME INTERVALS BETWEEN START AND END TIME
+  //THEN SORT THOSE GROUPS BY TIME PERIOD
+  //RETURN
   let arr: coordinate[]= [];
 
   for (let datum in data) {
-    arr.push({x: datum, y: 1})
+    let x = new Date(data[datum].created_at).toLocaleTimeString();
+    let y = 1;
+    arr.push({x, y})
   }
+
+  
+  let grouped_data = groupBy(arr, e => e.x);
+  let accumulated = 0;
+
+  let transformed_arr: coordinate[] = [];
+
+  for (let i = 0; i < grouped_data.length; i++) {
+    accumulated = accumulated +  grouped_data[i][1];
+    let time: string = grouped_data[i][0];
+    transformed_arr.push({x : time, y : accumulated})
+  }
+
+
+  return transformed_arr;
 }
 
 function makeLineGraph(data) {
@@ -312,9 +354,9 @@ function makeLineGraph(data) {
   let total_line_graph_data =[...data];
   let in_line_graph_data = data.filter(elem => elem.inout);
   let out_line_graph_data = data.filter(elem => !elem.inout);
-  console.log(Array.from(in_line_graph_data).sort());
+  convert_to_coordinate(Array.from(in_line_graph_data));
 
-  let chart_data:nivo_line_element[] = [{id: "Total_In", data: Array.from(in_line_graph_data).sort()}]
+  let chart_data: nivo_line_element[] = [{id: "Total_In", data: convert_to_coordinate(Array.from(in_line_graph_data).sort())}]
   
   return (
     <ResponsiveLine
@@ -489,7 +531,7 @@ function Analytics(props) {
   const [wristband_data] = useState<nivo_element[]>(props.wristband_data);
   const [attendee_data] = useState<nivo_element[]>(props.attendee_data);
   const [total_registrants] = useState<number>(props.count_data.total_registrants);
-  const [total_attendees] = useState<number>(-1);
+  const [total_attendees, setTotalAttendees] = useState<number>(4);
   const [picked_up_wristband] = useState<number>(props.count_data.picked_up_wristband);
 
   const RegistrationPieChart = makePieChart(registration_data);
@@ -507,7 +549,10 @@ function Analytics(props) {
       </div>
       <div className={openTab === 1 ? "block" : "hidden"}>
         Total Attendees: {total_attendees}
-        </div> 
+        <div className = "h-96">
+          {Attendee_LineGraph}
+        </div>
+      </div> 
       <div className={openTab === 2 ? "block" : "hidden"}>
         <div>
           <div className = "text-2xl">
