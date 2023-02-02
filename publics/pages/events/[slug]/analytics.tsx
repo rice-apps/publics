@@ -34,12 +34,12 @@ type nivo_element = {
 }
 
 type coordinate = {
-  x: string, 
+  x: string | Date, 
   y: number
 }
 
 type nivo_line_element = {
-  id: string, //i.e. total, attendees in, attendees out
+  id:  string, //i.e. total, attendees in, attendees out
   data: coordinate[]
 }
 
@@ -320,44 +320,75 @@ function compare_party_time(a, b) {
   //figure out if PM comes first
 }
 
-function convert_to_coordinate(data): coordinate[] {
+function convert_to_coordinate(data): coordinate[][] {
   //NEED TO GROUP INTO DISCRETE TIME INTERVALS BETWEEN START AND END TIME
   //THEN SORT THOSE GROUPS BY TIME PERIOD
   //RETURN
-  let arr: coordinate[]= [];
 
-  for (let datum in data) {
-    let x = new Date(data[datum].created_at).toLocaleTimeString();
-    let y = 1;
-    arr.push({x, y})
+  let num_groups = Math.max(data.length/10, 10); //number of buckets we put arrange data points around
+
+  /*
+  making an equally spaced array of dates between the first and last event
+  */
+  let date_interval = (new Date(data[data.length - 1].created_at).getTime() -  new Date(data[0].created_at).getTime())/num_groups;
+
+  let date_array: Date[] = [];
+
+  let accumulated_in_counts: coordinate[] = [];
+  let accumulated_out_counts: coordinate[] = [];
+  let accumulated_total_counts: coordinate[] = [];
+
+  for (let i = 0; i < num_groups; i++) {
+    date_array.push(new Date());
   }
 
+  date_array[0] = new Date(data[0].created_at);
+  date_array[num_groups - 1] = new Date(data[data.length - 1].created_at);
+
+  for (let i = 1; i < num_groups - 1; i++) {
+    date_array[i] = new Date(date_array[i - 1].getTime() + date_interval);
+  }
   
-  let grouped_data = groupBy(arr, e => e.x);
-  let accumulated = 0;
-
-  let transformed_arr: coordinate[] = [];
-
-  for (let i = 0; i < grouped_data.length; i++) {
-    accumulated = accumulated +  grouped_data[i][1];
-    let time: string = grouped_data[i][0];
-    transformed_arr.push({x : time, y : accumulated})
+  for (let i = 0; i < num_groups; i++) {
+    accumulated_in_counts.push({x: date_array[i], y: 0});
+    accumulated_out_counts.push({x: date_array[i], y: 0});
+    accumulated_total_counts.push({x: date_array[i], y: 0});
   }
 
+  //input data array is aready sorted by time
+  let date_ptr = 0;
 
-  return transformed_arr;
+  data.forEach(elem => {
+    let curr_date = new Date(elem.created_at);
+    while (curr_date > date_array[date_ptr]) {
+      date_ptr += 1;
+    }
+
+    if (elem.inout) {
+      accumulated_in_counts[date_ptr].y += 1;
+    } else {
+      accumulated_out_counts[date_ptr].y += 1;
+    }
+  })
+
+  for (let i = 0; i < num_groups; i++) {
+    accumulated_in_counts[i].x = accumulated_in_counts[i].x.toLocaleString().substring(11);
+    accumulated_out_counts[i].x = accumulated_out_counts[i].x.toLocaleString().substring(11);
+    accumulated_total_counts[i].y = accumulated_in_counts[i].y - accumulated_out_counts[i].y;
+    accumulated_total_counts[i].x = accumulated_total_counts[i].x.toLocaleString().substring(11);
+  }
+
+  return [accumulated_in_counts, accumulated_out_counts, accumulated_total_counts];
 }
 
 function makeLineGraph(data) {
   //total = attendees in - attendees outd
+  let formated_data = convert_to_coordinate(data);
 
-  let total_line_graph_data =[...data];
-  let in_line_graph_data = data.filter(elem => elem.inout);
-  let out_line_graph_data = data.filter(elem => !elem.inout);
-  convert_to_coordinate(Array.from(in_line_graph_data));
+  let chart_data: nivo_line_element[] = [{id : "Attendees In", data: formated_data[0]},
+                                         {id : "Attendees Out", data : formated_data[1]},
+                                         {id: "Attendees Total", data: formated_data[2]}]
 
-  let chart_data: nivo_line_element[] = [{id: "Total_In", data: convert_to_coordinate(Array.from(in_line_graph_data).sort())}]
-  
   return (
     <ResponsiveLine
         data={chart_data}
@@ -365,31 +396,33 @@ function makeLineGraph(data) {
         xScale={{ type: 'point' }}
         yScale={{
             type: 'linear',
-            min: 'auto',
+            min: 0,
             max: 'auto',
             stacked: true,
             reverse: false
         }}
-        yFormat=" >-.2f"
+        enableGridY = {false}
+        yFormat=" >-.10f"
+        curve = "cardinal"
         axisTop={null}
         axisRight={null}
         axisBottom={{
-            orient: 'bottom',
-            tickSize: 5,
-            tickPadding: 5,
-            tickRotation: 0,
-            legend: 'transportation',
-            legendOffset: 36,
-            legendPosition: 'middle'
+          orient: 'bottom',
+          tickSize: 5,
+          tickPadding: 5,
+          tickRotation: 0,
+          legend: 'Time',
+          legendOffset: 36,
+          legendPosition: 'middle'
         }}
         axisLeft={{
-            orient: 'left',
-            tickSize: 5,
-            tickPadding: 5,
-            tickRotation: 0,
-            legend: 'count',
-            legendOffset: -40,
-            legendPosition: 'middle'
+          orient: 'left',
+          tickSize: 5,
+          tickPadding: 5,
+          tickRotation: 0,
+          legend: 'count',
+          legendOffset: -40,
+          legendPosition: 'middle'
         }}
         pointSize={10}
         pointColor={{ theme: 'background' }}
@@ -397,16 +430,19 @@ function makeLineGraph(data) {
         pointBorderColor={{ from: 'serieColor' }}
         pointLabelYOffset={-12}
         useMesh={true}
+        lineWidth = {5}
+        colors = {{'scheme' : 'category10'}}
+        
         legends={[
             {
-                anchor: 'bottom-right',
-                direction: 'column',
+                anchor: 'top',
+                direction: 'row',
                 justify: false,
                 translateX: 100,
                 translateY: 0,
                 itemsSpacing: 0,
                 itemDirection: 'left-to-right',
-                itemWidth: 80,
+                itemWidth: 100,
                 itemHeight: 20,
                 itemOpacity: 0.75,
                 symbolSize: 12,
@@ -494,6 +530,17 @@ export const getServerSideProps = async (ctx) => {
   }
 }
 
+function get_total_attendee_count(data): number {
+  let total_attendees = 0;
+  data.forEach(datum => {
+    if (datum.inout) {
+      total_attendees += 1;
+    }
+  });
+
+  return total_attendees;
+}
+
 function Analytics(props) {
   /*
   Helpful stuff
@@ -531,7 +578,7 @@ function Analytics(props) {
   const [wristband_data] = useState<nivo_element[]>(props.wristband_data);
   const [attendee_data] = useState<nivo_element[]>(props.attendee_data);
   const [total_registrants] = useState<number>(props.count_data.total_registrants);
-  const [total_attendees, setTotalAttendees] = useState<number>(4);
+  const [total_attendees, setTotalAttendees] = useState<number>(get_total_attendee_count(attendee_data));
   const [picked_up_wristband] = useState<number>(props.count_data.picked_up_wristband);
 
   const RegistrationPieChart = makePieChart(registration_data);
@@ -550,6 +597,7 @@ function Analytics(props) {
       <div className={openTab === 1 ? "block" : "hidden"}>
         Total Attendees: {total_attendees}
         <div className = "h-96">
+          <h4>Attendance throughout Public</h4>
           {Attendee_LineGraph}
         </div>
       </div> 
