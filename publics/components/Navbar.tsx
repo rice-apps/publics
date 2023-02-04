@@ -11,6 +11,9 @@ export default function Navbar() {
         <Link href="/events">Events</Link>
       </li>
       <li>
+        <Link href="/about">About</Link>
+      </li>
+      <li>
         <Link href="mailto:awj3@rice.edu">Contact</Link>
       </li>
     </>
