@@ -38,7 +38,7 @@ const About = () => {
       image_url: "/headshots/divya.jpg",
       name: "Divya Wagh",
       title: "Developer",
-      college: "College",
+      college: "Brown College",
     },
     {
       image_url: "/headshots/elaine.jpg",
