@@ -7,6 +7,7 @@ import {
 } from "@supabase/auth-helpers-nextjs";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { ResponsiveLine } from '@nivo/line';
+import { ResponsivePie } from '@nivo/pie'
 
 /**
  * Simple type containing a friendly name for an event, and the UUID of the event
@@ -18,6 +19,11 @@ type EventDetails = {
   eventID: string //Using string as unsure what UUID type is in TS
   organization: string //Organization ID overseeing this event
   capacity: number //Capacity of this event
+}
+
+type nivo_element = {
+  id: string,
+  value: number,
 }
 
 /**
@@ -121,12 +127,47 @@ export const getServerSideProps = async (ctx) => {
   return {
     props: {
       InitialSession: session,
-      params: ctx.params
+      params: ctx.params,
+      event_info: event_detail
     }
   }
 }
 
 export default function Analytics(props) {
+  /*
+  Helpful stuff
+  */
+  const session = props.InitialSession;
+  const event_info = props.event_info;
+  const slug = props.params.slug;
+  const supabase = useSupabaseClient();
+  const router = useRouter();
+  /*
+  state for handling tabs
+  */
+  const [openTab, setOpenTab] = useState(1);
+  const [renderTab2, setRenderTab2] = useState(false);
+  const [tab1Class, setTab1Class] = useState("tab tab-active")
+  const [tab2Class, setTab2Class] = useState("tab")
+
+    // set tab classes on tab change
+    function handleClick(tab) {
+      if (tab === 1) {
+        setOpenTab(1)
+        setTab1Class("tab tab-active")
+        setTab2Class("tab")
+      } else if (tab === 2) {
+        setOpenTab(2)
+        setTab1Class("tab")
+        setTab2Class("tab tab-active")
+    }
+  }
+
+  /*
+  state for data
+  */
+  const [registration_data, setRegistrationData] = useState<nivo_element[]>([]);
+
     // Going to need to calculate:
 
     // 1. Total people counted night of the public
@@ -141,59 +182,48 @@ export default function Analytics(props) {
 
     // 7. [This one depends on some serious checking] caregiving rate in/rate out
 
-    const session = props.InitialSession;
-    const slug = props.params.slug;
-    const supabase = useSupabaseClient();
-    const router = useRouter();
-
     const fetchPosts = async () => {
         if (!slug) return;
-        const { data } = await supabase
-          .from("counts")
-          .select("*, event!inner(*), volunteer(id, profile(first_name))")
-          .eq("event.slug", slug);
-        const { data: eventData } = await supabase
-          .from("events")
-          .select("id")
-          .eq("slug", slug)
-          .single();
-        const { data: volunteer } = await supabase
-          .from("volunteers")
-          .select("id, event(slug)")
-          .eq("profile", session?.user?.id)
-          .single();
-        const { data: volunteers } = await supabase
-          .from("volunteers")
-          .select("id, profile(first_name), event(slug)");
 
-        if (
-          !data ||
-          !eventData ||
-          !volunteer ||
-          !volunteers ||
-          volunteer.event.slug !== slug
-        ) {
-          console.log("ERROR")
-          return;
+        /*
+        Getting and formatting registration data
+        */
+        const registration_response = await supabase
+        .from("registrations")
+        .select(`
+          profiles (
+            organizations (
+              name
+            )
+          )
+        `)  
+        .eq("event", event_info.eventID);
+
+        //TODO make this look pretty with some functional goodness
+        if (registration_response.error || registration_response === undefined) {
+          console.log(registration_response.error); 
         }
 
-        const countsData = data.group(data.eventData.id)
-        .map((data) => {
-          return {
-            id: data.eventData.id,
-            color: "hsl(220, 70%, 50%)",
-            data: {
-              x: data.created_at.getHours(),
-              // Need to filter by event and hour, sum total for that event's hour save as a data entry
-              y: data.filter((count) => count.eventData.id === data.eventData.id && count.created_at.getHours() === data.created_at.getHours())
-            }
-          };
+        let registration_data = {};
+        
+        registration_response.data?.forEach(datum => {
+          let name = datum.profiles?.organizations.name;
+
+          if (!(name in registration_data)) {
+            registration_data[name] = 0;
+          }
+          registration_data[name] += 1;
         });
 
-        return (
-          countsData
-        );
+        let formatted_registration_data: nivo_element[] = [];
+
+        for (let datum in registration_data) {
+          formatted_registration_data.push({id : datum, value : registration_data[datum]})
+        }
+
+        setRegistrationData(formatted_registration_data);
     }
+        
 
     // Filters data into the format required by the library
     /*
@@ -211,81 +241,87 @@ export default function Analytics(props) {
      */
 
     // For reference: https://nivo.rocks/line/
-const countsLineGraph = ({ countsData }) => (
-  <ResponsiveLine
-      data={countsData}
-      margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
-      xScale={{ type: 'point' }}
-      yScale={{
-          type: 'linear',
-          min: 'auto',
-          max: 'auto',
-          stacked: true,
-          reverse: false
-      }}
-      yFormat=" >-.2f"
-      axisTop={null}
-      axisRight={null}
-      axisBottom={{
-          orient: 'bottom',
-          tickSize: 5,
-          tickPadding: 5,
-          tickRotation: 0,
-          legend: 'time',
-          legendOffset: 36,
-          legendPosition: 'middle'
-      }}
-      axisLeft={{
-          orient: 'left',
-          tickSize: 5,
-          tickPadding: 5,
-          tickRotation: 0,
-          legend: 'count',
-          legendOffset: -40,
-          legendPosition: 'middle'
-      }}
-      pointSize={10}
-      pointColor={{ theme: 'background' }}
-      pointBorderWidth={2}
-      pointBorderColor={{ from: 'serieColor' }}
-      pointLabelYOffset={-12}
-      useMesh={true}
-      legends={[
-          {
-              anchor: 'bottom-right',
-              direction: 'column',
-              justify: false,
-              translateX: 100,
-              translateY: 0,
-              itemsSpacing: 0,
-              itemDirection: 'left-to-right',
-              itemWidth: 80,
-              itemHeight: 20,
-              itemOpacity: 0.75,
-              symbolSize: 12,
-              symbolShape: 'circle',
-              symbolBorderColor: 'rgba(0, 0, 0, .5)',
-              effects: [
-                  {
-                      on: 'hover',
-                      style: {
-                          itemBackground: 'rgba(0, 0, 0, .03)',
-                          itemOpacity: 1
-                      }
-                  }
-              ]
+    const RegistrationPieChart = () => (
+      <ResponsivePie
+          data={registration_data}
+          margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
+          padAngle={0.7}
+          cornerRadius={3}
+          activeOuterRadiusOffset={8}
+          borderWidth={1}
+          borderColor={{
+              from: 'color',
+              modifiers: [
+                  [
+                      'darker',
+                      0.2
+                  ]
+              ]session
           }
       ]}
-  />
-)
-<<<<<<< HEAD
-=======
 
-return (
-  <div>
-    <h1>hi</h1>
-    {countsLineGraph}
-  </div>
-);
+          }}
+          arcLinkLabelsSkipAngle={10}
+          arcLinkLabelsTextColor="#333333"
+          arcLinkLabelsThickness={2}
+          arcLinkLabelsColor={{ from: 'color' }}
+          arcLabelsSkipAngle={10}
+          arcLabelsTextColor={{
+              from: 'color',
+              modifiers: [
+                  [
+                      'darker',
+                      2
+                  ]
+              ]
+          }}
+          defs={[]}
+          fill={[]}
+          legends={[
+              {
+                  anchor: 'bottom',
+                  direction: 'row',
+                  justify: false,
+                  translateX: 0,
+                  translateY: 56,
+                  itemsSpacing: 0,
+                  itemWidth: 100,
+                  itemHeight: 18,
+                  itemTextColor: '#999',
+                  itemDirection: 'left-to-right',
+                  itemOpacity: 1,
+                  symbolSize: 18,
+                  symbolShape: 'circle',
+                  effects: [
+                      {
+                          on: 'hover',
+                          style: {
+                              itemTextColor: '#000'
+                          }
+                      }
+                  ]
+              }
+          ]}
+      />
+  );
+
+  fetchPosts();
+
+  return (
+    <div>
+      <div>
+        <h1>Analytics Dashboard</h1>
+      </div>
+      <div className = "tabs underline">
+        <a className={tab1Class} onClick = {() => handleClick(1)}>Attendees</a>
+        <a className={tab2Class} onClick = {() => handleClick(2)}>Registrations</a>
+      </div>
+      <div className={openTab === 1 ? "block" : "hidden"}><h1>TODO</h1></div> 
+      <div className={openTab === 2 ? "block" : "hidden"}>
+        <div className = "h-96">
+          {RegistrationPieChart()}
+        </div>
+      </div> 
+    </div>
+  );
 }
->>>>>>> 25956dc (added admin-level security so only those who are admins of an event can see the analytics)
