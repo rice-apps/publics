@@ -1,46 +1,49 @@
-import Link from "next/link";
-import { registrationOpen } from "../../utils/registration";
-import { ListEvent } from "../../utils/types";
-import { eventCardDate } from "./cardDate";
+import Link from "next/link"
+import { registrationOpen } from "../../utils/registration"
+import { ListEvent } from "../../utils/types"
+import { eventCardDate } from "./cardDate"
 
 type Props = {
-  event: ListEvent;
-  registration_status: string | null;
-  type: string;
-};
-const LargeEventCard = (props) => {
-  const link = "/events/" + props.event.slug;
+  event: ListEvent
+  registration_status?: string
+  type: string
+}
+
+const LargeEventCard = (props: Props) => {
+  const link = "/events/" + props.event.slug
   const setButtons = () => {
     if (props.type === "hosting") {
       return (
         <div className="card-actions sm:justify-end">
-          <button className="btn btn-primary">
-            <Link href={`${link}/registration_result`}>Registration Results</Link>
-          </button>
+          <Link href={`${link}/registration_result`}>
+            <button className="btn btn-primary">Registration Results</button>
+          </Link>
+
           <button className="btn btn-primary btn-outline">Volunteers</button>
         </div>
-      );
+      )
     } else if (props.type === "volunteering") {
       return (
         <div className="card-actions sm:justify-end">
           <button className="btn btn-primary">Check In</button>
-          <button className="btn btn-primary btn-outline">
-            <Link href={`${link}/counter`}>
+
+          <Link href={`${link}/counter`} passHref>
+            <button className="btn btn-primary btn-outline">
               Capacity Counter
-            </Link>
-          </button>
+            </button>
+          </Link>
         </div>
-      );
+      )
     } else {
       return (
         <div className="card-actions sm:justify-end">
-          <button className="btn btn-primary">
-            <Link href={link}>Event Details</Link>
-          </button>
+          <Link href={link} passHref>
+            <button className="btn btn-primary">Event Details</button>
+          </Link>
         </div>
-      );
+      )
     }
-  };
+  }
   return (
     <div className="card lg:card-side bg-base-100 shadow-xl max-w-4xl">
       <figure>
@@ -48,13 +51,17 @@ const LargeEventCard = (props) => {
       </figure>
       <div className="card-body">
         <div className="flex justify-between">
-        <h2 className="card-title">{props.event.name}</h2>
-        {props.type === "hosting" && <Link className="text-primary" href={`${link}/edit`}>Edit</Link>}
+          <h2 className="card-title">{props.event.name}</h2>
+          {props.type === "hosting" && (
+            <Link className="text-primary" href={`${link}/edit`}>
+              Edit
+            </Link>
+          )}
         </div>
         <p>{`${eventCardDate(props.event.event_datetime, false)}`} </p>
         <p className="font-medium flex items-center">
           <img
-            className="avatar w-8 rounded-full ring ring-primary ring-offset-base-100 mr-2"
+            className="avatar w-8 bg-opacity-0 mr-2"
             src={props.event.organization.photo}
             alt={props.event.organization.name}
           />
@@ -80,7 +87,7 @@ const LargeEventCard = (props) => {
         {setButtons()}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default LargeEventCard;
+export default LargeEventCard

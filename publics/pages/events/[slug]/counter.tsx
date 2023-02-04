@@ -1,133 +1,144 @@
-import { supabase } from "../../../utils/db";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
+import { useState, useEffect } from "react"
+import { useRouter } from "next/router"
+import {
+  SupabaseClient,
+  createBrowserSupabaseClient,
+  createServerSupabaseClient,
+} from "@supabase/auth-helpers-nextjs"
+import { useSupabaseClient } from "@supabase/auth-helpers-react"
 
-//create a type for allVolunteers
 interface Volunteer {
-  name: string;
-  id: string;
-  count: number;
-};
+  name: string
+  id: string
+  count: number
+}
 
-interface Profile {
-  first_name: string;
-  // other properties
+const fetchCounts = async (
+  supabase: SupabaseClient,
+  slug: string,
+  userId: string
+) => {
+  const { data } = await supabase
+    .from("counts")
+    .select("*, event!inner(*), volunteer(id, profile(first_name))")
+    .eq("event.slug", slug)
+  const { data: eventData } = await supabase
+    .from("events")
+    .select("id")
+    .eq("slug", slug)
+    .single()
+  const { data: volunteer } = await supabase
+    .from("volunteers")
+    .select("id, event(slug)")
+    .eq("profile", userId)
+    .single()
+  const { data: volunteers } = await supabase
+    .from("volunteers")
+    .select("id, profile(first_name), event!inner(slug)")
+    .eq("event.slug", slug)
+
+  if (
+    !data ||
+    !eventData ||
+    !volunteer ||
+    !volunteers ||
+    !volunteer.event ||
+    volunteer.event["slug"] !== slug
+  ) {
+    return { authorized: false }
+  }
+
+  const volunteerCountArray = volunteers.map((volunteer) => {
+    return {
+      name: volunteer.profile!["first_name"],
+      id: volunteer.id,
+      count:
+        data.filter(
+          (count) => count.volunteer.id === volunteer.id && count.inout
+        ).length -
+        data.filter(
+          (count) => count.volunteer.id === volunteer.id && !count.inout
+        ).length,
+    }
+  })
+
+  return {
+    authorized: true,
+    volunteer: volunteer.id,
+    event: eventData.id,
+    volunteers: volunteerCountArray,
+    count:
+      data.filter((row) => row.inout).length -
+      data.filter((row) => !row.inout).length,
+    myCount:
+      data.filter((row) => row.volunteer.id === volunteer?.id && row.inout)
+        .length -
+      data.filter((row) => row.volunteer.id === volunteer?.id && !row.inout)
+        .length,
+  }
 }
 
 const Counter = (props) => {
-  const { session } = props;
-  const { query } = useRouter() || { query: { slug: "" } };
-  const [count, setCount] = useState(0);
-  const [myCount, setMyCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [event, setEvent] = useState("");
-  const [volunteer, setVolunteer] = useState("");
-  const [allVolunteers, setAllVolunteers] = useState<Volunteer[]>([]);
+  const supabase = useSupabaseClient()
+  const router = useRouter() || { query: { slug: "" } }
+  const query = router.query
+  const [count, setCount] = useState(0)
+  const [myCount, setMyCount] = useState(0)
+  const [allVolunteers, setAllVolunteers] = useState<Volunteer[]>([])
+
   useEffect(() => {
-    fetchPosts();
-  }, [query]);
+    if (!props) {
+      return
+    }
+    setCount(props.count)
+    setMyCount(props.myCount)
+    setAllVolunteers(props.volunteers)
+  }, [props])
+
   useEffect(() => {
-    supabase
-      .channel(`count:${query.slug}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "counts" },
-        (payload: any) => {
-          //set count and my count
-          setCount((count) => count + (payload.new.inout ? 1 : -1));
-          //update count in allVolunteers
-          setAllVolunteers((volunteers) => {
-            return volunteers.map((volunteer) => {
-              if (volunteer.id === payload.new.volunteer) {
-                return {
-                  ...volunteer,
-                  count: volunteer.count + (payload.new.inout ? 1 : -1),
-                };
+    const channel = supabase.channel(`count:${query.slug}`)
+
+    channel.on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "counts" },
+      (payload: any) => {
+        //set count and my count
+        setCount((count) => count + (payload.new.inout ? 1 : -1))
+        //update count in allVolunteers
+        setAllVolunteers((volunteers) => {
+          return volunteers.map((volunteer) => {
+            if (volunteer.id === payload.new.volunteer) {
+              return {
+                ...volunteer,
+                count: volunteer.count + (payload.new.inout ? 1 : -1),
               }
-              return volunteer;
-            });
-          });
-        }
-      )
-      .subscribe();
-  }, []);
-  const fetchPosts = async () => {
-    if (!query.slug) return;
-    const { data } = await supabase
-      .from("counts")
-      .select("*, event!inner(*), volunteer(id, profile(first_name))")
-      .eq("event.slug", query.slug);
-    const { data: eventData } = await supabase
-      .from("events")
-      .select("id")
-      .eq("slug", query.slug)
-      .single();
-    const { data: volunteer } = await supabase
-      .from("volunteers")
-      .select("id, event(slug)")
-      .eq("profile", session?.user?.id)
-      .single();
-    const { data: volunteers } = await supabase
-      .from("volunteers")
-      .select("id, profile(first_name), event(slug)");
+            }
+            return volunteer
+          })
+        })
+      }
+    )
+    channel.subscribe()
 
-    if (
-      !data ||
-      !eventData ||
-      !volunteer ||
-      !volunteers ||
-      volunteer.event.slug !== query.slug
-    ) {
-      window.location.href = "/404/";
-      return;
+    return () => {
+      supabase.removeChannel(channel)
     }
-
-    const volunteerCountArray = volunteers.map((volunteer) => {
-      return {
-        name: volunteer.profile.first_name,
-        id: volunteer.id,
-        count:
-          data.filter(
-            (count) => count.volunteer.id === volunteer.id && count.inout
-          ).length -
-          data.filter(
-            (count) => count.volunteer.id === volunteer.id && !count.inout
-          ).length,
-      };
-    });
-    setVolunteer(volunteer.id);
-    setAllVolunteers(volunteerCountArray);
-    setEvent(eventData.id);
-    if (data.length > 0) {
-      setCount(
-        data.filter((row) => row.inout).length -
-          data.filter((row) => !row.inout).length
-      );
-      setMyCount(
-        data.filter((row) => row.volunteer.id === volunteer?.id && row.inout)
-          .length -
-          data.filter((row) => row.volunteer.id === volunteer?.id && !row.inout)
-            .length
-      );
-    }
-
-    setLoading(false);
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const updateCount = async (inout) => {
     await supabase.from("counts").insert([
       {
         inout: inout,
-        volunteer: volunteer,
-        event: event,
+        volunteer: props.volunteer,
+        event: props.event,
       },
-    ]);
-    setMyCount((count) => count + (inout ? 1 : -1));
-  };
-  if (loading) return <div className="flex flex-col h-screen">Loading ...</div>;
+    ])
+    setMyCount((count) => count + (inout ? 1 : -1))
+  }
   return (
     <div className="flex flex-col h-screen">
-      <div className="flex flex-row justify-center">
+      <div className="flex flex-row justify-center mt-8">
         <h1>{myCount}</h1>
         <h1 className="text-primary">/{count}</h1>
       </div>
@@ -142,14 +153,14 @@ const Counter = (props) => {
               <div className="badge badge-lg">{v.count}</div>
               <h4>{v.name}</h4>
             </div>
-          );
+          )
         })}
       </div>
       <div className="flex flex-grow justify-center space-x-10 items-center">
         <button
           className="btn btn-circle h-24 w-24"
           onClick={() => {
-            updateCount(false);
+            updateCount(false)
           }}
         >
           <svg
@@ -170,7 +181,7 @@ const Counter = (props) => {
         <button
           className="btn btn-circle h-24 w-24"
           onClick={() => {
-            updateCount(true);
+            updateCount(true)
           }}
         >
           <svg
@@ -190,6 +201,49 @@ const Counter = (props) => {
         </button>
       </div>
     </div>
-  );
-};
-export default Counter;
+  )
+}
+
+export const getServerSideProps = async (ctx) => {
+  // Create authenticated Supabase Client
+  const supabase = createServerSupabaseClient(ctx)
+  // Check if we have a session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  if (!session) {
+    //navigate to account page
+    return {
+      redirect: {
+        destination: `http://${ctx.req.headers.host}/account`,
+        permanent: false,
+      },
+    }
+  }
+
+  const { authorized, volunteer, event, volunteers, count, myCount } =
+    await fetchCounts(supabase, ctx.query.slug, session.user.id)
+
+  if (!authorized) {
+    return {
+      redirect: {
+        destination: `http://${ctx.req.headers.host}/404`,
+        permanent: false,
+      },
+    }
+  }
+
+  return {
+    props: {
+      initialSession: session,
+      volunteer: volunteer,
+      event: event,
+      volunteers: volunteers,
+      count: count,
+      myCount: myCount,
+    },
+  }
+}
+
+export default Counter
