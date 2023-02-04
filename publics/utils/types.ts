@@ -5,6 +5,7 @@ export type ListEvent = {
   slug: string
   event_datetime: string
   organization: Organization
+  location: string
   registration: boolean
   registration_datetime: string
   college_registration_datetime: string

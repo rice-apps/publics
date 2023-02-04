@@ -30,7 +30,7 @@ export async function getServerSideProps(ctx) {
   const { data: collData, error: eventError } = await supabase
     .from("events")
     .select(
-      `id, name, description, event_datetime, registration_datetime, college_registration_datetime, registration, waitlist_size, registration_closed, img_url, organization (
+      `id, name, description, event_datetime, registration_datetime, college_registration_datetime, location, registration, waitlist_size, registration_closed, img_url, organization (
             id,
             name,
             photo
@@ -197,11 +197,14 @@ const Details = (props: Props) => {
   const [enabled, setEnabled] = useState(
     !userReg &&
       !event.registration_closed &&
+      event.registration &&
       reg_time.getTime() < curr_date.getTime()
   )
 
   useEffect(() => {
-    if (reg_time.getTime() > curr_date.getTime()) {
+    if (!event.registration) {
+      setText("Registration is not required for this event!")
+    } else if (reg_time.getTime() > curr_date.getTime()) {
       setText("Registration is not open yet")
     } else if (props.waitlist) {
       setText(
@@ -214,7 +217,14 @@ const Details = (props: Props) => {
     } else if (event.registration_closed) {
       setText("Event registration has already closed.")
     }
-  }, [props.waitlist, props.userRegistered, event.registration_closed])
+  }, [
+    props.waitlist,
+    props.userRegistered,
+    event.registration_closed,
+    event.registration,
+    reg_time,
+    curr_date,
+  ])
 
   return (
     <>
@@ -258,7 +268,6 @@ const Details = (props: Props) => {
                 </p>
                 <span>
                   <p>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       width={24}
                       height={24}
@@ -269,6 +278,7 @@ const Details = (props: Props) => {
                     Hosted by {event.organization.name}
                   </p>
                 </span>
+                <p>Location: {event.location}</p>
                 <p className="">{event.description}</p>
 
                 <p className="font-medium text-primary">
@@ -315,7 +325,7 @@ const Details = (props: Props) => {
             </div>
           ) : (
             <div className="flex flex-row justify-center">
-              <div className="bg-base-100 h-16 w-11/12 flex items-center justify-center">
+              <div className="bg-base-100 h-16 w-11/12 flex items-center justify-center rounded-md border border-primary">
                 <p>{text}</p>
               </div>
             </div>
