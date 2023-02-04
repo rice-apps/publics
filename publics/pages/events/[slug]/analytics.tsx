@@ -347,6 +347,9 @@ function makePieChart(data, legend) {
 }
 
 function convert_to_coordinate(data): coordinate[][] {
+  if (data.length < 2) {
+    return [[],[],[]];
+  }
   let num_groups = Math.max(data.length/10, 10); //number of buckets we put arrange data points around
   /*
   making an equally spaced array of dates between the first and last event
