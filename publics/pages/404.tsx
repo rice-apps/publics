@@ -12,7 +12,7 @@ export default function Error404() {
             height={342}
             alt="Error Owl"
           />
-          <h1 className="text-5xl font-bold">Party's over :(</h1>
+          <h1 className="text-5xl font-bold">Party&apos;s over :(</h1>
           <p className="py-6">Error 404.</p>
           <Link href="/">
             <button className="btn btn-primary">Return Home.</button>
