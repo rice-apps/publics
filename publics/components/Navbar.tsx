@@ -87,7 +87,7 @@ export default function Navbar() {
             </div> */}
           </Link>
         ) : (
-          <LoginButton />
+          <LoginButton text="Sign in" />
         )}
       </div>
     </div>
