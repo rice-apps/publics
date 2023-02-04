@@ -104,6 +104,24 @@ async function isAdminUser(
 }
 
 /**
+ * Parse locale date string.
+ * @param time - the locale date string shift time to parse
+ * @returns The parsed shift time.
+ */
+// function parse_date_string(time: string) {
+//   // let time = date.toLocaleTimeString()
+//   let ampm = time.slice(time.indexOf(" "))
+//   let hrmin = time.slice(0, time.indexOf(":", 3))
+//   return hrmin + ampm
+// }
+function parse_time(date: Date) {
+  let time = date.toLocaleTimeString()
+  let ampm = time.slice(time.indexOf(" "))
+  let hrmin = time.slice(0, time.indexOf(":", 3))
+  return hrmin + ampm
+}
+
+/**
  * Gets registrations from backend for appropriate event and reformats them into an array of row objects
  * @param event_detail - information for the event we want to get information for
  * @returns Array of row objects based on registration table on backend
@@ -169,6 +187,10 @@ async function getVolunteers(
       college: profiles["organizations"].name,
       start_time: new Date(shifts["start"]).toLocaleString(),
       end_time: new Date(shifts["end"]).toLocaleString(),
+      // start_time: parse_time(new Date(shifts["start"])),
+      // end_time: parse_time(new Date(shifts["end"])),
+      // start_time: new Date(shifts["start"]).toLocaleDateString(),
+      // end_time: new Date(shifts["end"]).toLocaleDateString(),
       checked_in: current_object["checked_in"],
       is_counter: current_object["is_counter"],
     }
@@ -450,7 +472,7 @@ function VolunteerPage(props) {
       <div key="event_title">
         {/* <h1>Volunteers for {props.event_detail.eventName}</h1> */}
         
-        <h1>{props.shift_details.name} | {props.shift_details.start} - {props.shift_details.end}</h1>
+        <h1>{props.shift_details.name} | {parse_time(new Date(props.shift_details.start))} - {parse_time(new Date(props.shift_details.end))}</h1>
         
       </div>
 
