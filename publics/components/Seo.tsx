@@ -22,7 +22,7 @@ export default function Seo() {
           images: [
             {
               url: "https://publics.vercel.app/owl.png",
-              width: 712,
+              width: 512,
               height: 512,
               alt: "Owl",
             },
