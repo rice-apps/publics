@@ -10,7 +10,7 @@ const About = () => {
       college: "Brown College",
     },
     {
-      image_url: "/headshots/aidan.JPG",
+      image_url: "/headshots/aidan.jpg",
       name: "Aidan Gerber",
       title: "Tech Lead",
       college: "Baker College",
@@ -23,7 +23,7 @@ const About = () => {
       college: "Brown College",
     },
     {
-      image_url: "/headshots/rebecca.Jpg",
+      image_url: "/headshots/rebecca.jpg",
       name: "Rebecca Yee",
       title: "Designer",
       college: "Wiess College",
@@ -65,7 +65,7 @@ const About = () => {
       college: "Lovett College",
     },
     {
-      image_url: "/headshots/shivam.JPG",
+      image_url: "/headshots/shivam.jpg",
       name: "Shivam Pathak",
       title: "Developer",
       college: "Sid Richardson College",
