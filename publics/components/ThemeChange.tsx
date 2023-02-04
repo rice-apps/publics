@@ -35,6 +35,7 @@ export default function ThemeChange() {
     "pastel",
     "retro",
     "synthwave",
+    "tokyo-night",
     "valentine",
     "winter",
     "wireframe",
