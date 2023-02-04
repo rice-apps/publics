@@ -230,8 +230,6 @@ async function get_attendee_data(supabase, event_id) {
     return {};
   }
 
-  //data.forEach(element => element.created_at = new Date(element.created_at).toLocaleTimeString().slice(0, 4));
-  //data.forEach(element => element.created_at = new Date(element.created_at).toLocaleTimeString());
   return data;
 }
 
@@ -298,33 +296,7 @@ function makePieChart(data) {
   )
 }
 
-function groupBy(list, keyGetter) {
-  let map = new Map();
-  list.forEach((item) => {
-       const key = keyGetter(item);
-       const num = map.get(key);
-       if (!num) {
-           map.set(key, 1)
-           console.log(map.get[key])
-       } else {
-         //fix this!
-         let val = map.get(key); 
-         map.set(key, val + 1);
-       }
-  });
-
-  return Array.from(map);
-}
-
-function compare_party_time(a, b) {
-  //figure out if PM comes first
-}
-
 function convert_to_coordinate(data): coordinate[][] {
-  //NEED TO GROUP INTO DISCRETE TIME INTERVALS BETWEEN START AND END TIME
-  //THEN SORT THOSE GROUPS BY TIME PERIOD
-  //RETURN
-
   let num_groups = Math.max(data.length/10, 10); //number of buckets we put arrange data points around
 
   /*
@@ -372,7 +344,8 @@ function convert_to_coordinate(data): coordinate[][] {
   })
 
   for (let i = 0; i < num_groups; i++) {
-    accumulated_in_counts[i].x = accumulated_in_counts[i].x.toLocaleString().substring(11);
+    //React doesn't like rendering dates with this library at compile time for some reason, so I just use strings for the x axis
+    accumulated_in_counts[i].x = accumulated_in_counts[i].x.toLocaleString().substring(11); 
     accumulated_out_counts[i].x = accumulated_out_counts[i].x.toLocaleString().substring(11);
     accumulated_total_counts[i].y = accumulated_in_counts[i].y - accumulated_out_counts[i].y;
     accumulated_total_counts[i].x = accumulated_total_counts[i].x.toLocaleString().substring(11);
@@ -461,11 +434,6 @@ function makeLineGraph(data) {
         ]}
     />
   );
-  //
-  
-  //get timestamptz, then get them on the granularity of minutes
-  //then group by, and create line graph
-  return null;
 }
 
 export const getServerSideProps = async (ctx) => {
@@ -578,7 +546,7 @@ function Analytics(props) {
   const [wristband_data] = useState<nivo_element[]>(props.wristband_data);
   const [attendee_data] = useState<nivo_element[]>(props.attendee_data);
   const [total_registrants] = useState<number>(props.count_data.total_registrants);
-  const [total_attendees, setTotalAttendees] = useState<number>(get_total_attendee_count(attendee_data));
+  const [total_attendees] = useState<number>(get_total_attendee_count(attendee_data));
   const [picked_up_wristband] = useState<number>(props.count_data.picked_up_wristband);
 
   const RegistrationPieChart = makePieChart(registration_data);
@@ -596,7 +564,7 @@ function Analytics(props) {
       </div>
       <div className={openTab === 1 ? "block" : "hidden"}>
         Total Attendees: {total_attendees}
-        <div className = "h-96">
+        <div className = "h-96 text-center">
           <h4>Attendance throughout Public</h4>
           {Attendee_LineGraph}
         </div>
