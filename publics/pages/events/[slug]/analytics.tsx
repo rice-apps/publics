@@ -10,13 +10,6 @@ import { ResponsiveLine } from '@nivo/line';
 import { ResponsivePie } from '@nivo/pie'
 
 /**
- * TODO:
- * Get attendance through public data and graph it
- * Consolidate reused code into single function
- * Add "Data will be available once the event is concluded"
- * Style to fit figma
- */
-/**
  * Simple type containing a friendly name for an event, and the UUID of the event
  */
 type EventDetails = {
@@ -233,7 +226,71 @@ async function get_attendee_data(supabase, event_id) {
   return data;
 }
 
-function makePieChart(data) {
+function makePieChart(data, legend) {
+  if (legend) {
+    return (
+      <ResponsivePie
+          data={data}
+          margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
+          padAngle={0.7}
+          cornerRadius={3}
+          activeOuterRadiusOffset={8}
+          borderWidth={1}
+          borderColor={{
+              from: 'color',
+              modifiers: [
+                  [
+                      'darker',
+                      0.2
+                  ]
+              ]
+          }}
+          colors = {{'scheme' : 'set1'}}
+          arcLinkLabelsSkipAngle={10}
+          arcLinkLabelsTextColor="#333333"
+          arcLinkLabelsThickness={2}
+          arcLinkLabelsColor={{ from: 'color' }}
+          arcLabelsSkipAngle={10}
+          arcLabelsTextColor={{
+              from: 'color',
+              modifiers: [
+                  [
+                      'darker',
+                      2
+                  ]
+              ]
+          }}
+          defs={[]}
+          fill={[]}
+          legends={[
+              {
+                  anchor: 'right',
+                  direction: 'column',
+                  justify: false,
+                  translateX: -200,
+                  translateY: 56,
+                  itemsSpacing: 0,
+                  itemWidth: 100,
+                  itemHeight: 40,
+                  itemTextColor: '#999',
+                  itemDirection: 'left-to-right',
+                  itemOpacity: 1,
+                  symbolSize: 18,
+                  symbolShape: 'circle',
+                  effects: [
+                      {
+                          on: 'hover',
+                          style: {
+                              itemTextColor: '#000'
+                          }
+                      }
+                  ]
+              }
+          ]}
+      />
+    ) 
+  } 
+
   return (
     <ResponsivePie
         data={data}
@@ -251,6 +308,7 @@ function makePieChart(data) {
                 ]
             ]
         }}
+        colors = {{'scheme' : 'set1'}}
         arcLinkLabelsSkipAngle={10}
         arcLinkLabelsTextColor="#333333"
         arcLinkLabelsThickness={2}
@@ -267,38 +325,12 @@ function makePieChart(data) {
         }}
         defs={[]}
         fill={[]}
-        legends={[
-            {
-                anchor: 'right',
-                direction: 'column',
-                justify: false,
-                translateX: 0,
-                translateY: 56,
-                itemsSpacing: 0,
-                itemWidth: 100,
-                itemHeight: 40,
-                itemTextColor: '#999',
-                itemDirection: 'left-to-right',
-                itemOpacity: 1,
-                symbolSize: 18,
-                symbolShape: 'circle',
-                effects: [
-                    {
-                        on: 'hover',
-                        style: {
-                            itemTextColor: '#000'
-                        }
-                    }
-                ]
-            }
-        ]}
     />
-  )
+  ) 
 }
 
 function convert_to_coordinate(data): coordinate[][] {
   let num_groups = Math.max(data.length/10, 10); //number of buckets we put arrange data points around
-
   /*
   making an equally spaced array of dates between the first and last event
   */
@@ -332,23 +364,24 @@ function convert_to_coordinate(data): coordinate[][] {
 
   data.forEach(elem => {
     let curr_date = new Date(elem.created_at);
-    while (curr_date > date_array[date_ptr]) {
+    while (curr_date > date_array[date_ptr] && date_ptr < num_groups - 1) {
       date_ptr += 1;
     }
 
     if (elem.inout) {
       accumulated_in_counts[date_ptr].y += 1;
+      accumulated_total_counts[date_ptr].y += 1;
     } else {
       accumulated_out_counts[date_ptr].y += 1;
+      accumulated_total_counts[date_ptr].y -= 1;
     }
   })
 
   for (let i = 0; i < num_groups; i++) {
     //React doesn't like rendering dates with this library at compile time for some reason, so I just use strings for the x axis
-    accumulated_in_counts[i].x = accumulated_in_counts[i].x.toLocaleString().substring(11); 
-    accumulated_out_counts[i].x = accumulated_out_counts[i].x.toLocaleString().substring(11);
-    accumulated_total_counts[i].y = accumulated_in_counts[i].y - accumulated_out_counts[i].y;
-    accumulated_total_counts[i].x = accumulated_total_counts[i].x.toLocaleString().substring(11);
+    accumulated_in_counts[i].x = accumulated_in_counts[i].x.toLocaleString().substring(10); 
+    accumulated_out_counts[i].x = accumulated_out_counts[i].x.toLocaleString().substring(10);
+    accumulated_total_counts[i].x = accumulated_total_counts[i].x.toLocaleString().substring(10);
   }
 
   return [accumulated_in_counts, accumulated_out_counts, accumulated_total_counts];
@@ -374,38 +407,37 @@ function makeLineGraph(data) {
             stacked: true,
             reverse: false
         }}
+        yFormat=" > .0f"
         enableGridY = {false}
-        yFormat=" >-.10f"
-        curve = "cardinal"
+        curve = "linear"
         axisTop={null}
         axisRight={null}
-        axisBottom={{
-          orient: 'bottom',
-          tickSize: 5,
-          tickPadding: 5,
-          tickRotation: 0,
-          legend: 'Time',
-          legendOffset: 36,
-          legendPosition: 'middle'
-        }}
-        axisLeft={{
-          orient: 'left',
-          tickSize: 5,
-          tickPadding: 5,
-          tickRotation: 0,
-          legend: 'count',
-          legendOffset: -40,
-          legendPosition: 'middle'
-        }}
+        // axisBottom={{
+        //   orient: 'bottom',
+        //   tickSize: 5,
+        //   tickPadding: 5,
+        //   tickRotation: 0,
+        //   legend: 'Time',
+        //   legendOffset: 36,
+        //   legendPosition: 'middle'
+        // }}
+        // axisLeft={{
+        //   orient: 'left',
+        //   tickSize: 5,
+        //   tickPadding: 5,
+        //   tickRotation: 0,
+        //   legend: 'count',
+        //   legendOffset: -40,
+        //   legendPosition: 'middle'
+        // }}
         pointSize={10}
         pointColor={{ theme: 'background' }}
         pointBorderWidth={2}
         pointBorderColor={{ from: 'serieColor' }}
         pointLabelYOffset={-12}
         useMesh={true}
-        lineWidth = {5}
-        colors = {{'scheme' : 'category10'}}
-        
+        lineWidth = {3}
+        colors = {{'scheme' : 'set1'}}
         legends={[
             {
                 anchor: 'top',
@@ -549,8 +581,8 @@ function Analytics(props) {
   const [total_attendees] = useState<number>(get_total_attendee_count(attendee_data));
   const [picked_up_wristband] = useState<number>(props.count_data.picked_up_wristband);
 
-  const RegistrationPieChart = makePieChart(registration_data);
-  const WristBandPieChart = makePieChart(wristband_data);
+  const RegistrationPieChart = makePieChart(registration_data, true);
+  const WristBandPieChart = makePieChart(wristband_data, true);
   const Attendee_LineGraph = makeLineGraph(attendee_data);
 
   return (
@@ -570,24 +602,34 @@ function Analytics(props) {
         </div>
       </div> 
       <div className={openTab === 2 ? "block" : "hidden"}>
+        <div className="">
+          <table className="table-fixed">
+            <thead>
+            </thead>
+            <tbody>
+              <tr>
+                <td className = "w-60 text-lg">Total Registrants</td>
+                <td className = "text-lg font-bold">{total_registrants}</td>
+              </tr>
+              <tr>
+                <td className = "w-60 text-lg">Picked Up Wristband</td>
+                <td className = "text-lg font-bold">{picked_up_wristband}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <div>
-          <div className = "text-2xl">
-            Total Registrants <span className = "m-10">{total_registrants}</span>
+          <div className = "h-96 text-center">
+            <p className = "text-lg font-bold">Online Registration (Including Transfers)</p>
+            {RegistrationPieChart}
           </div>
-          <div className = "text-2xl">
-            Picked Up Wristband <span className = "m-10">{picked_up_wristband}</span>
+          <div className = "h-96 text-center">
+            <p className = "text-lg font-bold">Wristband Pickup</p> 
+            {WristBandPieChart}
           </div>
         </div>
-        <div className = "h-96 text-center">
-          <h4>Online Registration (Including Transfers)</h4>
-          {RegistrationPieChart}
-        </div>
-        <div className = "h-96 text-center">
-          <h4>Wristband Pickup</h4> 
-          {WristBandPieChart}
-        </div>
-      </div> 
-    </div>
+      </div>
+      </div>
   );
 }
 
