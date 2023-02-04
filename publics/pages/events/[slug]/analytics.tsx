@@ -89,7 +89,7 @@ async function getEvent(
 /**
  * Gets registration data for an event given identified by event_id and formats it into nivo-pie chart friendly data
  * @returns list of {college, count} pairs for each college with non-zero registrations
- */a
+ */
 async function get_registration_data(supabase, event_id) {
   const registration_response = await supabase
   .from("registrations")
@@ -210,7 +210,72 @@ async function get_count_data(supabase, event_id) {
 }
 
 async function get_attendee_data(supabase, event_id) {
-  //TODO
+  return {
+    total_attendees: 0
+  }
+}
+
+function makePieChart(data) {
+  return (
+    <ResponsivePie
+        data={data}
+        margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
+        padAngle={0.7}
+        cornerRadius={3}
+        activeOuterRadiusOffset={8}
+        borderWidth={1}
+        borderColor={{
+            from: 'color',
+            modifiers: [
+                [
+                    'darker',
+                    0.2
+                ]
+            ]
+        }}
+        arcLinkLabelsSkipAngle={10}
+        arcLinkLabelsTextColor="#333333"
+        arcLinkLabelsThickness={2}
+        arcLinkLabelsColor={{ from: 'color' }}
+        arcLabelsSkipAngle={10}
+        arcLabelsTextColor={{
+            from: 'color',
+            modifiers: [
+                [
+                    'darker',
+                    2
+                ]
+            ]
+        }}
+        defs={[]}
+        fill={[]}
+        legends={[
+            {
+                anchor: 'right',
+                direction: 'column',
+                justify: false,
+                translateX: 0,
+                translateY: 56,
+                itemsSpacing: 0,
+                itemWidth: 100,
+                itemHeight: 40,
+                itemTextColor: '#999',
+                itemDirection: 'left-to-right',
+                itemOpacity: 1,
+                symbolSize: 18,
+                symbolShape: 'circle',
+                effects: [
+                    {
+                        on: 'hover',
+                        style: {
+                            itemTextColor: '#000'
+                        }
+                    }
+                ]
+            }
+        ]}
+    />
+  )
 }
 
 export const getServerSideProps = async (ctx) => {
@@ -260,6 +325,7 @@ export const getServerSideProps = async (ctx) => {
     const registration_data = await get_registration_data(supabase, event_detail.eventID);
     const wristband_data = await get_wristband_data(supabase, event_detail.eventID);
     const count_data = await get_count_data(supabase, event_detail.eventID);
+    const attendee_data = await get_attendee_data(supabase, event_detail.eventID);
 
   return {
     props: {
@@ -269,11 +335,12 @@ export const getServerSideProps = async (ctx) => {
       registration_data: registration_data,
       wristband_data : wristband_data,
       count_data: count_data,
+      attendee_data: attendee_data,
     }
   }
 }
 
-export default function Analytics(props) {
+function Analytics(props) {
   /*
   Helpful stuff
   */
@@ -309,162 +376,11 @@ export default function Analytics(props) {
   const [registration_data] = useState<nivo_element[]>(props.registration_data);
   const [wristband_data] = useState<nivo_element[]>(props.wristband_data);
   const [total_registrants] = useState<number>(props.count_data.total_registrants);
+  const [total_attendees] = useState<number>(props.attendee_data.total_attendees);
   const [picked_up_wristband] = useState<number>(props.count_data.picked_up_wristband);
-    // Going to need to calculate:
 
-    // 1. Total people counted night of the public
-    // 2. In and out by hour
-    // 3. In and out by volunteer
-    // 4. Number of volunteers
-    // 5. Number of volunteers in an hour (registered v. showed up)
-    // 6. Registration analytics
-        // - Number of registrants: residential college hosting and general registration
-        // - Registered versus pick up
-        // - Chances of getting off the waitlist
-
-    // 7. [This one depends on some serious checking] caregiving rate in/rate out
-
-        
-
-    // Filters data into the format required by the library
-    /*
-    {
-      "id": "##:00", // Hour in military time
-      "color": "hsl(220, 70%, 50%)",
-      "data": [
-        {
-          "x": "##:00",
-          "y": #
-        },
-        {...}
-      ]
-    }
-     */
-
-    // For reference: https://nivo.rocks/line/
-    const RegistrationPieChart = () => (
-      <ResponsivePie
-          data={registration_data}
-          margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
-          padAngle={0.7}
-          cornerRadius={3}
-          activeOuterRadiusOffset={8}
-          borderWidth={1}
-          borderColor={{
-              from: 'color',
-              modifiers: [
-                  [
-                      'darker',
-                      0.2
-                  ]
-              ]session
-          }
-      ]}
-
-          }}
-          arcLinkLabelsSkipAngle={10}
-          arcLinkLabelsTextColor="#333333"
-          arcLinkLabelsThickness={2}
-          arcLinkLabelsColor={{ from: 'color' }}
-          arcLabelsSkipAngle={10}
-          arcLabelsTextColor={{
-              from: 'color',
-              modifiers: [
-                  [
-                      'darker',
-                      2
-                  ]
-              ]
-          }}
-          defs={[]}
-          fill={[]}
-          legends={[
-              {
-                  anchor: 'right',
-                  direction: 'column',
-                  justify: false,
-                  translateX: 0,
-                  translateY: 56,
-                  itemsSpacing: 0,
-                  itemWidth: 100,
-                  itemHeight: 40,
-                  itemTextColor: '#999',
-                  itemDirection: 'left-to-right',
-                  itemOpacity: 1,
-                  symbolSize: 18,
-                  symbolShape: 'circle',
-                  effects: [
-                      {
-                          on: 'hover',
-                          style: {
-                              itemTextColor: '#000'
-                          }
-                      }
-                  ]
-              }
-          ]}
-      />
-  );
-    const WristBandPieChart = () => (
-      <ResponsivePie
-          data={wristband_data}
-          margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
-          padAngle={0.7}
-          cornerRadius={3}
-          activeOuterRadiusOffset={8}
-          borderWidth={1}
-          borderColor={{
-              from: 'color',
-              modifiers: [
-                  [
-                      'darker',
-                      0.2
-                  ]
-              ]
-          }}
-          arcLinkLabelsSkipAngle={10}
-          arcLinkLabelsTextColor="#333333"
-          arcLinkLabelsThickness={2}
-          arcLinkLabelsColor={{ from: 'color' }}
-          arcLabelsSkipAngle={10}
-          arcLabelsTextColor={{
-              from: 'color',
-              modifiers: [
-                  [
-                      'darker',
-                      2
-                  ]
-              ]
-          }}
-          defs={[]}
-          fill={[]}
-          legends={[
-              {
-                  anchor: 'right',
-                  direction: 'column',
-                  justify: false,
-                  translateX: 0,
-                  translateY: 56,
-                  itemsSpacing: 0,
-                  itemWidth: 100,
-                  itemHeight: 40,
-                  itemTextColor: '#999',
-                  itemDirection: 'left-to-right',
-                  itemOpacity: 1,
-                  symbolSize: 18,
-                  symbolShape: 'circle',
-                  effects: [
-                      {
-                          on: 'hover',
-                          style: {
-                              itemTextColor: '#000'
-                          }
-                      }
-                  ]
-              }
-          ]}
-      />
-  );
+  const RegistrationPieChart = makePieChart(registration_data);
+  const WristBandPieChart = makePieChart(wristband_data);
 
 
   return (
@@ -476,7 +392,9 @@ export default function Analytics(props) {
         <a className={tab1Class} onClick = {() => handleClick(1)}>Attendees</a>
         <a className={tab2Class} onClick = {() => handleClick(2)}>Registrations</a>
       </div>
-      <div className={openTab === 1 ? "block" : "hidden"}><h1>TODO</h1></div> 
+      <div className={openTab === 1 ? "block" : "hidden"}>
+        <h1>Total Attendees: {total_attendees}</h1>
+        </div> 
       <div className={openTab === 2 ? "block" : "hidden"}>
         <div>
           <div className = "text-2xl">
@@ -488,13 +406,15 @@ export default function Analytics(props) {
         </div>
         <div className = "h-96 text-center">
           <h4>Online Registration (Including Transfers)</h4>
-          {RegistrationPieChart()}
+          {RegistrationPieChart}
         </div>
         <div className = "h-96 text-center">
           <h4>Wristband Pickup</h4> 
-          {WristBandPieChart()}
+          {WristBandPieChart}
         </div>
       </div> 
     </div>
   );
 }
+
+export default Analytics;
