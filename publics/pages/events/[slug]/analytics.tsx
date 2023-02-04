@@ -21,16 +21,25 @@ type EventDetails = {
   capacity: number //Capacity of this event
 }
 
+/*
+* Used for pie charts
+*/
 type nivo_element = {
   id: string,
   value: number
 }
 
+/*
+Type for a coordinate on a 2D-plane
+*/
 type coordinate = {
   x: string | Date, 
   y: number
 }
 
+/*
+* Type for data to be plotted on a 2D-plane
+*/
 type nivo_line_element = {
   id:  string, //i.e. total, attendees in, attendees out
   data: coordinate[]
@@ -136,7 +145,7 @@ async function get_registration_data(supabase, event_id) {
  * Gets registration data for an event given identified by event_id and formats it into nivo-pie chart friendly data
  * @returns list of {college, count} pairs for each college with non-zero registrations
  */
-async function get_wristband_data(supabase, event_id) {
+async function get_wristband_data(supabase, event_id): Promise<nivo_element[]> {
   const wristband_response = await supabase
   .from("registrations")
   .select(`
@@ -149,13 +158,14 @@ async function get_wristband_data(supabase, event_id) {
   .eq("event", event_id)
   .eq("picked_up_wristband", true);
 
-  //TODO make this look pretty with some functional goodness
   if (wristband_response.error || wristband_response === undefined) {
     console.log(wristband_response.error); 
+    return [];
   }
 
   let wristband_data = {};
   
+  //Putting everything from the DB response into a JS object
   wristband_response.data?.forEach(datum => {
     let name = datum.profiles?.organizations.name;
 
@@ -165,6 +175,7 @@ async function get_wristband_data(supabase, event_id) {
     wristband_data[name] += 1;
   });
 
+  //Reducing object into array
   let formatted_wristband_data: nivo_element[] = [];
 
   for (let datum in wristband_data) {
@@ -187,7 +198,6 @@ async function get_count_data(supabase, event_id) {
   `)  
   .eq("event", event_id);
 
-  //TODO make this look pretty with some functional goodness
   if (count_response.error || count_response === undefined) {
     console.log(count_response.error);
     return {
@@ -199,6 +209,7 @@ async function get_count_data(supabase, event_id) {
   let total_registrants = 0;
   let picked_up_wristband = 0;
 
+  //Accumulating count data
   count_response.data.forEach(datum => {
     total_registrants += 1;
     if (datum.picked_up_wristband) {
@@ -212,6 +223,9 @@ async function get_count_data(supabase, event_id) {
   }
 }
 
+/*
+* Gets counter data from backend in the form of an array of {timestamp, true/false} where the boolean is true if someone entered the party and false otherwise
+*/
 async function get_attendee_data(supabase, event_id) {
   const {data, error} = await supabase
   .from("counts")
@@ -226,6 +240,9 @@ async function get_attendee_data(supabase, event_id) {
   return data;
 }
 
+/*
+  Helper function to create pie charts
+*/
 function makePieChart(data, legend) {
   if (legend) {
     return (
@@ -555,19 +572,19 @@ function Analytics(props) {
   */
   const [openTab, setOpenTab] = useState(1);
   const [renderTab2, setRenderTab2] = useState(false);
-  const [tab1Class, setTab1Class] = useState("tab tab-active")
-  const [tab2Class, setTab2Class] = useState("tab")
+  const [tab1Class, setTab1Class] = useState("tab tab-lg tab-active")
+  const [tab2Class, setTab2Class] = useState("tab tab-lg")
 
     // set tab classes on tab change
     function handleClick(tab) {
       if (tab === 1) {
         setOpenTab(1)
-        setTab1Class("tab tab-active")
-        setTab2Class("tab")
+        setTab1Class("tab tab-lg tab-active")
+        setTab2Class("tab tab-lg")
       } else if (tab === 2) {
         setOpenTab(2)
-        setTab1Class("tab")
-        setTab2Class("tab tab-active")
+        setTab1Class("tab tab-lg")
+        setTab2Class("tab tab-lg tab-active")
     }
   }
 
@@ -582,20 +599,21 @@ function Analytics(props) {
   const [picked_up_wristband] = useState<number>(props.count_data.picked_up_wristband);
 
   const RegistrationPieChart = makePieChart(registration_data, true);
-  const WristBandPieChart = makePieChart(wristband_data, true);
+  const WristBandPieChart = makePieChart(wristband_data, false);
   const Attendee_LineGraph = makeLineGraph(attendee_data);
 
   return (
     <div>
-      <div>
+      <div className = "mx-auto mx-4 space-y-4">
         <h1>Analytics Dashboard</h1>
       </div>
-      <div className = "tabs underline">
+      <div className = "tabs underline mx-auto">
         <a className={tab1Class} onClick = {() => handleClick(1)}>Attendees</a>
         <a className={tab2Class} onClick = {() => handleClick(2)}>Registrations</a>
       </div>
+      <hr></hr>
       <div className={openTab === 1 ? "block" : "hidden"}>
-        Total Attendees: {total_attendees}
+        <p className = "mx-auto mx-4 space-y-4 text-lg">Total Attendees: {total_attendees}</p>
         <div className = "h-96 text-center">
           <h4>Attendance throughout Public</h4>
           {Attendee_LineGraph}
@@ -603,7 +621,7 @@ function Analytics(props) {
       </div> 
       <div className={openTab === 2 ? "block" : "hidden"}>
         <div className="">
-          <table className="table-fixed">
+          <table className="table-fixed mx-auto mx-4 space-y-4">
             <thead>
             </thead>
             <tbody>
