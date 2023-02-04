@@ -1,5 +1,5 @@
 {
-  "name": "Party Owl",
+  "name": "publics",
   "version": "0.2.2",
   "private": true,
   "scripts": {
@@ -10,12 +10,16 @@
     "test": "playwright test"
   },
   "dependencies": {
+    "@nivo/core": "^0.80.0",
+    "@nivo/line": "^0.80.0",
+    "@nivo/pie": "^0.80.0",
     "@supabase/auth-helpers-nextjs": "^0.5.4",
     "@supabase/auth-helpers-react": "^0.3.1",
     "@supabase/supabase-js": "^2.5.0",
     "daisyui": "^2.49.0",
     "next": "13.1.6",
     "next-seo": "^5.15.0",
+    "nivo": "^0.31.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "theme-change": "^2.3.0"
