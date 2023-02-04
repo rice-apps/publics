@@ -7,7 +7,7 @@ export default function Footer() {
         <Image
           width={36}
           height={36}
-          src="/owl.svg"
+          src="/owl.png"
           className="sm:max-w-sm rounded-lg shadow-2xl"
           alt="RiceApps Logo"
         />
