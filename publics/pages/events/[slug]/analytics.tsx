@@ -1,12 +1,78 @@
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
+import Router, { useRouter } from "next/router";
 import {
   SupabaseClient,
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { ResponsiveLine } from '@nivo/line';
+
+/**
+ * Simple type containing a friendly name for an event, and the UUID of the event
+ */
+type EventDetails = {
+  //friendly name
+  eventName: string
+  //uuid of event
+  eventID: string //Using string as unsure what UUID type is in TS
+  organization: string //Organization ID overseeing this event
+  capacity: number //Capacity of this event
+}
+
+/**
+ * Checks if the user trying to look at this page is an admin of the associated event (and thus has the permission to look at this page)
+ * @param event_detail : event details of this page
+ * @returns true if the user looking at this page is an admin, false otherwise
+ */
+async function isAdminUser(
+  supabase: SupabaseClient,
+  event_detail: EventDetails,
+  userId: string
+): Promise<boolean> {
+  let { data, error } = await supabase
+    .from("organizations_admins")
+    .select("organization")
+    .eq("profile", userId)
+
+  if (error || data === null) {
+    return false
+  }
+
+  return data.some((event) => event.organization === event_detail!.organization)
+}
+
+/**
+ * Gets the event that this user is an admin of, if they are one
+ * @returns Event Details corresponding to said event
+ */
+async function getEvent(
+  supabase: SupabaseClient,
+  slug: string
+): Promise<EventDetails> {
+  const { data, error } = await supabase
+    .from("events")
+    .select("id, name, organization, capacity")
+    .eq("slug", slug)
+    .single()
+
+  if (error) {
+    return {
+      eventName: "Error",
+      eventID: "Error",
+      organization: "Error",
+      capacity: 0,
+    }
+  }
+
+  return {
+    eventName: data.name,
+    eventID: data.id,
+    organization: data.organization,
+    capacity: data.capacity,
+  }
+}
+
 
 export const getServerSideProps = async (ctx) => {
   // Create authenticated Supabase Client
@@ -26,9 +92,36 @@ export const getServerSideProps = async (ctx) => {
     }
   }
 
+    //Get event details
+    const event_detail = await getEvent(supabase, ctx.params.slug)
+    if (event_detail.eventName === "Error") {
+      return {
+        redirect: {
+          destination: `http://${ctx.req.headers.host}/events/${ctx.params.slug}`,
+          permanent: false,
+        },
+      }
+    }
+    //Get admin status
+    const admin_status = await isAdminUser(
+      supabase,
+      event_detail,
+      session.user.id
+    )
+    //If not admin, redirect to 404 page
+    if (!admin_status) {
+      return {
+        redirect: {
+          destination: `http://${ctx.req.headers.host}/events/${ctx.params.slug}`,
+          permanent: false,
+        },
+      }
+    }
+
   return {
     props: {
-      session
+      InitialSession: session,
+      params: ctx.params
     }
   }
 }
@@ -48,20 +141,21 @@ export default function Analytics(props) {
 
     // 7. [This one depends on some serious checking] caregiving rate in/rate out
 
-    const { session } = props;
-    const { query } = useRouter() || { query: { slug: "" } };
+    const session = props.InitialSession;
+    const slug = props.params.slug;
     const supabase = useSupabaseClient();
+    const router = useRouter();
 
     const fetchPosts = async () => {
-        if (!query.slug) return;
+        if (!slug) return;
         const { data } = await supabase
           .from("counts")
           .select("*, event!inner(*), volunteer(id, profile(first_name))")
-          .eq("event.slug", query.slug);
+          .eq("event.slug", slug);
         const { data: eventData } = await supabase
           .from("events")
           .select("id")
-          .eq("slug", query.slug)
+          .eq("slug", slug)
           .single();
         const { data: volunteer } = await supabase
           .from("volunteers")
@@ -77,9 +171,9 @@ export default function Analytics(props) {
           !eventData ||
           !volunteer ||
           !volunteers ||
-          volunteer.event.slug !== query.slug
+          volunteer.event.slug !== slug
         ) {
-          window.location.href = "/events/";
+          console.log("ERROR")
           return;
         }
 
@@ -184,3 +278,14 @@ const countsLineGraph = ({ countsData }) => (
       ]}
   />
 )
+<<<<<<< HEAD
+=======
+
+return (
+  <div>
+    <h1>hi</h1>
+    {countsLineGraph}
+  </div>
+);
+}
+>>>>>>> 25956dc (added admin-level security so only those who are admins of an event can see the analytics)
