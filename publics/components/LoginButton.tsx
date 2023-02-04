@@ -3,7 +3,7 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react"
 
 // useSupabaseClient was not working
 
-export default function LoginButton() {
+export default function LoginButton({ text = "Sign in with your Rice ID" }) {
   const supabase = useSupabaseClient()
   return (
     <button
@@ -13,7 +13,7 @@ export default function LoginButton() {
         handleLogin(supabase)
       }}
     >
-      Sign in with your Rice ID
+      {text}
     </button>
   )
 }
