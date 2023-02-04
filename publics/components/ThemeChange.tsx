@@ -11,6 +11,7 @@ export default function ThemeChange() {
     "nocturnal party owl",
     "acid",
     "aqua",
+    "aura",
     "autumn",
     "black",
     "bumblebee",
