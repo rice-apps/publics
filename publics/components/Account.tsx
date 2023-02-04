@@ -5,22 +5,31 @@ import { useRouter } from "next/router"
 import { useState, useEffect } from "react"
 
 export default function Account({ session }) {
-  const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [adminOrgs, setAdminOrgs] = useState("Not an organization admin")
-  const [avatarUrl, setAvatarUrl] = useState(
-    "https://t4.ftcdn.net/jpg/04/08/24/43/360_F_408244382_Ex6k7k8XYzTbiXLNJgIL8gssebpLLBZQ.jpg"
-  )
+  const [avatarUrl, setAvatarUrl] = useState("/owl.png")
   const supabaseClient = useSupabaseClient()
   const router = useRouter()
 
+  type Profile = {
+    first_name: string
+    last_name: string
+    netid: string
+    college:
+      | {
+          name: string
+        }
+      | {
+          name: string
+        }[]
+      | null
+  }
+
   async function getProfile() {
     try {
-      setLoading(true)
-
       let { data, error, status } = await supabaseClient
         .from("profiles")
-        .select(`first_name, last_name, netid`)
+        .select(`first_name, last_name, netid, college (name)`)
         .eq("id", session.user.id)
         .single()
 
@@ -28,7 +37,7 @@ export default function Account({ session }) {
         throw error
       }
 
-      if (data) {
+      if (data && !Array.isArray(data)) {
         setProfile(data)
       }
 
@@ -58,8 +67,6 @@ export default function Account({ session }) {
         alert(error.message)
         console.log(error.message)
       }
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -69,17 +76,8 @@ export default function Account({ session }) {
     }
   }, [session])
 
-  type Profile = {
-    first_name: string | null
-    last_name: string | null
-    netid: string | null
-    id?: string
-    updated_at?: Date
-  }
-
-  // console.log()
   return (
-    <div className="flex flex-col justify-center items-center space-y-10">
+    <div className="flex flex-col justify-center items-center space-y-4">
       <div className="pt-10">
         <h1 className="text-3xl font-bold">Account Information</h1>
       </div>
@@ -90,53 +88,29 @@ export default function Account({ session }) {
             <img src={avatarUrl} />
           </div>
         </div>
-        <div>
-          <p className="text-lg font-medium">{profile?.first_name} {profile?.last_name}</p>
-        </div>
+        <p className="text-lg font-medium">
+          {profile?.first_name} {profile?.last_name}
+        </p>
       </div>
 
-      <div className="card bg-base-100 px-10 py-5 max-w-md">
-        <div className="flex place-content-center space-x-4 py-1">
-          <div>
-            <p className="font-medium"> Name: </p>
-          </div>
-          <div>
-            <p className="text-slate-500">{profile?.first_name} {profile?.last_name}</p>
-          </div>
-        </div>
-        <div className="flex place-content-center space-x-4 py-1">
-          <div>
-            <p className="font-medium"> Email: </p>
-          </div>
-          <div>
-            <p className="text-slate-500"> {session.user.email} </p>
-          </div>
-        </div>
-        <div className="flex place-content-center space-x-4 py-1">
-          <div>
-            <p className="font-medium"> Net ID: </p>
-          </div>
-          <div>
-            <p className="text-slate-500"> {profile?.netid} </p>
-          </div>
-        </div>
-        <div className="flex place-content-center space-x-4 py-1">
-          <div>
-            <p className="font-medium inline"> Admin: </p>
-          </div>
-          <div>
-            <p className="text-slate-500"> {adminOrgs} </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center space-x-4">
-        <div>
-          <p className="text-lg font-medium">Theme </p>
-        </div>
-        <div>
-          <ThemeChange />
-        </div>
+      <div className="card bg-base-100 px-10 py-5 max-w-md flex justify-center border-primary border gap-y-2">
+        <p>
+          {" "}
+          Name: {profile?.first_name} {profile?.last_name}{" "}
+        </p>
+        <p> Email: {session.user.email} </p>
+        <p> Net ID: {profile?.netid}</p>
+        <p>
+          {" "}
+          College:{" "}
+          {Array.isArray(profile?.college)
+            ? profile?.college[0]?.name
+            : profile?.college?.name}
+        </p>
+        {adminOrgs.length > 0 ? (
+          <p className="inline"> Admin: {adminOrgs} </p>
+        ) : null}
+        <ThemeChange />
       </div>
 
       <div>
@@ -152,7 +126,7 @@ export default function Account({ session }) {
       </div>
 
       <div>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-primary">
           Notice: Please contact the Office of the Registrar to change your
           preferred name
         </p>

@@ -144,14 +144,15 @@ export default function Edit(props) {
       capacity,
       description,
       img_url: newImgUrl,
-      registration,
+      codeword: codeword,
       registration_mode: registrationMode,
-      codeword,
+      registration,
       ...(registration
         ? {
             college_registration_datetime: new Date(collegeRegistration),
             registration_datetime: new Date(registrationDatetime),
             signup_size: signupSize,
+            registration_mode: registrationMode,
           }
         : {}),
     }

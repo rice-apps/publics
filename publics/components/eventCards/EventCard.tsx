@@ -6,6 +6,7 @@ import Link from "next/link"
 
 type Props = {
   event: ListEvent
+  sameColl: boolean
 }
 
 export default function EventCard(props: Props) {
@@ -31,6 +32,13 @@ export default function EventCard(props: Props) {
             ? `Registration closed`
             : registrationOpen(props.event)
             ? "Registration open!"
+            : props.sameColl
+            ? `Registration opens for ${
+                props.event.organization.name
+              }: ${eventCardDate(
+                props.event.college_registration_datetime,
+                true
+              )}`
             : `Registration opens: ${eventCardDate(
                 props.event.registration_datetime,
                 true

@@ -1,18 +1,26 @@
-import { handleLogin } from "../utils/login"
-import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react"
+import LoginButton from "./LoginButton"
+import { useSession } from "@supabase/auth-helpers-react"
 import Image from "next/image"
 import Link from "next/link"
 
 export default function Navbar() {
-  const supabaseClient = useSupabaseClient()
   const navbar_content = (
     <>
-      <li>
-        <Link href="/events">Events</Link>
-      </li>
-      <li>
-        <Link href="mailto:awj3@rice.edu">Contact</Link>
-      </li>
+      <button className="btn btn-ghost normal-case text-lg">
+        <Link href="/events" passHref>
+          Events
+        </Link>
+      </button>
+      <button className="btn btn-ghost normal-case text-lg">
+        <Link href="/about" passHref>
+          About
+        </Link>
+      </button>
+      <button className="btn btn-ghost normal-case text-lg">
+        <Link href="mailto:awj3@rice.edu" passHref>
+          Feedback
+        </Link>
+      </button>
     </>
   )
 
@@ -38,32 +46,37 @@ export default function Navbar() {
               />
             </svg>
           </label>
-          <ul
+          <div
             tabIndex={0}
             className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52"
           >
             {navbar_content}
-          </ul>
+          </div>
         </div>
-        <span className="btn btn-ghost normal-case text-xl">
+        <button className="btn btn-ghost normal-case text-xl">
           <Link href="/">
-            PartyOwl
+            Party Owl
             <span className="inline-block ml-2 align-middle">
-              <Image src="/owl.png" alt="Owl" width={30} height={42} />
+              <Image src="/owl.svg" alt="Owl" width={30} height={42} />
             </span>
           </Link>
-        </span>
+        </button>
       </div>
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal p-0">{navbar_content}</ul>
       </div>
       <div className="navbar-end">
-        {session && session.user && session.user.user_metadata.picture ? (
+        {session && session.user && session.user.user_metadata.avatar_url ? (
           <Link
             href="/account"
-            className="btn btn-outline hover:scale-110 hover:drop-shadow-lg transition-all"
+            className="btn btn-circle hover:scale-110 hover:drop-shadow-lg transition-all border-none"
           >
             <div className="avatar">
+              <div className="w-12 rounded-full">
+                <img src={session.user.user_metadata.avatar_url} />
+              </div>
+            </div>
+            {/* <div className="avatar">
               <div className="w-8 rounded">
                 <img
                   src={session.user.user_metadata.picture}
@@ -71,18 +84,10 @@ export default function Navbar() {
                   className="w-fit"
                 />
               </div>
-            </div>
+            </div> */}
           </Link>
         ) : (
-          <button
-            className="btn btn-primary"
-            onClick={(e) => {
-              e.preventDefault()
-              handleLogin(supabaseClient)
-            }}
-          >
-            Sign in
-          </button>
+          <LoginButton text="Sign in" />
         )}
       </div>
     </div>

@@ -67,7 +67,6 @@ export default function Create(props) {
     if (uploadImg) {
       const fileExt = uploadImg.name.split(".").pop()
       const fileName = `cover_image.${fileExt}`
-
       let { error: uploadError } = await supabase.storage
         .from("images/" + slug)
         .upload(fileName, uploadImg)
@@ -86,35 +85,34 @@ export default function Create(props) {
         fileName
     }
 
-    let insert1 = {
-      name: name,
-      slug: slug,
+    const insert = {
+      name,
+      slug,
       event_datetime: new Date(eventDateTime),
       organization: host,
-      location: location,
-      capacity: capacity,
-      description: description,
-      registration: registration,
+      location,
+      capacity,
+      description,
       img_url: url == "" ? null : url,
       codeword: codeword,
       registration_mode: registrationMode,
+      registration,
+      ...(registration
+        ? {
+            college_registration_datetime: new Date(collegeRegistration),
+            registration_datetime: new Date(registrationDatetime),
+            signup_size: signupSize,
+            registration_mode: registrationMode,
+          }
+        : {}),
     }
 
-    let insert2 = {}
-    if (registration) {
-      insert2 = {
-        college_registration_datetime: new Date(collegeRegistration),
-        registration_datetime: new Date(registrationDatetime),
-        signup_size: signupSize,
-      }
-    }
-
-    let insert = Object.assign({}, insert1, insert2)
-    const { error } = await supabase.from("events").insert(insert)
+    const { data: _, error } = await supabase.from("events").insert(insert)
     if (error) {
       alert(error.message)
+      return
     } else {
-      redirect()
+      window.location.href = "/events/" + slug
       return
     }
   }

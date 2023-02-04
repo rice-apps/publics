@@ -1,13 +1,11 @@
-import { handleLogin } from "../utils/login"
-import { useSupabaseClient } from "@supabase/auth-helpers-react"
+import LoginButton from "./LoginButton"
 
 export default function Auth() {
-  const supabaseClient = useSupabaseClient()
   return (
     <div className="hero min-h-screen bg-base-200">
       <div className="hero-content flex-col lg:flex-row-reverse">
         <img
-          src="https://placeimg.com/260/400/arch"
+          src="/martelpic.jpg"
           className="ml-2 max-w-sm rounded-lg shadow-2xl"
         />
         <div className="lg:max-w-2/5 md:max-w-2/3">
@@ -26,15 +24,7 @@ export default function Auth() {
             <span className="text-primary">Socials</span> can create events,
             manage attendees and volunteers, and view event analytics.
           </p>
-          <button
-            className="btn btn-primary"
-            onClick={(e) => {
-              e.preventDefault()
-              handleLogin(supabaseClient)
-            }}
-          >
-            Sign in with your Rice Google
-          </button>
+          <LoginButton />
         </div>
       </div>
     </div>

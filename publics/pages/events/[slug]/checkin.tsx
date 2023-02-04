@@ -1,4 +1,4 @@
-import { volunteer_authorize } from "../../../utils/volunteer"
+import { get_volunteer, get_event } from "../../../utils/volunteer"
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import Head from "next/head"
@@ -8,15 +8,15 @@ import React from "react"
 export default function CheckIn(props) {
   const supabase = useSupabaseClient()
 
-  const [eventID] = useState<string>(props.eventID)
-  const [codeword] = useState<string>(props.codeword)
+  const eventID = props.eventID
+  const codeword = props.codeword
   const [entered_cw, setEnteredCW] = useState(String)
   var correct_cw_entered = true
   const [checked_in, setCheckIn] = useState<boolean>(props.checked_in)
   const [checked_out, setCheckOut] = useState<boolean>(props.checked_out)
-  const [shift] = useState<any[]>(props.shift)
-  const [instructions] = useState<string>(props.shift.volunteer_instructions)
-  const [userID] = useState<string>(props.userID)
+  const shift = props.shift
+  const instructions = props.shift.volunteer_instructions
+  const userID = props.userID
 
   const shift_start = new Date(shift.start)
   const shift_end = new Date(shift.end)
@@ -33,13 +33,6 @@ export default function CheckIn(props) {
   const minutes_end = Math.abs(
     Math.floor((new Date().getTime() - shift_end.getTime()) / 60000)
   )
-
-  function parse_time(date: Date) {
-    let time = date.toLocaleTimeString()
-    let ampm = time.slice(time.indexOf(" "))
-    let hrmin = time.slice(0, time.indexOf(":", 3))
-    return hrmin + ampm
-  }
 
   async function update() {
     const minutes_start1 = Math.abs(
@@ -66,6 +59,7 @@ export default function CheckIn(props) {
           .update({ checked_in: true, start_shift: new Date() })
           .eq("profile", userID)
           .eq("event", eventID)
+          .eq("shift", shift.id)
         if (error) {
           throw error
         }
@@ -80,6 +74,7 @@ export default function CheckIn(props) {
         .update({ checked_out: true, end_shift: new Date() })
         .eq("profile", userID)
         .eq("event", eventID)
+        .eq("shift", shift.id)
       if (error) {
         throw error
       }
@@ -106,7 +101,15 @@ export default function CheckIn(props) {
         </div>
         <div className="mx-3 mt-3">
           <p className="text-lg font-medium">
-            {parse_time(shift_start)} to {parse_time(shift_end)}
+            {shift_start.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}{" "}
+            to{" "}
+            {shift_end.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
           </p>
         </div>
         <div className="mx-3 mt-3">
@@ -220,24 +223,11 @@ export const getServerSideProps = async (ctx) => {
     }
   }
 
-  //Check if user is admin
-  const authorizations = await volunteer_authorize(
-    supabase,
-    ctx.params.slug,
-    session.user.id
-  )
+  const event = await get_event(supabase, ctx.params.slug)
 
-  const volunteer = authorizations[0]
-  const volunteer_status = volunteer.length > 0
-  const eventID = authorizations[1].id
-  const codeword = authorizations[1].codeword
-  const checked_in = volunteer[0].checked_in
-  const checked_out = volunteer[0].checked_out
+  const volunteer = await get_volunteer(supabase, event["id"], session.user.id)
 
-  const userID = session.user.id
-
-  //If not admin, redirect to event page
-  if (!volunteer_status) {
+  if (volunteer.length === 0) {
     return {
       redirect: {
         destination: `http://${ctx.req.headers.host}/events/${ctx.params.slug}`,
@@ -245,24 +235,66 @@ export const getServerSideProps = async (ctx) => {
       },
     }
   }
-  //Get event data
 
-  const shift = await supabase
+  const { data: shiftData } = await supabase
     .from("volunteers")
-    .select("shift ( start, end, name, volunteer_instructions )")
+    .select("shift ( id, start, end, name, volunteer_instructions )")
     .eq("profile", session.user.id)
-    .eq("event", eventID)
+    .eq("event", event.id)
+
+  if (!shiftData || shiftData.length === 0) {
+    return {
+      redirect: {
+        destination: `http://${ctx.req.headers.host}/events/${ctx.params.slug}`,
+        permanent: false,
+      },
+    }
+  }
+
+  // get shifts where end time is greater than fifteen minutes ago
+  const now = new Date()
+  now.setMinutes(now.getMinutes() - 15)
+  const futureShifts = shiftData.filter((shift) => {
+    if (shift.shift === null) {
+      return false
+    }
+    return new Date(shift.shift["end"]) > now
+  })
+
+  if (futureShifts.length === 0) {
+    return {
+      redirect: {
+        destination: `http://${ctx.req.headers.host}/events/${ctx.params.slug}`,
+        permanent: false,
+      },
+    }
+  }
+
+  //order future shifts by start time
+  futureShifts.sort((a, b) => {
+    return (
+      new Date(a.shift!["start"]).valueOf() -
+      new Date(b.shift!["start"]).valueOf()
+    )
+  })
+
+  const checked_in = volunteer.filter((volunteer) => {
+    return volunteer.shift === futureShifts[0].shift["id"]
+  })[0].checked_in
+
+  const checked_out = volunteer.filter((volunteer) => {
+    return volunteer.shift === futureShifts[0].shift["id"]
+  })[0].checked_out
 
   return {
     props: {
       initialSession: session,
-      eventID: eventID,
-      codeword: codeword,
+      eventID: event.id,
+      codeword: event.codeword,
       checked_in: checked_in,
       checked_out: checked_out,
-      volunteer_status: volunteer_status,
-      shift: shift.data[0].shift,
-      userID: userID,
+      shift: futureShifts[0].shift,
+      userID: session.user.id,
       params: ctx.params,
     },
   }
