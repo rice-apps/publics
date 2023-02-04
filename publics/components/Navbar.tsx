@@ -12,6 +12,11 @@ export default function Navbar() {
         </Link>
       </button>
       <button className="btn btn-ghost normal-case text-lg">
+        <Link href="/about" passHref>
+          About
+        </Link>
+      </button>
+      <button className="btn btn-ghost normal-case text-lg">
         <Link href="mailto:awj3@rice.edu" passHref>
           Feedback
         </Link>

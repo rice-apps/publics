@@ -18,3 +18,10 @@ type Organization = {
   photo: string
   name: string
 }
+
+export type MemberAbout = {
+  image_url: string
+  name: string
+  title: string
+  college: string
+}
