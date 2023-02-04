@@ -1,5 +1,9 @@
 import { useState } from "react"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
+import AddShiftModal from "./AddShiftModal"
+import ShiftCard from "./ShiftCard"
+
+
 
 function EditShiftModal(props) {
   const [name, setName] = useState<string>("")

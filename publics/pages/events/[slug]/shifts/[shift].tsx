@@ -449,6 +449,7 @@ function VolunteerPage(props) {
     <div key="registration_results_page" className="mx-auto mx-4 space-y-4">
       <div key="event_title">
         {/* <h1>Volunteers for {props.event_detail.eventName}</h1> */}
+        
         <h1>{props.shift_details.name} | {props.shift_details.start} - {props.shift_details.end}</h1>
         
       </div>
