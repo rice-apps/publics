@@ -95,7 +95,6 @@ export default function Create(props) {
       description,
       img_url: url == "" ? null : url,
       codeword: codeword,
-      registration_mode: registrationMode,
       registration,
       ...(registration
         ? {

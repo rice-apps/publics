@@ -145,7 +145,6 @@ export default function Edit(props) {
       description,
       img_url: newImgUrl,
       codeword: codeword,
-      registration_mode: registrationMode,
       registration,
       ...(registration
         ? {
