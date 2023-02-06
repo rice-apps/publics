@@ -284,7 +284,7 @@ function makePieChart(data, legend) {
                   anchor: 'right',
                   direction: 'column',
                   justify: false,
-                  translateX: -200,
+                  translateX: 20,
                   translateY: 56,
                   itemsSpacing: 0,
                   itemWidth: 100,
@@ -463,8 +463,8 @@ function makeLineGraph(data) {
                 anchor: 'top',
                 direction: 'row',
                 justify: false,
-                translateX: 100,
-                translateY: 0,
+                translateX: 35,
+                translateY: -50,
                 itemsSpacing: 0,
                 itemDirection: 'left-to-right',
                 itemWidth: 100,
@@ -601,30 +601,38 @@ function Analytics(props) {
   const [total_attendees] = useState<number>(get_total_attendee_count(attendee_data));
   const [picked_up_wristband] = useState<number>(props.count_data.picked_up_wristband);
 
-  const RegistrationPieChart = makePieChart(registration_data, true);
-  const WristBandPieChart = makePieChart(wristband_data, false);
+  const RegistrationPieChart = makePieChart(registration_data, false);
+  const WristBandPieChart = makePieChart(wristband_data, true);
   const Attendee_LineGraph = makeLineGraph(attendee_data);
 
   return (
     <div>
-      <div className = "mx-auto mx-4 space-y-4">
+      <div className = "mx-auto mx-24 space-y-4">
         <h1>Analytics Dashboard</h1>
       </div>
-      <div className = "tabs underline mx-auto">
+      <div className = "tabs underline mx-auto mx-20">
         <a className={tab1Class} onClick = {() => handleClick(1)}>Attendees</a>
         <a className={tab2Class} onClick = {() => handleClick(2)}>Registrations</a>
       </div>
-      <hr></hr>
       <div className={openTab === 1 ? "block" : "hidden"}>
-        <p className = "mx-auto mx-4 space-y-4 text-lg">Total Attendees: {total_attendees}</p>
-        <div className = "h-96 text-center">
+        <table className="table-fixed mx-auto mx-24 space-y-4">
+            <thead>
+            </thead>
+            <tbody>
+              <tr>
+                <td className = "w-60 text-lg">Total Attendees</td>
+                <td className = "text-lg font-bold">{total_attendees}</td>
+              </tr>
+            </tbody>
+          </table>
+        <div className = "h-96 text-center mx-auto mx-20">
           <h4>Attendance throughout Public</h4>
           {Attendee_LineGraph}
         </div>
       </div> 
       <div className={openTab === 2 ? "block" : "hidden"}>
         <div className="">
-          <table className="table-fixed mx-auto mx-4 space-y-4">
+          <table className="table-fixed mx-auto mx-24 space-y-4">
             <thead>
             </thead>
             <tbody>
@@ -640,13 +648,15 @@ function Analytics(props) {
           </table>
         </div>
         <div>
-          <div className = "h-96 text-center">
-            <p className = "text-lg font-bold">Online Registration (Including Transfers)</p>
-            {RegistrationPieChart}
-          </div>
-          <div className = "h-96 text-center">
+          <div className = "flex h-96 text-center">
+            <div className= "flex-auto">
+              <p className = "text-lg font-bold">Online Registration (Including Transfers)</p>
+              {RegistrationPieChart}
+            </div>
+            <div className= "flex-auto">
             <p className = "text-lg font-bold">Wristband Pickup</p> 
             {WristBandPieChart}
+            </div>
           </div>
         </div>
       </div>
