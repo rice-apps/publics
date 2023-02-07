@@ -432,6 +432,7 @@ function makeLineGraph(data) {
         curve = "linear"
         axisTop={null}
         axisRight={null}
+        theme = {{}}
         // axisBottom={{
         //   orient: 'bottom',
         //   tickSize: 5,
@@ -575,19 +576,19 @@ function Analytics(props) {
   */
   const [openTab, setOpenTab] = useState(1);
   const [renderTab2, setRenderTab2] = useState(false);
-  const [tab1Class, setTab1Class] = useState("tab tab-lg tab-active")
+  const [tab1Class, setTab1Class] = useState("tab tab-lg tab-active text-[hsl(var(--s))]")
   const [tab2Class, setTab2Class] = useState("tab tab-lg")
 
     // set tab classes on tab change
     function handleClick(tab) {
       if (tab === 1) {
         setOpenTab(1)
-        setTab1Class("tab tab-lg tab-active")
+        setTab1Class("tab tab-lg tab-active text-[hsl(var(--s))]")
         setTab2Class("tab tab-lg")
       } else if (tab === 2) {
         setOpenTab(2)
         setTab1Class("tab tab-lg")
-        setTab2Class("tab tab-lg tab-active")
+        setTab2Class("tab tab-lg tab-active text-[hsl(var(--s))]")
     }
   }
 
@@ -607,7 +608,7 @@ function Analytics(props) {
 
   return (
     <div>
-      <div className = "mx-auto mx-24 space-y-4">
+      <div className = "mx-auto mx-24 pt-10">
         <h1>Analytics Dashboard</h1>
       </div>
       <div className = "tabs underline mx-auto mx-20">
@@ -620,8 +621,8 @@ function Analytics(props) {
             </thead>
             <tbody>
               <tr>
-                <td className = "w-60 text-lg">Total Attendees</td>
-                <td className = "text-lg font-bold">{total_attendees}</td>
+                <td className = "w-44 text-lg text-[hsl(var(--inc))]">Total Attendees</td>
+                <td className = "text-lg text-[hsl(var(--bc))]">{total_attendees}</td>
               </tr>
             </tbody>
           </table>
@@ -637,23 +638,23 @@ function Analytics(props) {
             </thead>
             <tbody>
               <tr>
-                <td className = "w-60 text-lg">Total Registrants</td>
-                <td className = "text-lg font-bold">{total_registrants}</td>
+                <td className = "w-44 text-lg text-[hsl(var(--inc))]">Total Registrants</td>
+                <td className = "text-lg text-[hsl(var(--bc))]">{total_registrants}</td>
               </tr>
               <tr>
-                <td className = "w-60 text-lg">Picked Up Wristband</td>
-                <td className = "text-lg font-bold">{picked_up_wristband}</td>
+                <td className = "w-44 text-lg text-[hsl(var(--inc))]">Picked Up Wristband</td>
+                <td className = "text-lg text-[hsl(var(--bc))]">{picked_up_wristband}</td>
               </tr>
             </tbody>
           </table>
         </div>
         <div>
-          <div className = "flex h-96 text-center">
-            <div className= "flex-auto">
+          <div className = "flex mb-4 h-96 text-center">
+            <div className= "w-1/3">
               <p className = "text-lg font-bold">Online Registration (Including Transfers)</p>
               {RegistrationPieChart}
             </div>
-            <div className= "flex-auto">
+            <div className= "w-1/3">
             <p className = "text-lg font-bold">Wristband Pickup</p> 
             {WristBandPieChart}
             </div>
