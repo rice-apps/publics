@@ -28,8 +28,28 @@ serve(async (req) => {
   const json = await response.json()
 
   if (json.stats.count == 0) {
-    return new Response("No results found", {
-      status: 404,
+    const { data, error } = await supabaseClient.from("profiles").insert([
+      {
+        id: id,
+        first_name: null,
+        last_name: null,
+        college: null,
+        netid: username,
+        can_create_event: false,
+      },
+    ])
+
+    if (error) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 500,
+        headers: {
+          "content-type": "application/json",
+        },
+      })
+    }
+
+    return new Response("Success", {
+      status: 200,
       headers: {
         "content-type": "application/json",
       },
