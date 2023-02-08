@@ -248,7 +248,7 @@ function makePieChart(data, legend) {
     return (
       <ResponsivePie
           data={data}
-          margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
+          margin={{ top: 40, right: 50, bottom: 80, left: 80 }}
           padAngle={0.7}
           cornerRadius={3}
           activeOuterRadiusOffset={8}
@@ -263,20 +263,8 @@ function makePieChart(data, legend) {
               ]
           }}
           colors = {{'scheme' : 'set1'}}
-          arcLinkLabelsSkipAngle={10}
-          arcLinkLabelsTextColor="#333333"
-          arcLinkLabelsThickness={2}
-          arcLinkLabelsColor={{ from: 'color' }}
-          arcLabelsSkipAngle={10}
-          arcLabelsTextColor={{
-              from: 'color',
-              modifiers: [
-                  [
-                      'darker',
-                      2
-                  ]
-              ]
-          }}
+          enableArcLabels={false}
+          enableArcLinkLabels={false}
           defs={[]}
           fill={[]}
           legends={[
@@ -284,8 +272,8 @@ function makePieChart(data, legend) {
                   anchor: 'right',
                   direction: 'column',
                   justify: false,
-                  translateX: 20,
-                  translateY: 56,
+                  translateX: 50,
+                  translateY: -115,
                   itemsSpacing: 0,
                   itemWidth: 100,
                   itemHeight: 40,
@@ -326,20 +314,8 @@ function makePieChart(data, legend) {
             ]
         }}
         colors = {{'scheme' : 'set1'}}
-        arcLinkLabelsSkipAngle={10}
-        arcLinkLabelsTextColor="#333333"
-        arcLinkLabelsThickness={2}
-        arcLinkLabelsColor={{ from: 'color' }}
-        arcLabelsSkipAngle={10}
-        arcLabelsTextColor={{
-            from: 'color',
-            modifiers: [
-                [
-                    'darker',
-                    2
-                ]
-            ]
-        }}
+        enableArcLabels={false}
+        enableArcLinkLabels={false}
         defs={[]}
         fill={[]}
     />
@@ -418,7 +394,7 @@ function makeLineGraph(data) {
   return (
     <ResponsiveLine
         data={chart_data}
-        margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
+        margin={{ top: 50, right: 110, bottom: 75, left: 60 }}
         xScale={{ type: 'point' }}
         yScale={{
             type: 'linear',
@@ -428,7 +404,7 @@ function makeLineGraph(data) {
             reverse: false
         }}
         yFormat=" > .0f"
-        enableGridY = {false}
+        enableGridX = {false}
         curve = "linear"
         axisTop={null}
         axisRight={null}
@@ -611,24 +587,26 @@ function Analytics(props) {
       <div className = "mx-auto mx-24 pt-10">
         <h1>Analytics Dashboard</h1>
       </div>
-      <div className = "tabs underline mx-auto mx-20">
+      <div className = "tabs underline mx-auto mx-20 pt-5">
         <a className={tab1Class} onClick = {() => handleClick(1)}>Attendees</a>
         <a className={tab2Class} onClick = {() => handleClick(2)}>Registrations</a>
       </div>
       <div className={openTab === 1 ? "block" : "hidden"}>
-        <table className="table-fixed mx-auto mx-24 space-y-4">
+        <table className="table-fixed mx-auto mx-24 py-5">
             <thead>
             </thead>
             <tbody>
               <tr>
-                <td className = "w-44 text-lg text-[hsl(var(--inc))]">Total Attendees</td>
+                <td className = "w-48 py-5 text-lg text-[hsl(var(--nc))]">Total Attendees</td>
                 <td className = "text-lg text-[hsl(var(--bc))]">{total_attendees}</td>
               </tr>
             </tbody>
           </table>
-        <div className = "h-96 text-center mx-auto mx-20">
-          <h4>Attendance throughout Public</h4>
-          {Attendee_LineGraph}
+        <div className = "bg-[hsl(var(--b2))] border border-gray-400 text-center mx-auto mx-24">
+          <div className = "h-[32rem]">
+            <h4 className = "py-5">Attendance throughout Public</h4>
+            {Attendee_LineGraph}
+          </div>
         </div>
       </div> 
       <div className={openTab === 2 ? "block" : "hidden"}>
@@ -638,25 +616,28 @@ function Analytics(props) {
             </thead>
             <tbody>
               <tr>
-                <td className = "w-44 text-lg text-[hsl(var(--inc))]">Total Registrants</td>
+                <td className = "w-72 text-lg text-[hsl(var(--nc))] py-5">Total Registrants</td>
                 <td className = "text-lg text-[hsl(var(--bc))]">{total_registrants}</td>
               </tr>
               <tr>
-                <td className = "w-44 text-lg text-[hsl(var(--inc))]">Picked Up Wristband</td>
+                <td className = "text-lg text-[hsl(var(--nc))]">Picked Up Wristband</td>
                 <td className = "text-lg text-[hsl(var(--bc))]">{picked_up_wristband}</td>
               </tr>
             </tbody>
           </table>
         </div>
         <div>
-          <div className = "flex mb-4 h-96 text-center">
-            <div className= "w-1/3">
-              <p className = "text-lg font-bold">Online Registration (Including Transfers)</p>
-              {RegistrationPieChart}
-            </div>
-            <div className= "w-1/3">
-            <p className = "text-lg font-bold">Wristband Pickup</p> 
-            {WristBandPieChart}
+          <div className="mx-auto mx-24 py-5">
+            <div className = "text-xl text-center pt-5">Registration by Residential College</div>
+            <div className = "flex mb-4 h-96 text-center py-5">
+              <div className= "w-6/12 h-[28rem]">
+                  <p className = "text-lg">Online Registration (Including Transfers)</p>
+                  {RegistrationPieChart}
+              </div>
+              <div className= "w-2/5 h-[28rem]">
+                <p className = "text-lg">Wristband Pickup</p> 
+                {WristBandPieChart}
+              </div>
             </div>
           </div>
         </div>
