@@ -403,12 +403,12 @@ function makeLineGraph(data) {
             stacked: true,
             reverse: false
         }}
+        theme = {{"textColor": "hsl(var(--nc))",}}
         yFormat=" > .0f"
         enableGridX = {false}
         curve = "linear"
         axisTop={null}
         axisRight={null}
-        theme = {{}}
         // axisBottom={{
         //   orient: 'bottom',
         //   tickSize: 5,
