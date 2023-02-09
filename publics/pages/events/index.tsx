@@ -12,7 +12,7 @@ type Props = {
   hosting: string[]
   volunteering: string[]
   registrations: Registration[]
-  userData 
+  userData
 }
 
 interface Registration {
@@ -204,6 +204,8 @@ function Events(props: Props) {
                 <LargeEventCard
                   event={event}
                   key={event.slug}
+                  sameColl={event.organization!["id"] == props.userData.college}
+                  userId={props.userData.id}
                   type="volunteering"
                 />
               ))}
@@ -219,7 +221,7 @@ function Events(props: Props) {
             {props.events
               .filter((event) => props.hosting.includes(event.id))
               .map((event) => (
-                <LargeEventCard event={event} key={event.slug} type="hosting" />
+                <LargeEventCard event={event} key={event.slug} sameColl={event.organization!["id"] == props.userData.college} type="hosting" />
               ))}
           </div>
         ) : (
@@ -248,7 +250,7 @@ export async function getServerSideProps(ctx) {
 
   const { data: userData, error: userError } = await supabase
     .from("profiles")
-    .select(`college`)
+    .select(`college, id`)
     .eq("id", session.user?.id)
     .single()
   
