@@ -1,9 +1,38 @@
 import LoginButton from "./LoginButton"
-import { useSession } from "@supabase/auth-helpers-react"
+import {
+  SupabaseClient,
+  useSession,
+  useSupabaseClient,
+} from "@supabase/auth-helpers-react"
 import Image from "next/image"
 import Link from "next/link"
+import { useEffect, useState } from "react"
+
+const canCreateEvent = async (session: any, supabase: SupabaseClient) => {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("can_create_event")
+    .eq("id", session.user.id)
+    .single()
+  if (error) {
+    return false
+  }
+  return data.can_create_event
+}
 
 export default function Navbar() {
+  const [canCreate, setCanCreate] = useState(false)
+  const session = useSession()
+  const supabase = useSupabaseClient()
+
+  useEffect(() => {
+    if (session && session.user) {
+      canCreateEvent(session, supabase).then((canCreate) => {
+        setCanCreate(canCreate)
+      })
+    }
+  }, [session, supabase])
+
   const navbar_content = (
     <>
       <button className="btn btn-ghost normal-case text-lg">
@@ -11,6 +40,13 @@ export default function Navbar() {
           Events
         </Link>
       </button>
+      {canCreate && (
+        <button className="btn btn-ghost normal-case text-lg">
+          <Link href="/create" passHref>
+            Create Event
+          </Link>
+        </button>
+      )}
       <button className="btn btn-ghost normal-case text-lg">
         <Link href="/about" passHref>
           About
@@ -23,8 +59,6 @@ export default function Navbar() {
       </button>
     </>
   )
-
-  const session = useSession()
 
   return (
     <div className="navbar bg-base-100 min-h-fit">
