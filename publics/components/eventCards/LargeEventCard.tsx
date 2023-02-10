@@ -43,7 +43,6 @@ const LargeEventCard = (props: Props) => {
       setCounter(data.is_counter)
       setMinutes1(Math.floor((new Date().getTime() - checkin.getTime()) / 60000))
       setMinutes2(Math.floor((new Date().getTime() - checkout.getTime()) / 60000))
-      console.log(checkin)
     })
   }, [])
   const setButtons = () => {
