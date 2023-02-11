@@ -42,7 +42,7 @@ export default function Navbar() {
       </button>
       {canCreate && (
         <button className="btn btn-ghost normal-case text-lg">
-          <Link href="/create" passHref>
+          <Link href="/events/create" passHref>
             Create Event
           </Link>
         </button>
