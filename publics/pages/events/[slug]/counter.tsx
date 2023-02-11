@@ -55,12 +55,11 @@ const fetchCounts = async (
   }
   const { data: volunteer } = await supabase
     .from("volunteers")
-    .select("id, event")
+    .select("id, event, checked_in")
     .match({
       profile: userId,
       event: eventData.id,
       is_counter: true,
-      checked_in: true,
       checked_out: false,
     })
     .single()
@@ -257,6 +256,15 @@ export const getServerSideProps = async (ctx) => {
     return {
       redirect: {
         destination: `http://${ctx.req.headers.host}/404`,
+        permanent: false,
+      },
+    }
+  }
+
+  if (!volunteer.checked_in) {
+    return {
+      redirect: {
+        destination: `http://${ctx.req.headers.host}/events/${ctx.query.slug}/checkin`,
         permanent: false,
       },
     }
