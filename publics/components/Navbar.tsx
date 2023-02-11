@@ -1,61 +1,36 @@
 import Link from "next/link"
-import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react"
+//import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react"
 import { handleLogin } from "../utils/login"
 import { useEffect, useState } from "react"
+import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
 import {
   SupabaseClient,
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs"
 import CreateEventButton from "./eventCards/CreateEventButton"
+import { off } from "process"
 
 
-/*async function authorize(supabase: SupabaseClient, userId: string) {
-  const { data, error } = await supabase
-    .from("organizations_admins")
-    .select("organization ( id, name )")
-    .eq("profile", userId)
-
-  if (error) {
-    throw error
-  }
-
-  return data.length > 0
-}
-
-async function getAuthUsers(supabase: SupabaseClient, userId: string) {
-  const authorized = authorize(supabase, session.user.id)
-  const { data: users, error } = await supabase
-    .from("profiles")
-    .select("can_create_event ( bool )")
-    .eq("profile", userId)
-    
-  if (error) {
-    throw error
-  }
-  if (!users) {
-    return []
-  }
-  //setCanCreate(true);
-
-  return users
-}*/
 
 export default function Navbar() {
   const supabaseClient = useSupabaseClient()
-  const [canCreate, setCanCreate] = useState(false);
-  async function authorize(supabase: SupabaseClient, userId: string) {
-    const { data, error } = await supabase
+  //const [canCreate, setCanCreate] = useState(false);
+  /*const user = useUser()
+
+  useEffect(() => {
+    async function setAuth(){
+      const { data } = await supabaseClient
       .from("profiles")
-      .select("can_create_event ( bool )")
-      .eq("profile", userId)
-  
-    if (error) {
-      throw error
+      .select("can_create_event")
+      .eq("can_create_event", true)
+      setCanCreate(true)
     }
-    setCanCreate(true);
-  
-    return data.length > 0
-  }
+    if (user) setAuth()
+  }, [user]
+  )
+
+  if(!user)
+    setCanCreate(false)*/
 
   
   const navbar_content = (
@@ -63,17 +38,16 @@ export default function Navbar() {
       <li>
         <Link href="/events">Events</Link>
       </li>
-      <div className={canCreate ? "block" : "hidden"}>
-        <li>
-          <Link href="/events/create">Create Event</Link>
-        </li>
-      </div>
+      <li className={canCreate() ? "block" : "hidden"}>
+        <Link href="/events/create">Create Event</Link>
+      </li>
       <li>
         <Link href="mailto:awj3@rice.edu">Contact</Link>
       </li>
 
     </>
   )
+
 
   const session = useSession()
   //const authorized = await authorize(supabase, session.user.id)
@@ -144,23 +118,51 @@ export default function Navbar() {
   )
 }
 
-/*export async function getServerSideProps(ctx) {
+async function isAdminUser(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<boolean> {
+  let { data, error } = await supabase
+    .from("profiles")
+    .select("id, can_create_event")
+    .eq("can_create_event", true)
+
+  if (!error && data) {
+    return true
+  }
+  return false;
+  
+  //return data.some((event) => event.organization === event_detail!.organization)
+}
+
+export const getServerSideProps = async (ctx) => {
+  // Create authenticated Supabase Client
   const supabase = createServerSupabaseClient(ctx)
+  // Check if we have a session
   const {
     data: { session },
   } = await supabase.auth.getSession()
 
-  if (!session)
+  const admin_status = await isAdminUser(
+    supabase,
+    session.user.id
+  )
+  
+  if(!admin_status){
     return {
-      redirect: {
-        destination: `http://${ctx.req.headers.host}/account`,
-        permanent: false,
+      props: {
+        canCreateEvent: false,
       },
     }
+  }
 
-  const authorized = await authorize(supabase, session.user.id)
+  return {
+    props: {
+      canCreateEvent: true,
+    },
+  }
+}
 
-  let props = { authorized }
-
-  return { props } // will be passed to the page component as props
-}*/
+function canCreate(props){
+  return props.canCreateEvent;
+}
