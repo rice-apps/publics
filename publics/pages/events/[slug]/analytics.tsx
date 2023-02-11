@@ -25,8 +25,8 @@ type EventDetails = {
 * Used for pie charts
 */
 type nivo_element = {
-  id: string,
-  value: number
+  id: string, //college name
+  value: number //count associated with that college
 }
 
 /*
@@ -133,7 +133,7 @@ async function get_registration_data(supabase, event_id) {
   let formatted_registration_data: nivo_element[] = [];
 
   for (let datum in registration_data) {
-    formatted_registration_data.push({id : datum, value : registration_data[datum]})
+    formatted_registration_data.push({id : datum.split(' ')[0], value : registration_data[datum]})
   }
 
   return formatted_registration_data;
@@ -165,7 +165,7 @@ async function get_wristband_data(supabase, event_id): Promise<nivo_element[]> {
 
   let wristband_data = {};
   
-  //Putting everything from the DB response into a JS object
+  //Putting everything from the DB response into a JS object where the key is the college name and the value is the count associated with that college
   wristband_response.data?.forEach(datum => {
     let name = datum.profiles?.organizations.name;
 
@@ -179,7 +179,8 @@ async function get_wristband_data(supabase, event_id): Promise<nivo_element[]> {
   let formatted_wristband_data: nivo_element[] = [];
 
   for (let datum in wristband_data) {
-    formatted_wristband_data.push({id : datum, value : wristband_data[datum]})
+    //only getting the college name. I.e. "Hanszen College" => "Hanszen"
+    formatted_wristband_data.push({id : datum.split(' ')[0], value : wristband_data[datum]})
   }
 
   return formatted_wristband_data;
@@ -250,7 +251,7 @@ function makePieChart(data, legend) {
           data={data}
           margin={{ top: 40, right: 50, bottom: 80, left: 80 }}
           padAngle={0.7}
-          cornerRadius={3}
+          cornerRadius={0}
           activeOuterRadiusOffset={8}
           borderWidth={1}
           borderColor={{
@@ -262,7 +263,7 @@ function makePieChart(data, legend) {
                   ]
               ]
           }}
-          colors = {{'scheme' : 'set1'}}
+          colors = {{'scheme' : "paired"}}
           enableArcLabels={false}
           enableArcLinkLabels={false}
           defs={[]}
@@ -301,7 +302,7 @@ function makePieChart(data, legend) {
         data={data}
         margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
         padAngle={0.7}
-        cornerRadius={3}
+        cornerRadius={0}
         activeOuterRadiusOffset={8}
         borderWidth={1}
         borderColor={{
@@ -313,7 +314,7 @@ function makePieChart(data, legend) {
                 ]
             ]
         }}
-        colors = {{'scheme' : 'set1'}}
+        colors = {{'scheme' : 'paired'}}
         enableArcLabels={false}
         enableArcLinkLabels={false}
         defs={[]}
@@ -322,26 +323,34 @@ function makePieChart(data, legend) {
   ) 
 }
 
+/**
+ * Takes in raw count data and converts it to coordinate form via grouping the dates into time buckets and counting them
+ * @param data - raw count data 
+ * @returns Arrays containing graph data needed for "Total Attendees", "Attendees In", and the "Attendees Out" lines
+ */
 function convert_to_coordinate(data): coordinate[][] {
   if (data.length < 2) {
     return [[],[],[]];
   }
+
+  //getting the number of data points to use (dividing by 10 is an arbitary value, can be replaced with something else if chart's get too crowded or what not)
   let num_groups = Math.max(data.length/10, 10); //number of buckets we put arrange data points around
-  /*
-  making an equally spaced array of dates between the first and last event
-  */
+  
+  //making an equally spaced array of dates between the first and last event
   let date_interval = (new Date(data[data.length - 1].created_at).getTime() -  new Date(data[0].created_at).getTime())/num_groups;
 
   let date_array: Date[] = [];
-
+  //These are the total in/total out/total attendees data
   let accumulated_in_counts: coordinate[] = [];
   let accumulated_out_counts: coordinate[] = [];
   let accumulated_total_counts: coordinate[] = [];
 
+  //initializing date array to hold empty dates
   for (let i = 0; i < num_groups; i++) {
     date_array.push(new Date());
   }
 
+  //setting beginning and end of date array to be the beginning and end of the party respectively, and then placing equally spaced dates in between
   date_array[0] = new Date(data[0].created_at);
   date_array[num_groups - 1] = new Date(data[data.length - 1].created_at);
 
@@ -349,6 +358,7 @@ function convert_to_coordinate(data): coordinate[][] {
     date_array[i] = new Date(date_array[i - 1].getTime() + date_interval);
   }
   
+  //Initializing acculumuated counts to start at 0
   for (let i = 0; i < num_groups; i++) {
     accumulated_in_counts.push({x: date_array[i], y: 0});
     accumulated_out_counts.push({x: date_array[i], y: 0});
@@ -358,6 +368,8 @@ function convert_to_coordinate(data): coordinate[][] {
   //input data array is aready sorted by time
   let date_ptr = 0;
 
+  //Mapping each count event to the date range they fall into and counting
+  //Note: this code assumes the data that got returned by the DB is sorted by date. 
   data.forEach(elem => {
     let curr_date = new Date(elem.created_at);
     while (curr_date > date_array[date_ptr] && date_ptr < num_groups - 1) {
@@ -366,23 +378,33 @@ function convert_to_coordinate(data): coordinate[][] {
 
     if (elem.inout) {
       accumulated_in_counts[date_ptr].y += 1;
-      accumulated_total_counts[date_ptr].y += 1;
     } else {
       accumulated_out_counts[date_ptr].y += 1;
-      accumulated_total_counts[date_ptr].y -= 1;
     }
   })
 
   for (let i = 0; i < num_groups; i++) {
     //React doesn't like rendering dates with this library at compile time for some reason, so I just use strings for the x axis
-    accumulated_in_counts[i].x = accumulated_in_counts[i].x.toLocaleString().substring(10); 
-    accumulated_out_counts[i].x = accumulated_out_counts[i].x.toLocaleString().substring(10);
-    accumulated_total_counts[i].x = accumulated_total_counts[i].x.toLocaleString().substring(10);
+    //total in/out is the total amount of people that entered between the last point and the current point
+    let time_without_date = accumulated_in_counts[i].x.toLocaleString().split(' ')[1];
+    accumulated_in_counts[i].x = time_without_date;
+    accumulated_out_counts[i].x = time_without_date;
+    //total attendees is the amount of people in the party at the previous coordinate plus the people who came in minus the people who came out
+    accumulated_total_counts[i].x = time_without_date;
+    if (i > 0) {
+      let new_total = accumulated_total_counts[i - 1].y + accumulated_in_counts[i].y - accumulated_out_counts[i].y;
+      accumulated_total_counts[i].y = new_total;
+    } else {
+      accumulated_total_counts[i].y = accumulated_in_counts[i].y - accumulated_out_counts[i].y;
+    }
   }
 
   return [accumulated_in_counts, accumulated_out_counts, accumulated_total_counts];
 }
 
+/*
+* Helper to make line graphs
+*/
 function makeLineGraph(data) {
   //total = attendees in - attendees outd
   let formated_data = convert_to_coordinate(data);
@@ -403,30 +425,12 @@ function makeLineGraph(data) {
             stacked: true,
             reverse: false
         }}
-        theme = {{"textColor": "hsl(var(--nc))",}}
+        theme = {{"textColor": "hsl(var(--bc))",}}
         yFormat=" > .0f"
         enableGridX = {false}
         curve = "linear"
         axisTop={null}
         axisRight={null}
-        // axisBottom={{
-        //   orient: 'bottom',
-        //   tickSize: 5,
-        //   tickPadding: 5,
-        //   tickRotation: 0,
-        //   legend: 'Time',
-        //   legendOffset: 36,
-        //   legendPosition: 'middle'
-        // }}
-        // axisLeft={{
-        //   orient: 'left',
-        //   tickSize: 5,
-        //   tickPadding: 5,
-        //   tickRotation: 0,
-        //   legend: 'count',
-        //   legendOffset: -40,
-        //   legendPosition: 'middle'
-        // }}
         pointSize={10}
         pointColor={{ theme: 'background' }}
         pointBorderWidth={2}
@@ -540,18 +544,9 @@ function get_total_attendee_count(data): number {
 
 function Analytics(props) {
   /*
-  Helpful stuff
-  */
-  const session = props.InitialSession;
-  const event_info = props.event_info;
-  const slug = props.params.slug;
-  const supabase = useSupabaseClient();
-  const router = useRouter();
-  /*
   state for handling tabs
   */
   const [openTab, setOpenTab] = useState(1);
-  const [renderTab2, setRenderTab2] = useState(false);
   const [tab1Class, setTab1Class] = useState("tab tab-lg tab-active text-[hsl(var(--s))]")
   const [tab2Class, setTab2Class] = useState("tab tab-lg")
 
@@ -597,7 +592,7 @@ function Analytics(props) {
             </thead>
             <tbody>
               <tr>
-                <td className = "w-48 py-5 text-lg text-[hsl(var(--nc))]">Total Attendees</td>
+                <td className = "w-48 py-5 text-lg text-[hsl(var(--bc))]">Total Attendees</td>
                 <td className = "text-lg text-[hsl(var(--bc))]">{total_attendees}</td>
               </tr>
             </tbody>
@@ -616,11 +611,11 @@ function Analytics(props) {
             </thead>
             <tbody>
               <tr>
-                <td className = "w-72 text-lg text-[hsl(var(--nc))] py-5">Total Registrants</td>
+                <td className = "w-72 text-lg text-[hsl(var(--bc))] py-5">Total Registrants</td>
                 <td className = "text-lg text-[hsl(var(--bc))]">{total_registrants}</td>
               </tr>
               <tr>
-                <td className = "text-lg text-[hsl(var(--nc))]">Picked Up Wristband</td>
+                <td className = "text-lg text-[hsl(var(--bc))]">Picked Up Wristband</td>
                 <td className = "text-lg text-[hsl(var(--bc))]">{picked_up_wristband}</td>
               </tr>
             </tbody>
