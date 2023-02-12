@@ -90,6 +90,7 @@ const fetchCounts = async (
   return {
     authorized: true,
     volunteer: volunteer?.id,
+    checked_in: volunteer?.checked_in,
     event: eventData,
     volunteers: volunteerCountArray,
     count:
@@ -249,8 +250,15 @@ export const getServerSideProps = async (ctx) => {
     }
   }
 
-  const { authorized, volunteer, event, volunteers, count, myCount } =
-    await fetchCounts(supabase, ctx.query.slug, session.user.id)
+  const {
+    authorized,
+    volunteer,
+    checked_in,
+    event,
+    volunteers,
+    count,
+    myCount,
+  } = await fetchCounts(supabase, ctx.query.slug, session.user.id)
 
   if (!authorized) {
     return {
@@ -261,7 +269,7 @@ export const getServerSideProps = async (ctx) => {
     }
   }
 
-  if (!volunteer.checked_in) {
+  if (!checked_in) {
     return {
       redirect: {
         destination: `http://${ctx.req.headers.host}/events/${ctx.query.slug}/checkin`,
