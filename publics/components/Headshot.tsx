@@ -9,7 +9,7 @@ const Headshot = (props: Props) => {
   return (
     <div className="card card-side items-left text-left">
       <div className="card-body">
-        <figure className="object-fill">
+        <figure className="object-fill shadow-lg hover:scale-110 transition-transform duration-300">
           <Image
             src={props.member.image_url}
             width="200"
