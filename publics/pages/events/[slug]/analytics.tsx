@@ -422,7 +422,7 @@ function makeLineGraph(data) {
             type: 'linear',
             min: 0,
             max: 'auto',
-            stacked: true,
+            stacked: false,
             reverse: false
         }}
         theme = {{"textColor": "hsl(var(--bc))",}}
