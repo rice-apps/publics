@@ -6,15 +6,16 @@ import Link from "next/link"
 export default function Navbar() {
   const navbar_content = (
     <>
-      <li>
-        <Link href="/events">Events</Link>
-      </li>
-      <li>
-        <Link href="/about">About</Link>
-      </li>
-      <li>
-        <Link href="mailto:awj3@rice.edu">Contact</Link>
-      </li>
+      <button className="btn btn-ghost normal-case text-lg">
+        <Link href="/events" passHref>
+          Events
+        </Link>
+      </button>
+      <button className="btn btn-ghost normal-case text-lg">
+        <Link href="mailto:awj3@rice.edu" passHref>
+          Feedback
+        </Link>
+      </button>
     </>
   )
 
@@ -40,21 +41,21 @@ export default function Navbar() {
               />
             </svg>
           </label>
-          <ul
+          <div
             tabIndex={0}
             className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52"
           >
             {navbar_content}
-          </ul>
+          </div>
         </div>
-        <span className="btn btn-ghost normal-case text-xl">
+        <button className="btn btn-ghost normal-case text-xl">
           <Link href="/">
             Party Owl
             <span className="inline-block ml-2 align-middle">
               <Image src="/owl.svg" alt="Owl" width={30} height={42} />
             </span>
           </Link>
-        </span>
+        </button>
       </div>
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal p-0">{navbar_content}</ul>
