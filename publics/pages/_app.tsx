@@ -1,11 +1,10 @@
 import Layout from "../components/Layout"
+import Seo from "../components/Seo"
 import "../styles/global.css"
 import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs"
 import { SessionContextProvider, Session } from "@supabase/auth-helpers-react"
 import type { NextPage } from "next"
-import { DefaultSeo } from "next-seo"
 import type { AppProps } from "next/app"
-import Head from "next/head"
 import { useState } from "react"
 import type { ReactElement, ReactNode } from "react"
 
@@ -27,6 +26,7 @@ export default function MyApp({
     Component.getLayout ||
     ((page) => (
       <>
+<<<<<<< HEAD
         <Head>
           <link rel="icon" href="/owl.png" />
           <meta
@@ -55,6 +55,9 @@ export default function MyApp({
             cardType: "summary_large_image",
           }}
         />
+=======
+        <Seo />
+>>>>>>> fdfa501 (seo fixed)
         <SessionContextProvider
           supabaseClient={supabaseClient}
           initialSession={pageProps.initialSession}
