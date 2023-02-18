@@ -1,3 +1,4 @@
+import { authorize } from "../utils/authorize_for_create"
 import LoginButton from "./LoginButton"
 import {
   SupabaseClient,
@@ -8,27 +9,15 @@ import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 
-const canCreateEvent = async (session: any, supabase: SupabaseClient) => {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("can_create_event")
-    .eq("id", session.user.id)
-    .single()
-  if (error) {
-    return false
-  }
-  return data.can_create_event
-}
-
 export default function Navbar() {
-  const [canCreate, setCanCreate] = useState(false)
+  const [showCreate, setShowCreate] = useState(false)
   const session = useSession()
   const supabase = useSupabaseClient()
 
   useEffect(() => {
     if (session && session.user) {
-      canCreateEvent(session, supabase).then((canCreate) => {
-        setCanCreate(canCreate)
+      authorize(supabase, session.user.id).then((showCreate) => {
+        setShowCreate(showCreate)
       })
     }
   }, [session, supabase])
@@ -40,7 +29,7 @@ export default function Navbar() {
           Events
         </Link>
       </button>
-      {canCreate && (
+      {showCreate && (
         <button className="btn btn-ghost normal-case text-lg">
           <Link href="/events/create" passHref>
             Create Event
