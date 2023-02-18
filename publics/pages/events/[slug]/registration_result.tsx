@@ -532,6 +532,9 @@ function ResultPage(props) {
               </ul>
             </div>
           </div>
+          <div>
+            <button onClick = {() => router.push("/events/" + props.params.slug + "/analytics")} className = "btn btn-primary">Analytics Page</button>
+          </div>
           <MoveRegistrationsModal
             eventId={eventDetails.eventID}
             signup_size={eventDetails.signup_size}
