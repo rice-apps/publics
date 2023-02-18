@@ -1,4 +1,5 @@
 import Image from "next/image"
+import Link from "next/link"
 
 export default function Footer() {
   return (
@@ -11,7 +12,15 @@ export default function Footer() {
           className="sm:max-w-sm rounded-lg shadow-2xl"
           alt="RiceApps Logo"
         />
-        <p>Copyright© Party Owl 2023 - All right reserved</p>
+        <p>
+          Copyright© Party Owl 2023 - All right reserved
+          <Link href="/about" className="mx-3 underline">
+            About
+          </Link>
+          <Link href="/privacy" className="mx-3 underline">
+            Privacy
+          </Link>
+        </p>
       </div>
     </footer>
   )
