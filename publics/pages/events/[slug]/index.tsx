@@ -279,7 +279,19 @@ const Details = (props: Props) => {
                   </p>
                 </span>
                 <p>Location: {event.location}</p>
+<<<<<<< HEAD
                 <p className="">{event.description}</p>
+=======
+                <p>
+                  Start time:{" "}
+                  {event_datetime.toLocaleTimeString("en-US", {
+                    hour: "numeric",
+                    minute: "numeric",
+                    hour12: true,
+                  })}
+                </p>
+                <p>Description: {event.description}</p>
+>>>>>>> 03675760e65946556af3081e75e36a20792a21d3
 
                 <p className="font-medium text-primary">
                   {!event.registration

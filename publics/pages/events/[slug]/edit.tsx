@@ -5,7 +5,6 @@ import {
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
-import Head from "next/head"
 import { useRouter } from "next/router"
 import { useState, useEffect } from "react"
 
@@ -46,6 +45,7 @@ export default function Edit(props) {
   const [location, setLocation] = useState(String)
   const [capacity, setCapacity] = useState(Number)
   const [description, setDescription] = useState(String)
+  const [codeword, setCodeword] = useState(String)
 
   const [registration, setRegistration] = useState(Boolean)
   const [collegeRegistration, setCollegeRegistration] = useState(Date)
@@ -77,6 +77,7 @@ export default function Edit(props) {
     setCapacity(data.capacity)
     setDescription(data.description)
     setRegistration(data.registration)
+    setCodeword(data.codeword)
     setImgUrl(data.img_url)
     setRegistrationMode(data.registration_mode)
 
@@ -143,6 +144,7 @@ export default function Edit(props) {
       capacity,
       description,
       img_url: newImgUrl,
+      codeword: codeword,
       registration,
       ...(registration
         ? {
@@ -277,6 +279,23 @@ export default function Edit(props) {
                 onChange={(e) => setDescription(e.target.value)}
                 className="textarea textarea-bordered max-w-xs h-24 hover:border-primary focus:outline-none focus:ring focus:ring-primary-focus"
               ></textarea>
+            </div>
+            <div className="form-control w-full max-w-xs mr-2">
+              <label className="label">
+                <span
+                  className="label-text tooltip tooltip-bottom"
+                  data-tip="This is a secret word (like a password) that volunteers will enter to verify that they checked in"
+                >
+                  Codeword &#8505;
+                </span>
+              </label>
+              <input
+                value={codeword}
+                onChange={(e) => setCodeword(e.target.value)}
+                type="text"
+                required
+                className="input input-bordered w-full max-w-xs hover:border-primary focus:outline-none focus:ring focus:ring-primary-focus"
+              />
             </div>
             <div>
               <label className="label">

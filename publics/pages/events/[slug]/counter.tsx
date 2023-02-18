@@ -55,12 +55,11 @@ const fetchCounts = async (
   }
   const { data: volunteer } = await supabase
     .from("volunteers")
-    .select("id, event")
+    .select("id, event, checked_in")
     .match({
       profile: userId,
       event: eventData.id,
       is_counter: true,
-      checked_in: true,
       checked_out: false,
     })
     .single()
@@ -91,6 +90,7 @@ const fetchCounts = async (
   return {
     authorized: true,
     volunteer: volunteer?.id,
+    checked_in: volunteer?.checked_in,
     event: eventData,
     volunteers: volunteerCountArray,
     count:
@@ -250,13 +250,29 @@ export const getServerSideProps = async (ctx) => {
     }
   }
 
-  const { authorized, volunteer, event, volunteers, count, myCount } =
-    await fetchCounts(supabase, ctx.query.slug, session.user.id)
+  const {
+    authorized,
+    volunteer,
+    checked_in,
+    event,
+    volunteers,
+    count,
+    myCount,
+  } = await fetchCounts(supabase, ctx.query.slug, session.user.id)
 
   if (!authorized) {
     return {
       redirect: {
         destination: `http://${ctx.req.headers.host}/404`,
+        permanent: false,
+      },
+    }
+  }
+
+  if (!checked_in) {
+    return {
+      redirect: {
+        destination: `http://${ctx.req.headers.host}/events/${ctx.query.slug}/checkin`,
         permanent: false,
       },
     }

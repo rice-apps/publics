@@ -12,7 +12,7 @@ type Props = {
   hosting: string[]
   volunteering: string[]
   registrations: Registration[]
-  userData 
+  userData
 }
 
 interface Registration {
@@ -162,7 +162,15 @@ function Events(props: Props) {
             {props.events
               .filter((event) => new Date(event.event_datetime) >= new Date())
               .map((event) => (
+<<<<<<< HEAD
                 <EventCard key={event.slug} event={event} sameColl={event.organization!["id"] == props.userData.college}/>
+=======
+                <EventCard
+                  key={event.slug}
+                  event={event}
+                  sameColl={event.organization!["id"] == props.userData.college}
+                />
+>>>>>>> 03675760e65946556af3081e75e36a20792a21d3
               ))}
           </div>
         ) : (
@@ -204,6 +212,8 @@ function Events(props: Props) {
                 <LargeEventCard
                   event={event}
                   key={event.slug}
+                  sameColl={event.organization!["id"] == props.userData.college}
+                  userId={props.userData.id}
                   type="volunteering"
                 />
               ))}
@@ -219,7 +229,12 @@ function Events(props: Props) {
             {props.events
               .filter((event) => props.hosting.includes(event.id))
               .map((event) => (
-                <LargeEventCard event={event} key={event.slug} type="hosting" />
+                <LargeEventCard
+                  event={event}
+                  key={event.slug}
+                  sameColl={event.organization!["id"] == props.userData.college}
+                  type="hosting"
+                />
               ))}
           </div>
         ) : (
@@ -248,10 +263,17 @@ export async function getServerSideProps(ctx) {
 
   const { data: userData, error: userError } = await supabase
     .from("profiles")
+<<<<<<< HEAD
     .select(`college`)
     .eq("id", session.user?.id)
     .single()
   
+=======
+    .select(`college, id`)
+    .eq("id", session.user?.id)
+    .single()
+
+>>>>>>> 03675760e65946556af3081e75e36a20792a21d3
   if (userError) {
     throw userError
   }
