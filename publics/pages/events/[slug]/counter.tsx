@@ -70,7 +70,7 @@ const fetchCounts = async (
   const { data: volunteers } = await supabase
     .from("volunteers")
     .select("id, profile(first_name)")
-    .match({ event: eventData.id, is_counter: true, checked_in: true })
+    .match({ event: eventData.id, is_counter: true })
 
   const volunteerCountArray = volunteers.map((volunteer) => {
     return {
