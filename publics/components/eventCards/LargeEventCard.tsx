@@ -1,7 +1,6 @@
 import { registrationOpen } from "../../utils/registration"
 import { ListEvent } from "../../utils/types"
 import { eventCardDate } from "./cardDate"
-import { SupabaseClient, useSupabaseClient } from "@supabase/auth-helpers-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 
@@ -9,46 +8,10 @@ type Props = {
   event: ListEvent
   registration_status?: string
   type: string
-  sameColl?: boolean
-  userId?: string
-}
-
-async function vol_data(props: Props, supabase: SupabaseClient) {
-  const { data, error } = await supabase
-    .from("volunteers")
-    .select("is_counter, shift (start, end)")
-    .eq("profile", props.userId)
-    .eq("event", props.event.id)
-    .single()
-
-  if (error) {
-    throw error
-  }
-
-  return data
 }
 
 const LargeEventCard = (props: Props) => {
   const link = "/events/" + props.event.slug
-  const supabase = useSupabaseClient()
-  var checkin
-  var checkout
-  const [minutes1, setMinutes1] = useState(-20)
-  const [minutes2, setMinutes2] = useState(20)
-  const [isCounter, setCounter] = useState(false)
-  useEffect(() => {
-    Promise.resolve(vol_data(props, supabase)).then((data) => {
-      checkin = new Date(data.shift?.start)
-      checkout = new Date(data.shift?.end)
-      setCounter(data.is_counter)
-      setMinutes1(
-        Math.floor((new Date().getTime() - checkin.getTime()) / 60000)
-      )
-      setMinutes2(
-        Math.floor((new Date().getTime() - checkout.getTime()) / 60000)
-      )
-    })
-  }, [])
   const setButtons = () => {
     if (props.type === "hosting") {
       return (
@@ -64,23 +27,14 @@ const LargeEventCard = (props: Props) => {
     } else if (props.type === "volunteering") {
       return (
         <div className="card-actions sm:justify-end">
-          {minutes1 >= -15 && minutes2 <= 15 ? (
-            <Link href={`${link}/checkin`} passHref>
-              <button className="btn btn-primary">Check In/Out</button>
-            </Link>
-          ) : (
-            <button className="btn btn-disabled">Check In/Out</button>
-          )}
-          {isCounter &&
-            (minutes1 >= -15 && minutes2 <= 15 ? (
-              <Link href={`${link}/counter`} passHref>
-                <button className="btn btn-primary btn-outline">
-                  Capacity Counter
-                </button>
-              </Link>
-            ) : (
-              <button className="btn btn-disabled">Capacity Counter</button>
-            ))}
+          <Link href={`${link}/checkin`} passHref>
+            <button className="btn btn-primary">Check In</button>
+          </Link>
+          <Link href={`${link}/counter`} passHref>
+            <button className="btn btn-primary btn-outline">
+              Capacity Counter
+            </button>
+          </Link>
         </div>
       )
     } else {
@@ -137,13 +91,6 @@ const LargeEventCard = (props: Props) => {
               ? `Registration closed`
               : registrationOpen(props.event)
               ? "Registration open!"
-              : props.sameColl
-              ? `Registration opens for ${
-                  props.event.organization.name
-                }: ${eventCardDate(
-                  props.event.college_registration_datetime,
-                  true
-                )}`
               : `Registration opens: ${eventCardDate(
                   props.event.registration_datetime,
                   true

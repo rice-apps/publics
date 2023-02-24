@@ -169,11 +169,7 @@ export default function ThemePage() {
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
-<<<<<<< HEAD
-              className="stroke-info flex-shrink-0 w-6 h-6"
-=======
               className="stroke-current flex-shrink-0 w-6 h-6"
->>>>>>> 03675760e65946556af3081e75e36a20792a21d3
             >
               <path
                 strokeLinecap="round"
@@ -191,11 +187,7 @@ export default function ThemePage() {
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
-<<<<<<< HEAD
-              className="stroke-info flex-shrink-0 w-6 h-6"
-=======
               className="stroke-primary flex-shrink-0 w-6 h-6"
->>>>>>> 03675760e65946556af3081e75e36a20792a21d3
             >
               <path
                 strokeLinecap="round"
@@ -213,11 +205,7 @@ export default function ThemePage() {
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
-<<<<<<< HEAD
-              className="stroke-info flex-shrink-0 w-6 h-6"
-=======
               className="stroke-secondary flex-shrink-0 w-6 h-6"
->>>>>>> 03675760e65946556af3081e75e36a20792a21d3
             >
               <path
                 strokeLinecap="round"
@@ -235,11 +223,7 @@ export default function ThemePage() {
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
-<<<<<<< HEAD
-              className="stroke-info flex-shrink-0 w-6 h-6"
-=======
               className="stroke-accent flex-shrink-0 w-6 h-6"
->>>>>>> 03675760e65946556af3081e75e36a20792a21d3
             >
               <path
                 strokeLinecap="round"

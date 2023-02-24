@@ -8,8 +8,8 @@ export default function Error404() {
         <div className="max-w-md flex flex-col items-center">
           <Image
             src="/owl_error.png"
-            width={250}
-            height={342}
+            width={312.5}
+            height={427.5}
             alt="Error Owl"
           />
           <h1 className="text-5xl font-bold">Party&apos;s over :(</h1>

@@ -50,10 +50,7 @@ const fetchCounts = async (
     .select("inout, volunteer, volunteer(id, profile(first_name))")
     .eq("event", eventData.id)
 
-  if (!data) {
-    return { authorized: false }
-  }
-  const { data: volunteer } = await supabase
+  const { data: volunteerData } = await supabase
     .from("volunteers")
     .select("id, event, checked_in")
     .match({
@@ -62,16 +59,18 @@ const fetchCounts = async (
       is_counter: true,
       checked_out: false,
     })
-    .single()
+
+  if (volunteerData.length === 0) {
+    return { authorized: false }
+  }
+
+  // select first entry from volunteer
+  const volunteer = volunteerData[0]
 
   const { data: volunteers } = await supabase
     .from("volunteers")
     .select("id, profile(first_name)")
     .match({ event: eventData.id, is_counter: true, checked_in: true })
-
-  if (!volunteer || !volunteers || !volunteer.event) {
-    return { authorized: false }
-  }
 
   const volunteerCountArray = volunteers.map((volunteer) => {
     return {

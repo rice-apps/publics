@@ -2,11 +2,17 @@ import { get_volunteer, get_event } from "../../../utils/volunteer"
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import Head from "next/head"
+import Link from "next/link"
+import { useRouter } from "next/router"
 import { useState, useEffect } from "react"
 import React from "react"
 
 export default function CheckIn(props) {
   const supabase = useSupabaseClient()
+
+  // get event slug
+  const router = useRouter()
+  const { slug } = router.query
 
   const eventID = props.eventID
   const codeword = props.codeword
@@ -193,12 +199,56 @@ export default function CheckIn(props) {
           </button>
         )}
         {minutes_end <= 15 && checked_in && !checked_out && (
-          <button className="mx-3 mt-8 btn btn-primary" onClick={update}>
-            Check Out
-          </button>
+          <div>
+            <Link href={`/events/${slug}/counter`} passHref>
+              <div className="mx-3 btn btn-primary">Capacity Counter</div>
+            </Link>
+            <label
+              htmlFor="check-out-modal"
+              className="mx-3 mt-8 btn btn-primary btn-outline"
+            >
+              Check Out
+            </label>
+            <input
+              type="checkbox"
+              id="check-out-modal"
+              className="modal-toggle"
+            />
+            <div className="modal">
+              <div className="modal-box">
+                <p className="py-2 text-center">
+                  Are you sure you want to check out of your shift?
+                </p>
+                <div className="flex flex-row gap-4 justify-center">
+                  <div className="modal-action">
+                    <label
+                      htmlFor="check-out-modal"
+                      className="btn btn-outline btn-primary"
+                    >
+                      Cancel
+                    </label>
+                  </div>
+                  <div className="modal-action">
+                    <label
+                      htmlFor="check-out-modal"
+                      className="btn btn-primary"
+                      onClick={update}
+                    >
+                      Check Out
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
         {minutes_end > 15 && checked_in && !checked_out && (
-          <button className="mx-3 mt-8 btn btn-disabled">Check Out</button>
+          <>
+            <Link href={`/events/${slug}/counter`} passHref>
+              <div className="mx-3 btn btn-primary">Capacity Counter</div>
+            </Link>
+            <button className="mx-3 mt-8 btn btn-disabled">Check Out</button>
+          </>
         )}
       </main>
     </div>
