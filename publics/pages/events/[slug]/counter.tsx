@@ -70,7 +70,12 @@ const fetchCounts = async (
   const { data: volunteers } = await supabase
     .from("volunteers")
     .select("id, profile(first_name)")
-    .match({ event: eventData.id, is_counter: true })
+    .match({
+      event: eventData.id,
+      is_counter: true,
+      checked_in: true,
+      checked_out: false,
+    })
 
   const volunteerCountArray = volunteers.map((volunteer) => {
     return {
@@ -92,6 +97,7 @@ const fetchCounts = async (
     checked_in: volunteer?.checked_in,
     event: eventData,
     volunteers: volunteerCountArray,
+    raw_data: data,
     count:
       data.filter((row) => row.inout).length -
       data.filter((row) => !row.inout).length,
@@ -101,6 +107,38 @@ const fetchCounts = async (
       data.filter((row) => row.volunteer.id === volunteer?.id && !row.inout)
         .length,
   }
+}
+
+async function fetchVolunteers(
+  supabase: SupabaseClient,
+  event_id: string,
+  counts: any[]
+) {
+  const { data: volunteers } = await supabase
+    .from("volunteers")
+    .select("id, profile(first_name)")
+    .match({
+      event: event_id,
+      is_counter: true,
+      checked_in: true,
+      checked_out: false,
+    })
+
+  const volunteerCountArray = volunteers.map((volunteer) => {
+    return {
+      name: volunteer.profile!["first_name"],
+      id: volunteer.id,
+      count:
+        counts.filter(
+          (count) => count.volunteer.id === volunteer.id && count.inout
+        ).length -
+        counts.filter(
+          (count) => count.volunteer.id === volunteer.id && !count.inout
+        ).length,
+    }
+  })
+
+  return volunteerCountArray
 }
 
 const Counter = (props: Props) => {
@@ -140,6 +178,19 @@ const Counter = (props: Props) => {
             }
             return volunteer
           })
+        })
+      }
+    )
+
+    channel.on(
+      "postgres_changes",
+      { event: "UPDATE", schema: "public", table: "volunteers" },
+      (payload: any) => {
+        //refetch volunteers
+        const volunteers = Promise.resolve(
+          fetchVolunteers(supabase, props.event.id, props.raw_data)
+        ).then((volunteers) => {
+          setAllVolunteers(volunteers)
         })
       }
     )
@@ -255,6 +306,7 @@ export const getServerSideProps = async (ctx) => {
     checked_in,
     event,
     volunteers,
+    raw_data,
     count,
     myCount,
   } = await fetchCounts(supabase, ctx.query.slug, session.user.id)
@@ -285,6 +337,7 @@ export const getServerSideProps = async (ctx) => {
       volunteers: volunteers,
       count: count,
       myCount: myCount,
+      raw_data: raw_data,
     },
   }
 }
