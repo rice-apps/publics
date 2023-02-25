@@ -8,9 +8,11 @@ import { useRouter } from "next/router"
 import EditShiftModal from "../../../../components/shifts/EditShiftModal"
 
 interface ShiftDetails {
+  shiftId: string
   name: string
   start: string
   end: string
+  volunteer_instructions: string
 }
 
 /**
@@ -104,16 +106,10 @@ async function isAdminUser(
 }
 
 /**
- * Parse locale date string.
- * @param time - the locale date string shift time to parse
+ * Parses shift time.
+ * @param date - the shift time to parse
  * @returns The parsed shift time.
  */
-// function parse_date_string(time: string) {
-//   // let time = date.toLocaleTimeString()
-//   let ampm = time.slice(time.indexOf(" "))
-//   let hrmin = time.slice(0, time.indexOf(":", 3))
-//   return hrmin + ampm
-// }
 function parse_time(date: Date) {
   let time = date.toLocaleTimeString()
   let ampm = time.slice(time.indexOf(" "))
@@ -208,7 +204,7 @@ async function getShiftDetails(
 ): Promise<ShiftDetails> {
   const { data, error } = await supabase
     .from("shifts")
-    .select("name, start, end")
+    .select("id, name, start, end, volunteer_instructions")
     .eq("id", shift)
     .single()
 
@@ -216,7 +212,7 @@ async function getShiftDetails(
     console.log("GOT ERROR:", error.message)
   }
 
-  return {name: data?.name, start: data?.start, end: data?.end}
+  return {shiftId: data?.id, name: data?.name, start: data?.start, end: data?.end, volunteer_instructions: data?.volunteer_instructions}
 }
 
 /**
@@ -467,16 +463,37 @@ function VolunteerPage(props) {
     }
   }
 
+  const [formattedStart, setFormattedStart] = useState("")
+  const [formattedEnd, setFormattedEnd] = useState("")
+  useEffect(() => {
+    setFormattedStart(new Date(props.shift_details.start).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }))
+  
+    setFormattedEnd(new Date(props.shift_details.end).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }))
+  }, [props])
+  
+
   return (
     <div key="registration_results_page" className="mx-auto mx-4 space-y-4">
+
+      <div className="flex flex-col w-full">
+      </div>
+      
       <div key="event_title">
+
         {/* <h1>Volunteers for {props.event_detail.eventName}</h1> */}
         
-        <h1>{props.shift_details.name} | {parse_time(new Date(props.shift_details.start))} - {parse_time(new Date(props.shift_details.end))}</h1>
+        <h1>{props.shift_details.name} | {formattedStart} - {formattedEnd}</h1>
         
       </div>
 
-      <EditShiftModal/>
+      <EditShiftModal shiftId={props.shift_details.shiftId} name={props.shift_details.name} start={props.shift_details.start} end={props.shift_details.end} volunteer_instructions={props.shift_details.volunteer_instructions}/>
+
 
       <div className="flex justify-end gap-4">
         <div className="tooltip" data-tip="Copy Emails">

@@ -3,36 +3,70 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import AddShiftModal from "./AddShiftModal"
 import ShiftCard from "./ShiftCard"
 
-
+  // TODO: find easier way of formatting
+  function format_date(date: string) {
+    if (date === null) {
+      return "purposely-nonformatted-date"
+    }
+    let eventDate = new Date(date)
+    let tzoffset = new Date().getTimezoneOffset() * 60000
+    let localISOTime = new Date(eventDate.getTime() - tzoffset).toISOString()
+    return localISOTime.slice(0, localISOTime.indexOf("Z"))
+  }
 
 function EditShiftModal(props) {
-  const [name, setName] = useState<string>("")
-  const [shiftStartDateTime, setShiftStartDateTime] = useState<string | number>(
-    ""
-  )
-  const [shiftEndDateTime, setShiftEndDateTime] = useState<string | number>("")
+  console.log(props)
+
+
+  // const [name, setName] = useState<string>("")
+  const [name, setName] = useState<string>(props.name)
+  console.log(name)
+
+  const [shiftStartDateTime, setShiftStartDateTime] = useState<string | number>(format_date(props.start))
+  console.log(shiftStartDateTime)
+
+  
+  const [shiftEndDateTime, setShiftEndDateTime] = useState<string | number>(format_date(props.end))
+  console.log(shiftEndDateTime)
+
+
+  // const [shiftEndDateTime, setShiftEndDateTime] = useState<string | number>("")
+
+  // use supabase field names
+  // const [volunteerInstructions, setVolunteerInstructions] = useState<
+  //   string | number
+  // >("")
   const [volunteerInstructions, setVolunteerInstructions] = useState<
     string | number
-  >("")
+  >(props.volunteer_instructions)
 
   const supabase = useSupabaseClient()
 
-  const createShift = async (e) => {
+  const editShift = async (e) => {
     e.preventDefault()
 
-    const { data, error } = await supabase.from("shifts").insert([
-      {
-        name: name,
-        start: new Date(shiftStartDateTime),
-        end: new Date(shiftEndDateTime),
-        volunteer_instructions: volunteerInstructions,
-        event: props.eventId,
-      },
-    ])
+    console.log("in editShift")
+
+    console.log(supabase)
+
+    console.log(volunteerInstructions)
+
+    const { data, error } = await supabase
+    .from('shifts')
+    .update({ 
+      name: name, 
+      start: new Date(shiftStartDateTime),
+      end: new Date(shiftEndDateTime),
+      volunteer_instructions: volunteerInstructions
+    })
+    .eq('id', props.shiftId)
+    .select()
+    
     if (error) {
       alert(error)
     } else {
-      window.location.reload()
+      // window.location.reload()
+      console.log(data, error)
     }
   }
 
@@ -45,7 +79,7 @@ function EditShiftModal(props) {
       <div className="modal">
         <div className="modal-box w-5/6 max-w-3xl">
           <h3 className="font-bold text-lg">Edit shift details</h3>
-          <form onSubmit={createShift}>
+          <form onSubmit={editShift}>
             <div className="flex flex-row justify-between">
               <div className="form-control max-w-xs">
                 <label className="label">
@@ -54,6 +88,7 @@ function EditShiftModal(props) {
                 <select
                   required
                   className="select select-bordered max-w-xs"
+                  // value={name}
                   onChange={(e) => setName(e.target.value)}
                   value={name}
                 >
@@ -70,6 +105,7 @@ function EditShiftModal(props) {
                   <span className="label-text">Start</span>
                 </label>
                 <input
+                  value={shiftStartDateTime}
                   onChange={(e) => setShiftStartDateTime(e.target.value)}
                   type="datetime-local"
                   required
@@ -81,6 +117,7 @@ function EditShiftModal(props) {
                   <span className="label-text">End</span>
                 </label>
                 <input
+                  value={shiftEndDateTime}
                   onChange={(e) => setShiftEndDateTime(e.target.value)}
                   type="datetime-local"
                   required
