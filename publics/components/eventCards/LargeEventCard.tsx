@@ -30,7 +30,7 @@ const LargeEventCard = (props: Props) => {
       return (
         <div className="card-actions sm:justify-end">
           <Link href={`${link}/checkin`} passHref>
-            <button className="btn btn-primary">Check In</button>
+            <button className="btn btn-primary">Check In/Out</button>
           </Link>
           <Link href={`${link}/counter`} passHref>
             <button className="btn btn-primary btn-outline">
