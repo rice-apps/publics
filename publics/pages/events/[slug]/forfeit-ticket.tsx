@@ -130,7 +130,7 @@ function TransferTicketPage(props) {
         <div className = "flex flex-col justify-center items-center m-5">
             <div className="card w-96 bg-base-100">
                 <div className="card-body items-center text-center">
-                    <h1>Transfer Tickets for {props.event_info["name"]}</h1>
+                    <h1>Forfeit Ticket for {props.event_info["name"]}</h1>
                     <div className="card-actions justify-end">
                     <label htmlFor="transfer-modal" className="btn btn-primary " onClick = {() => {setForfeitMessage("Are you sure? This action is NOT reversible!"); setForfeitRequest(true)}}>Forfeit Ticket</label>
                 <input type="checkbox" id="transfer-modal" className="modal-toggle" />

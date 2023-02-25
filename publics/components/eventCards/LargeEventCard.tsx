@@ -39,6 +39,17 @@ const LargeEventCard = (props: Props) => {
           </Link>
         </div>
       )
+    } else if (props.type === "my-events" && props.registration_status !== "Waitlisted") {
+      return (
+        <div className="card-actions sm:justify-end">
+          <Link href = {`${link}/forfeit-ticket`} passHref>
+            <button className="btn btn-primary">Forfeit Ticket</button>
+          </Link>
+          <Link href={link} passHref>
+            <button className="btn btn-primary">Event Details</button>
+          </Link>
+        </div>
+      );
     } else {
       return (
         <div className="card-actions sm:justify-end">
