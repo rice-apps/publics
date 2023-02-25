@@ -506,6 +506,19 @@ function get_total_attendee_count(data): number {
   })
   return total_attendees
 }
+
+function get_current_attendee_count(data): number {
+  let current_attendees = 0
+  data.forEach((datum) => {
+    if (datum.inout) {
+      current_attendees += 1
+    } else {
+      current_attendees -= 1
+    }
+  })
+  return current_attendees
+}
+
 function Analytics(props) {
   /*
   state for handling tabs
@@ -542,9 +555,31 @@ function Analytics(props) {
   const [picked_up_wristband] = useState<number>(
     props.count_data.picked_up_wristband
   )
+  const [count, setCount] = useState<number>(
+    get_current_attendee_count(attendee_data)
+  )
   const RegistrationPieChart = makePieChart(registration_data, false)
   const WristBandPieChart = makePieChart(wristband_data, true)
   const Attendee_LineGraph = makeLineGraph(attendee_data)
+
+  useEffect(() => {
+    const channel = supabase.channel(`analytics:${query.slug}`)
+
+    channel.on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "counts" },
+      (payload: any) => {
+        //set count and my count
+        setCount((count) => count + (payload.new.inout ? 1 : -1))
+      }
+    )
+    channel.subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div>
@@ -570,6 +605,10 @@ function Analytics(props) {
               <td className="text-lg text-[hsl(var(--bc))]">
                 {total_attendees}
               </td>
+              <td className="w-48 py-5 text-lg text-[hsl(var(--bc))]">
+                Current Count
+              </td>
+              <td className="text-lg text-[hsl(var(--bc))]">{count}</td>
             </tr>
           </tbody>
         </table>
