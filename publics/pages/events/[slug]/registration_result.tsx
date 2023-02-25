@@ -447,7 +447,7 @@ function ResultPage(props) {
           </div>
           <div className = "mx-auto mx-1 mt-1">
             <h4 className ="">
-              Available tickets: {props.capacity - total_signed_up}
+              Available tickets: {Math.max(eventDetails.signup_size - total_signed_up, 0)}
             </h4>
         </div>
         </div>
@@ -788,13 +788,6 @@ export const getServerSideProps = async (ctx) => {
   //Get registrations for that event
   const page = +ctx.query.page || 0
   const registrations = await getRegistrations(supabase, event_detail)
-  const capacity = await supabase.from("events").select("capacity").eq("id", event_detail.eventID).single();
-  let capacity_data : number | string;
-  if (!capacity.data) {
-    capacity_data = "No Defined Capacity"
-  } else {
-    capacity_data = capacity.data.capacity;
-  }
 
   return {
     props: {
@@ -804,7 +797,6 @@ export const getServerSideProps = async (ctx) => {
       registrations,
       event_detail,
       page: page,
-      capacity: capacity_data
     },
   }
 }
