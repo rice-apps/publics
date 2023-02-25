@@ -520,6 +520,7 @@ function get_current_attendee_count(data): number {
 }
 
 function Analytics(props) {
+  const supabase = useSupabaseClient()
   /*
   state for handling tabs
   */
