@@ -52,7 +52,7 @@ const fetchCounts = async (
 
   const { data: volunteerData } = await supabase
     .from("volunteers")
-    .select("id, event, checked_in")
+    .select("id, event, checked_in, shift(start, end)")
     .match({
       profile: userId,
       event: eventData.id,
@@ -64,8 +64,9 @@ const fetchCounts = async (
     return { authorized: false }
   }
 
-  // select first entry from volunteer
-  const volunteer = volunteerData[0]
+  const volunteer = volunteerData.reduce((prev, current) => {
+    return prev.shift.start < current.shift.start ? prev : current
+  })
 
   const { data: volunteers } = await supabase
     .from("volunteers")

@@ -33,25 +33,17 @@ export default function CheckIn(props) {
    * for minutes, and then absolute value is taken so give a window of time that is anywhere between 15 minutes
    * before and after the shift's start/end
    */
-  const minutes_start = Math.abs(
-    Math.floor((new Date().getTime() - shift_start.getTime()) / 60000)
-  )
-  const minutes_end = Math.abs(
-    Math.floor((new Date().getTime() - shift_end.getTime()) / 60000)
+  const minutes_start = Math.floor(
+    (shift_start.getTime() - new Date().getTime()) / 60000
   )
 
   async function update() {
-    const minutes_start1 = Math.abs(
-      Math.floor((new Date().getTime() - shift_start.getTime()) / 60000)
-    )
-    const minutes_end1 = Math.abs(
-      Math.floor((new Date().getTime() - shift_end.getTime()) / 60000)
+    const minutes_start1 = Math.floor(
+      (shift_start.getTime() - new Date().getTime()) / 60000
     )
 
     if (!checked_in && !checked_out && minutes_start1 > 15) {
       alert("Cannot check in now")
-    } else if (checked_in && !checked_out && minutes_end1 > 15) {
-      alert("Cannot check out now")
     } else if (checked_in && checked_out) {
       alert("Already checked out")
     }
@@ -198,7 +190,7 @@ export default function CheckIn(props) {
             Check In
           </button>
         )}
-        {minutes_end <= 15 && checked_in && !checked_out && (
+        {checked_in && !checked_out && (
           <div>
             <Link href={`/events/${slug}/counter`} passHref>
               <div className="mx-3 btn btn-primary">Capacity Counter</div>
@@ -242,14 +234,14 @@ export default function CheckIn(props) {
             </div>
           </div>
         )}
-        {minutes_end > 15 && checked_in && !checked_out && (
+        {/* {minutes_end > 15 && checked_in && !checked_out && (
           <>
             <Link href={`/events/${slug}/counter`} passHref>
               <div className="mx-3 btn btn-primary">Capacity Counter</div>
             </Link>
             <button className="mx-3 mt-8 btn btn-disabled">Check Out</button>
           </>
-        )}
+        )} */}
       </main>
     </div>
   )

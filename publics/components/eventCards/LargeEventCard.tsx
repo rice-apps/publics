@@ -21,6 +21,9 @@ const LargeEventCard = (props: Props) => {
           <Link href={`${link}/shifts`}>
             <button className="btn btn-primary btn-outline">Volunteers</button>
           </Link>
+          {/* <Link href={`${link}/analytics`}>
+            <button className="btn btn-primary btn-outline">Analytics</button>
+          </Link> */}
         </div>
       )
     } else if (props.type === "volunteering") {
