@@ -606,6 +606,8 @@ function Analytics(props) {
               <td className="text-lg text-[hsl(var(--bc))]">
                 {total_attendees}
               </td>
+            </tr>
+            <tr>
               <td className="w-48 py-5 text-lg text-[hsl(var(--bc))]">
                 Current Count
               </td>
