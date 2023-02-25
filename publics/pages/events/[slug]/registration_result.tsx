@@ -197,6 +197,8 @@ function ResultPage(props) {
 
   const router = useRouter()
 
+  let total_signed_up = registration.filter(datum => !datum.waitlist).length;
+
   // this should reverse the sorting each time it is pressed
   const sortRegistrationsByDate = () => {
     setRegistration((prev) => {
@@ -443,6 +445,11 @@ function ResultPage(props) {
               </button>
             </div>
           </div>
+          <div className = "mx-auto mx-1 mt-1">
+            <h4 className ="">
+              Available tickets: {props.capacity - total_signed_up}
+            </h4>
+        </div>
         </div>
         <div className="flex justify-end gap-4">
           <div className="tooltip" data-tip="Copy Emails">
@@ -781,6 +788,13 @@ export const getServerSideProps = async (ctx) => {
   //Get registrations for that event
   const page = +ctx.query.page || 0
   const registrations = await getRegistrations(supabase, event_detail)
+  const capacity = await supabase.from("events").select("capacity").eq("id", event_detail.eventID).single();
+  let capacity_data : number | string;
+  if (!capacity.data) {
+    capacity_data = "No Defined Capacity"
+  } else {
+    capacity_data = capacity.data.capacity;
+  }
 
   return {
     props: {
@@ -790,6 +804,7 @@ export const getServerSideProps = async (ctx) => {
       registrations,
       event_detail,
       page: page,
+      capacity: capacity_data
     },
   }
 }
