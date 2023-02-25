@@ -564,7 +564,7 @@ function Analytics(props) {
   const Attendee_LineGraph = makeLineGraph(attendee_data)
 
   useEffect(() => {
-    const channel = supabase.channel(`analytics:${query.slug}`)
+    const channel = supabase.channel(`analytics:${props.event_info.slug}`)
 
     channel.on(
       "postgres_changes",
