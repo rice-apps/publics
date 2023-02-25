@@ -60,12 +60,12 @@ const fetchCounts = async (
       checked_out: false,
     })
 
-  if (volunteerData.length === 0) {
+  if (volunteerData!.length === 0) {
     return { authorized: false }
   }
 
-  const volunteer = volunteerData.reduce((prev, current) => {
-    return prev.shift.start < current.shift.start ? prev : current
+  const volunteer = volunteerData!.reduce((prev, current) => {
+    return prev.shift!["start"] < current.shift!["start"] ? prev : current
   })
 
   const { data: volunteers } = await supabase
@@ -78,15 +78,15 @@ const fetchCounts = async (
       checked_out: false,
     })
 
-  const volunteerCountArray = volunteers.map((volunteer) => {
+  const volunteerCountArray = volunteers!.map((volunteer) => {
     return {
       name: volunteer.profile!["first_name"],
       id: volunteer.id,
       count:
-        data.filter(
+        data!.filter(
           (count) => count.volunteer.id === volunteer.id && count.inout
         ).length -
-        data.filter(
+        data!.filter(
           (count) => count.volunteer.id === volunteer.id && !count.inout
         ).length,
     }
@@ -100,12 +100,12 @@ const fetchCounts = async (
     volunteers: volunteerCountArray,
     raw_data: data,
     count:
-      data.filter((row) => row.inout).length -
-      data.filter((row) => !row.inout).length,
+      data!.filter((row) => row.inout).length -
+      data!.filter((row) => !row.inout).length,
     myCount:
-      data.filter((row) => row.volunteer.id === volunteer?.id && row.inout)
+      data!.filter((row) => row.volunteer.id === volunteer?.id && row.inout)
         .length -
-      data.filter((row) => row.volunteer.id === volunteer?.id && !row.inout)
+      data!.filter((row) => row.volunteer.id === volunteer?.id && !row.inout)
         .length,
   }
 }
@@ -125,7 +125,7 @@ async function fetchVolunteers(
       checked_out: false,
     })
 
-  const volunteerCountArray = volunteers.map((volunteer) => {
+  const volunteerCountArray = volunteers!.map((volunteer) => {
     return {
       name: volunteer.profile!["first_name"],
       id: volunteer.id,
@@ -189,7 +189,7 @@ const Counter = (props: Props) => {
       (payload: any) => {
         //refetch volunteers
         const volunteers = Promise.resolve(
-          fetchVolunteers(supabase, props.event.id, props.raw_data)
+          fetchVolunteers(supabase, props.event.id, props["raw_data"])
         ).then((volunteers) => {
           setAllVolunteers(volunteers)
         })
