@@ -7,6 +7,7 @@ import {
   SupabaseClient,
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs"
+import {useState, useEffect} from "react";
 
 type Props = {
   event: ListEvent
@@ -14,31 +15,47 @@ type Props = {
   type: string
 }
 
-
 const LargeEventCard = (props: Props) => {
   const link = "/events/" + props.event.slug
-  async function toggleRegistration(supabase: SupabaseClient){
-    //update supabase when called
-    if (props.event.registration_closed){
-      await supabase
-      .from('events')
-      .update({ 'name': 'Middle Earth' })
-      .match({ 'name': 'Auckland' });
+  const supabase = useSupabaseClient()
+
+  const [registrationAvailable, setRegistrationAvailable] = useState(props.event.registration_closed)
+  const [toggleRegistrationText, setToggleRegistrationText] = useState((props.event.registration_closed == true)? "Open Registration" : "Close Registration")
+
+  async function toggle_registration(eventid: String) {
+    setRegistrationAvailable((registrationAvailable == true)? false : true)
+    setToggleRegistrationText((registrationAvailable == true)? "Close Registration" : "Open Registration")
+    
+    const {data, error} = await supabase.from("events")
+    .update({"registration_closed": (registrationAvailable == true)? false: true})
+    .eq("id", eventid)
+    .select()
+
+    if (error) {
+      throw error
+    }
+
   }
-      
+
   
-  }
+  
   const toggleRegistrationButton = () => {
-    if (props.event.registration) return(
-      <button onClick = "toggleRegistration()" className = "btn btn-primary">
-        <label className="swap">
-          <input type="checkbox" />
-          <div className="swap-on">Open Registration</div>
-          <div className="swap-off">Close Registration</div>
-        </label>
-      </button>
-    )
-  }
+    /*if (props.event.registration && registrationOpen(props.event)) {
+      let text = "Close Registration"
+      if (props.event.registration_closed) {
+          text = 'Open Registration';
+      }
+      return(
+        <button className = "btn" onClick = {(toggle: any) =>toggle_registration(props.event.id)}>{text} </button>
+      )
+    }*/
+    if (props.event.registration && registrationOpen(props.event)) {
+      return(
+        <button className = "btn" onClick = {(toggle: any) =>toggle_registration(props.event.id)}>{toggleRegistrationText} </button>
+      )
+      }
+    };
+
   const setButtons = () => {
     if (props.type === "hosting") {
       return (
@@ -48,9 +65,10 @@ const LargeEventCard = (props: Props) => {
             <button className="btn btn-primary">Registration Results</button>
           </Link>
           <Link href={`${link}/shifts`}>
-            <button className="btn btn-primary btn-outline">Volunteers</button>
+            <button className="btn btn-primary btn-outlinex">Volunteers</button>
           </Link>
         </div>
+
       )
     } else if (props.type === "volunteering") {
       return (
@@ -119,7 +137,7 @@ const LargeEventCard = (props: Props) => {
           <p className="font-medium text-primary">
             {!props.event.registration
               ? "No registration required"
-              : props.event.registration_closed
+              : registrationAvailable
               ? `Registration closed`
               : registrationOpen(props.event)
               ? "Registration open!"
