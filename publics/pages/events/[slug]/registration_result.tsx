@@ -197,6 +197,8 @@ function ResultPage(props) {
 
   const router = useRouter()
 
+  let total_signed_up = registration.filter(datum => !datum.waitlist).length;
+
   // this should reverse the sorting each time it is pressed
   const sortRegistrationsByDate = () => {
     setRegistration((prev) => {
@@ -443,6 +445,11 @@ function ResultPage(props) {
               </button>
             </div>
           </div>
+          <div className = "mx-auto mx-1 mt-1">
+            <h4 className ="">
+              Available tickets: {Math.max(eventDetails.signup_size - total_signed_up, 0)}
+            </h4>
+        </div>
         </div>
         <div className="flex justify-end gap-4">
           <div className="tooltip" data-tip="Copy Emails">
