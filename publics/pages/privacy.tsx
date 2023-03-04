@@ -34,8 +34,8 @@ export default function Privacy() {
             netid, and residential college
           </li>
           <li>
-            Information about the user's interactions with the site, including
-            last login and events registered for using the site
+            Information about the user&apos;s interactions with the site,
+            including last login and events registered for using the site
           </li>
         </ul>
       </section>
