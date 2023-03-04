@@ -29,7 +29,7 @@ export default function CounterError(props) {
       )}
 
       {!in_time_range && (
-        <p className="text-lg font-normal mx-3">You are not within your shift's time range (within 15 minutes of shift start or end).</p>
+        <p className="text-lg font-normal mx-3">You are not within your shift's time range &#40;within 15 minutes of shift start or end&#41;.</p>
       )}
 
       <button className="mx-3 mt-8 btn btn-primary" onClick={returnHome}>
