@@ -38,6 +38,16 @@ next-env.d.ts
 # ides
 .vscode
 .idea
+
+# playwright
 /test-results/
 /playwright-report/
 /playwright/.cache/
+/tests/.auth
+
+# pwa
+/public/sw.js
+/public/sw.js.map
+/public/workbox-*.js
+/public/workbox-*.js.map
+/public/fallback-*.js

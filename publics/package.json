@@ -1,5 +1,5 @@
 {
-  "name": "Party Owl",
+  "name": "partyowl",
   "version": "0.2.2",
   "private": true,
   "scripts": {
@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "playwright test"
+    "test": "playwright test --headed"
   },
   "dependencies": {
     "@nivo/core": "^0.80.0",

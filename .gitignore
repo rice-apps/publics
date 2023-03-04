@@ -1,2 +1,6 @@
 node_modules
 .vscode
+publics/public/workbox-327c579b.js
+publics/public/sw.js.map
+publics/public/sw.js
+publics/public/fallback-development.js

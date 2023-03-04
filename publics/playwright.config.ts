@@ -2,12 +2,6 @@ import type { PlaywrightTestConfig } from "@playwright/test"
 import { devices } from "@playwright/test"
 
 /**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// require('dotenv').config();
-
-/**
  * See https://playwright.dev/docs/test-configuration.
  */
 const config: PlaywrightTestConfig = {
@@ -44,17 +38,23 @@ const config: PlaywrightTestConfig = {
 
   /* Configure projects for major browsers */
   projects: [
+    // Setup project
+    { name: "setup", testMatch: /.*\.setup\.ts/ },
     {
       name: "chromium",
       use: {
         ...devices["Desktop Chrome"],
+        // Use prepared auth state.
+        storageState: "tests/.auth/user.json",
       },
+      // dependencies: ['setup'],
     },
 
     {
       name: "firefox",
       use: {
         ...devices["Desktop Firefox"],
+        storageState: "tests/.auth/user.json",
       },
     },
 
@@ -62,6 +62,7 @@ const config: PlaywrightTestConfig = {
       name: "webkit",
       use: {
         ...devices["Desktop Safari"],
+        storageState: "tests/.auth/user.json",
       },
     },
 
