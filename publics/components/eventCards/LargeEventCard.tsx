@@ -45,6 +45,9 @@ const LargeEventCard = (props: Props) => {
           <Link href={`${link}/shifts`}>
             <button className="btn btn-primary btn-outline">Volunteers</button>
           </Link>
+          {/* <Link href={`${link}/analytics`}>
+            <button className="btn btn-primary btn-outline">Analytics</button>
+          </Link> */}
         </div>
 
       )
@@ -52,7 +55,7 @@ const LargeEventCard = (props: Props) => {
       return (
         <div className="card-actions sm:justify-end">
           <Link href={`${link}/checkin`} passHref>
-            <button className="btn btn-primary">Check In</button>
+            <button className="btn btn-primary">Check In/Out</button>
           </Link>
           <Link href={`${link}/counter`} passHref>
             <button className="btn btn-primary btn-outline">

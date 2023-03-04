@@ -1,4 +1,5 @@
 import { redirect_url } from "../../utils/admin"
+import { authorize } from "../../utils/authorize_for_create"
 import {
   SupabaseClient,
   createServerSupabaseClient,
@@ -6,20 +7,6 @@ import {
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import Router from "next/router"
 import { useState } from "react"
-import React from "react"
-
-async function authorize(supabase: SupabaseClient, userId: string) {
-  const { data, error } = await supabase
-    .from("organizations_admins")
-    .select("organization ( id, name )")
-    .eq("profile", userId)
-
-  if (error) {
-    throw error
-  }
-
-  return data.length > 0
-}
 
 async function getOrgs(supabase: SupabaseClient, userId: string) {
   const { data: orgs, error } = await supabase
@@ -240,8 +227,12 @@ export default function Create(props) {
             </div>
             <div className="form-control w-full max-w-xs mr-2">
               <label className="label">
-                <span className="label-text tooltip tooltip-bottom" data-tip="This is a secret word (like a password) that volunteers will enter to verify that they checked in"
-                >Codeword &#8505;</span>
+                <span
+                  className="label-text tooltip tooltip-bottom"
+                  data-tip="This is a secret word (like a password) that volunteers will enter to verify that they checked in"
+                >
+                  Codeword &#8505;
+                </span>
               </label>
               <input
                 value={codeword}
