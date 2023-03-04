@@ -32,11 +32,6 @@ const LargeEventCard = (props: Props) => {
     setRegistrationAvailable(registrationAvailable? false : true)
   }
 
-  
-  
-  const toggleRegistrationButton = () => {
-
-    };
 
   const setButtons = () => {
     if (props.type === "hosting") {
