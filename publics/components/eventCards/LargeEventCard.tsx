@@ -1,8 +1,9 @@
 import { registrationOpen } from "../../utils/registration"
 import { ListEvent } from "../../utils/types"
 import { eventCardDate } from "./cardDate"
-import { useSupabaseClient } from "@supabase/auth-helpers-react"
-import Link from "next/link"
+import Link from "next/link" 
+import { useSupabaseClient, SupabaseClient } from "@supabase/auth-helpers-react"
+import { useState, useEffect } from "react"
 
 import {useState} from "react";
 
@@ -46,6 +47,9 @@ const LargeEventCard = (props: Props) => {
           <Link href={`${link}/shifts`}>
             <button className="btn btn-primary btn-outline">Volunteers</button>
           </Link>
+          {/* <Link href={`${link}/analytics`}>
+            <button className="btn btn-primary btn-outline">Analytics</button>
+          </Link> */}
         </div>
 
       )
@@ -53,7 +57,7 @@ const LargeEventCard = (props: Props) => {
       return (
         <div className="card-actions sm:justify-end">
           <Link href={`${link}/checkin`} passHref>
-            <button className="btn btn-primary">Check In</button>
+            <button className="btn btn-primary">Check In/Out</button>
           </Link>
           <Link href={`${link}/counter`} passHref>
             <button className="btn btn-primary btn-outline">
