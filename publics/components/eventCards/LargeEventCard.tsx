@@ -3,7 +3,6 @@ import { ListEvent } from "../../utils/types"
 import { eventCardDate } from "./cardDate"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import Link from "next/link"
-
 import {useState} from "react";
 
 type Props = {
@@ -21,7 +20,7 @@ const LargeEventCard = (props: Props) => {
   async function toggle_registration(eventid: String) {
     
     const {data, error} = await supabase.from("events")
-    .update({"registration_closed": registrationAvailable? false: true})
+    .update({"registration_closed": !registrationAvailable})
     .eq("id", eventid)
     .select()
 
@@ -29,7 +28,7 @@ const LargeEventCard = (props: Props) => {
       throw error
     }
 
-    setRegistrationAvailable(registrationAvailable? false : true)
+    setRegistrationAvailable(!registrationAvailable)
   }
 
 
