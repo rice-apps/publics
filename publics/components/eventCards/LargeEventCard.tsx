@@ -30,6 +30,23 @@ async function vol_data(props: Props, supabase: SupabaseClient) {
 const LargeEventCard = (props: Props) => {
   const link = "/events/" + props.event.slug
   const supabase = useSupabaseClient()
+
+  const [registrationAvailable, setRegistrationAvailable] = useState(props.event.registration_closed)
+
+  async function toggle_registration(eventid: String) {
+    
+    const {data, error} = await supabase.from("events")
+    .update({"registration_closed": !registrationAvailable})
+    .eq("id", eventid)
+    .select()
+
+    if (error) {
+      throw error
+    }
+
+    setRegistrationAvailable(!registrationAvailable)
+  }
+
   var checkin
   var checkout;
   const [isTime, setTime]= useState(false)
@@ -44,15 +61,15 @@ const LargeEventCard = (props: Props) => {
       // This is the data we will use
       var data2Use = data[0];
       for (var i = 0; i < data.length; i++) { 
-        if ((new Date(data2Use.shift?.end).getTime() < currentDate.getTime())){
+        if ((new Date(data2Use.shift!["end"]).getTime() < currentDate.getTime())){
           data2Use = data[i]
-        } else if (new Date(data[i].shift?.start) < new Date (data2Use.shift?.start)){
+        } else if (new Date(data[i].shift!["start"]) < new Date (data2Use.shift!["start"])){
           data2Use = data[i]
         }
       }
 
-      checkin = new Date(data2Use.shift?.start)
-      checkout = new Date(data2Use.shift?.end)
+      checkin = new Date(data2Use.shift!["start"])
+      checkout = new Date(data2Use.shift!["end"])
 
       // Can check in between 15 min (900,000 ms) before start of shift time until end of shift)
       setTime(((checkin.getTime()-currentDate.getTime()) < 900000) && (checkout.getTime() > currentDate.getTime()))
@@ -66,6 +83,9 @@ const LargeEventCard = (props: Props) => {
     if (props.type === "hosting") {
       return (
         <div className="card-actions sm:justify-end">
+          {(props.event.registration && registrationOpen(props.event)) &&
+              <button className = "btn" onClick = {() => toggle_registration(props.event.id)}>{registrationAvailable? "Open Registration": "Close Registration"} </button>
+          }
           <Link href={`${link}/registration_result`}>
             <button className="btn btn-primary">Registration Results</button>
           </Link>
@@ -76,6 +96,7 @@ const LargeEventCard = (props: Props) => {
             <button className="btn btn-primary btn-outline">Analytics</button>
           </Link> */}
         </div>
+
       )
     } else if (props.type === "volunteering") {
       return (
@@ -127,11 +148,11 @@ const LargeEventCard = (props: Props) => {
       <div className="card-body">
         <div className="flex justify-between">
           <h2 className="card-title">{props.event.name}</h2>
-          {props.type === "hosting" && (
+            {props.type === "hosting" && (
             <Link className="text-primary" href={`${link}/edit`}>
               Edit
             </Link>
-          )}
+            )}
         </div>
         <p>{`${eventCardDate(props.event.event_datetime, false)}`} </p>
         <p className="font-medium flex items-center">
@@ -148,10 +169,10 @@ const LargeEventCard = (props: Props) => {
             {props.registration_status}
           </p>
         ) : (
-          <p className="font-medium text-primary">
+          <p className="font-medium text-primary  ">
             {!props.event.registration
               ? "No registration required"
-              : props.event.registration_closed
+              : registrationAvailable
               ? `Registration closed`
               : registrationOpen(props.event)
               ? "Registration open!"
