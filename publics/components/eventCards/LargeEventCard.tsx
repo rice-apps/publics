@@ -3,11 +3,8 @@ import { ListEvent } from "../../utils/types"
 import { eventCardDate } from "./cardDate"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import Link from "next/link"
-import {
-  SupabaseClient,
-  createServerSupabaseClient,
-} from "@supabase/auth-helpers-nextjs"
-import {useState, useEffect} from "react";
+
+import {useState} from "react";
 
 type Props = {
   event: ListEvent
@@ -20,14 +17,11 @@ const LargeEventCard = (props: Props) => {
   const supabase = useSupabaseClient()
 
   const [registrationAvailable, setRegistrationAvailable] = useState(props.event.registration_closed)
-  const [toggleRegistrationText, setToggleRegistrationText] = useState((props.event.registration_closed == true)? "Open Registration" : "Close Registration")
 
   async function toggle_registration(eventid: String) {
-    setRegistrationAvailable((registrationAvailable == true)? false : true)
-    setToggleRegistrationText((registrationAvailable == true)? "Close Registration" : "Open Registration")
     
     const {data, error} = await supabase.from("events")
-    .update({"registration_closed": (registrationAvailable == true)? false: true})
+    .update({"registration_closed": registrationAvailable? false: true})
     .eq("id", eventid)
     .select()
 
@@ -35,37 +29,27 @@ const LargeEventCard = (props: Props) => {
       throw error
     }
 
+    setRegistrationAvailable(registrationAvailable? false : true)
   }
 
   
   
   const toggleRegistrationButton = () => {
-    /*if (props.event.registration && registrationOpen(props.event)) {
-      let text = "Close Registration"
-      if (props.event.registration_closed) {
-          text = 'Open Registration';
-      }
-      return(
-        <button className = "btn" onClick = {(toggle: any) =>toggle_registration(props.event.id)}>{text} </button>
-      )
-    }*/
-    if (props.event.registration && registrationOpen(props.event)) {
-      return(
-        <button className = "btn" onClick = {(toggle: any) =>toggle_registration(props.event.id)}>{toggleRegistrationText} </button>
-      )
-      }
+
     };
 
   const setButtons = () => {
     if (props.type === "hosting") {
       return (
         <div className="card-actions sm:justify-end">
-          {toggleRegistrationButton()}
+          {(props.event.registration && registrationOpen(props.event)) &&
+              <button className = "btn" onClick = {() => toggle_registration(props.event.id)}>{registrationAvailable? "Open Registration": "Close Registration"} </button>
+          }
           <Link href={`${link}/registration_result`}>
             <button className="btn btn-primary">Registration Results</button>
           </Link>
           <Link href={`${link}/shifts`}>
-            <button className="btn btn-primary btn-outlinex">Volunteers</button>
+            <button className="btn btn-primary btn-outline">Volunteers</button>
           </Link>
         </div>
 
@@ -109,15 +93,11 @@ const LargeEventCard = (props: Props) => {
       <div className="card-body">
         <div className="flex justify-between">
           <h2 className="card-title">{props.event.name}</h2>
-          <div className= "justify-end">
-            
             {props.type === "hosting" && (
             <Link className="text-primary" href={`${link}/edit`}>
               Edit
             </Link>
             )}
-          
-          </div>
         </div>
         <p>{`${eventCardDate(props.event.event_datetime, false)}`} </p>
         <p className="font-medium flex items-center">
@@ -134,7 +114,7 @@ const LargeEventCard = (props: Props) => {
             {props.registration_status}
           </p>
         ) : (
-          <p className="font-medium text-primary">
+          <p className="font-medium text-primary  ">
             {!props.event.registration
               ? "No registration required"
               : registrationAvailable
