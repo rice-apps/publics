@@ -116,10 +116,21 @@ export const getServerSideProps = async (ctx) => {
     }
 
     async function addSocial(supabase, supabaseProfileID: string, selectedEvent: string, setActionStatusText) {
+        /* Checks if this person is already an admin for this event */
+        const is_already_there = await supabase
+        .from("organizations_admins")
+        .select("id")
+        .eq("profile", supabaseProfileID)
+        .eq("organization", selectedEvent);
+
+        if (is_already_there.data.length > 0) {            
+            setActionStatusText("That person is already an admin for the selected college!");
+            return;
+        }
+        /* Uploads the user to be an admin for the given event */
         const {data, error} = await supabase.from("organizations_admins")
         .upsert({"profile" : supabaseProfileID, "organization" : selectedEvent});
 
-        /* TODO: ensure that you can't add a social more than once to organization admins. */
         if (error) {
             console.log(error)
             setActionStatusText("Could not successfully add social to this event. Please try again. If the issue persists, please email us.")
@@ -131,9 +142,9 @@ export const getServerSideProps = async (ctx) => {
 
     return (
         <div>
-            <div className="flex">
-                <input type="text" placeholder="Enter netID here" className="input input-bordered w-25" onChange = {(e) => setNetID(e.target.value)} />
-                <select className="select select-primary w-full max-w-xs" value = {selectedEvent} onChange = {(e) => setSelectedEvent(e.target.value)} >
+            <div className="flex max-w-full items-center justify-center">
+                <input type="text" placeholder="Enter netID here" className="input input-bordered w-25 mr-3" onChange = {(e) => setNetID(e.target.value)} />
+                <select className="select select-primary w-full max-w-xs mr-3" value = {selectedEvent} onChange = {(e) => setSelectedEvent(e.target.value)} >
                     <option disabled selected>Select Event Here</option>
                     {props.colleges.map(datum => {
                         return <option value = {datum.id}>{datum.name}</option>
