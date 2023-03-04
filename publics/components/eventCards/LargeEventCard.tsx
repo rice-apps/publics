@@ -1,7 +1,7 @@
 import { registrationOpen } from "../../utils/registration"
 import { ListEvent } from "../../utils/types"
 import { eventCardDate } from "./cardDate"
-import Link from "next/link"
+import Link from "next/link" 
 
 type Props = {
   event: ListEvent
