@@ -1,8 +1,6 @@
 import { registrationOpen } from "../../utils/registration"
 import { ListEvent } from "../../utils/types"
 import { eventCardDate } from "./cardDate"
-import { SupabaseClient, useSupabaseClient } from "@supabase/auth-helpers-react"
-import { useEffect, useState } from "react"
 import Link from "next/link"
 
 type Props = {
@@ -72,6 +70,9 @@ const LargeEventCard = (props: Props) => {
           <Link href={`${link}/shifts`}>
             <button className="btn btn-primary btn-outline">Volunteers</button>
           </Link>
+          {/* <Link href={`${link}/analytics`}>
+            <button className="btn btn-primary btn-outline">Analytics</button>
+          </Link> */}
         </div>
       )
     } else if (props.type === "volunteering") {
@@ -152,13 +153,6 @@ const LargeEventCard = (props: Props) => {
               ? `Registration closed`
               : registrationOpen(props.event)
               ? "Registration open!"
-              : props.sameColl
-              ? `Registration opens for ${
-                  props.event.organization.name
-                }: ${eventCardDate(
-                  props.event.college_registration_datetime,
-                  true
-                )}`
               : `Registration opens: ${eventCardDate(
                   props.event.registration_datetime,
                   true
