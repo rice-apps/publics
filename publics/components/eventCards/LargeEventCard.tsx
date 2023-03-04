@@ -1,7 +1,7 @@
 import { registrationOpen } from "../../utils/registration"
 import { ListEvent } from "../../utils/types"
 import { eventCardDate } from "./cardDate"
-import Link from "next/link" 
+import Link from "next/link"
 import { useSupabaseClient, SupabaseClient } from "@supabase/auth-helpers-react"
 import { useState, useEffect } from "react"
 
@@ -9,10 +9,59 @@ type Props = {
   event: ListEvent
   registration_status?: string
   type: string
+  sameColl?: boolean
+  userId?: string
+}
+
+async function vol_data(props: Props, supabase: SupabaseClient) {
+  const { data, error } = await supabase
+    .from('volunteers')
+    .select('is_counter, shift (start, end)')
+    .eq('profile', props.userId)
+    .eq('event', props.event.id)
+    //.single()
+  
+  if (error) {
+    throw error
+  }
+  return data
 }
 
 const LargeEventCard = (props: Props) => {
   const link = "/events/" + props.event.slug
+  const supabase = useSupabaseClient()
+  var checkin
+  var checkout;
+  const [isTime, setTime]= useState(false)
+  const [isCounter, setCounter ]= useState(false)
+  
+
+  useEffect(() => {
+    Promise.resolve(vol_data(props, supabase)).then((data) => {
+      var currentDate = new Date();
+
+      // Find earliest shift in data that has not ended yet (data2Use)
+      // This is the data we will use
+      var data2Use = data[0];
+      for (var i = 0; i < data.length; i++) { 
+        if ((new Date(data2Use.shift?.end).getTime() < currentDate.getTime())){
+          data2Use = data[i]
+        } else if (new Date(data[i].shift?.start) < new Date (data2Use.shift?.start)){
+          data2Use = data[i]
+        }
+      }
+
+      checkin = new Date(data2Use.shift?.start)
+      checkout = new Date(data2Use.shift?.end)
+
+      // Can check in between 15 min (900,000 ms) before start of shift time until end of shift)
+      setTime(((checkin.getTime()-currentDate.getTime()) < 900000) && (checkout.getTime() > currentDate.getTime()))
+
+      // Check if shift is capacity counter shift
+      setCounter(data2Use.is_counter)
+    })
+  }, [])
+
   const setButtons = () => {
     if (props.type === "hosting") {
       return (
@@ -31,14 +80,25 @@ const LargeEventCard = (props: Props) => {
     } else if (props.type === "volunteering") {
       return (
         <div className="card-actions sm:justify-end">
-          <Link href={`${link}/checkin`} passHref>
-            <button className="btn btn-primary">Check In/Out</button>
-          </Link>
-          <Link href={`${link}/counter`} passHref>
-            <button className="btn btn-primary btn-outline">
-              Capacity Counter
-            </button>
-          </Link>
+          {(isTime) ? 
+            (<Link href={`${link}/checkin`} passHref>
+              <button className="btn btn-primary">Check In/Out</button>
+            </Link>) : (
+              <button className="btn btn-disabled">Check In/Out</button>
+            )}
+          {isCounter && (
+            (isTime) ? (
+              <Link href={`${link}/counter`} passHref>
+                <button className="btn btn-primary btn-outline">
+                  Capacity Counter
+                </button>
+              </Link>
+            ) : (
+              <button className="btn btn-disabled">
+                Capacity Counter
+              </button>
+            )
+          )}
         </div>
       )
     } else {
