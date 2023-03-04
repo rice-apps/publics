@@ -1,7 +1,9 @@
 import { registrationOpen } from "../../utils/registration"
 import { ListEvent } from "../../utils/types"
 import { eventCardDate } from "./cardDate"
-import Link from "next/link"
+import Link from "next/link" 
+import { useSupabaseClient, SupabaseClient } from "@supabase/auth-helpers-react"
+import { useState, useEffect } from "react"
 
 type Props = {
   event: ListEvent
