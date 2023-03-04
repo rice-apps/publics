@@ -80,7 +80,7 @@ export default function Navbar() {
           <Link href="/">
             Party Owl
             <span className="inline-block ml-2 align-middle">
-              <Image src="/owl.svg" alt="Owl" width={30} height={42} />
+              <Image src="/owl.svg" alt="Owl" width={50} height={40} />
             </span>
           </Link>
         </button>
