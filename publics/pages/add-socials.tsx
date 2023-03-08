@@ -93,6 +93,7 @@ export const getServerSideProps = async (ctx) => {
     const [supabaseProfileID, setSupabaseProfileID] = useState<string>("");
     //Text displayed on modal that pops up when a superadmin tries to add a social
     const [modalText, setModalText] = useState<string>("Loading...")
+    const [removeModalText, setRemoveModalText] = useState<string>("Loading...");
     //Text that gets below normal inputs. This indicates the success/failure of whatever you just tried to do
     const [actionStatusText, setActionStatusText] = useState<string>("");
 
@@ -123,6 +124,35 @@ export const getServerSideProps = async (ctx) => {
         let full_name = profile_data.data.first_name + " " + profile_data.data.last_name;
 
         setModalText("Are you sure you want to add " + full_name + " as an admin for " + event_name[0].name + "?");
+    }
+
+    /*
+    * Handles input from user and populates modal with appropriate text. 
+    * I.e. if the superadmin puts in a bad netID this will indicate as such on the modal that pops up 
+    */
+    async function handleRemoveSocial(props, supabase, selectedEvent: string, netID: string, setModalText, setSupabaseProfileID) {
+        const profile_data = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name")
+        .eq("netid", netID)
+        .single();
+
+        if (profile_data.error) {
+            setModalText("There is no profile associated with that netID!")
+            return;
+        }
+
+        setSupabaseProfileID(profile_data.data.id);
+
+        let event_name = props.colleges.filter(datum => datum.id == selectedEvent);
+        if (event_name.length == 0) {
+            setModalText("Please select an event!")
+            return;
+        }
+
+        let full_name = profile_data.data.first_name + " " + profile_data.data.last_name;
+
+        setModalText("Are you sure you want to remove " + full_name + " as an admin for " + event_name[0].name + "?");
     }
 
     /*
@@ -158,6 +188,42 @@ export const getServerSideProps = async (ctx) => {
         setActionStatusText("Successfully added social!")
     }
 
+    /*
+    * Populates backend with new social that the superadmin selected
+    */
+    async function RemoveSocial(supabase, supabaseProfileID: string, selectedEvent: string, setActionStatusText) {
+        /* Checks if this person is already an admin for this event */
+        const is_already_there = await supabase
+        .from("organizations_admins")
+        .select("id")
+        .eq("profile", supabaseProfileID)
+        .eq("organization", selectedEvent);
+
+        if(is_already_there.error) {
+            setActionStatusText("An error occured. Check your inputs and please try again!");
+            return;
+        }
+
+        if (is_already_there.data.length == 0) {            
+            setActionStatusText("That person is not currently registered as a social for this event!");
+            return;
+        }
+        /* Remove the user as a social for the given event */
+        const {data, error} = await supabase.from("organizations_admins")
+        .delete()
+        .eq("profile", supabaseProfileID)
+        .eq("organization", selectedEvent);
+
+        if (error) {
+            console.log(error)
+            setActionStatusText("Could not successfully remove social to this event. Please try again. If the issue persists, please email us.")
+            return;
+        }
+        
+        setActionStatusText("Successfully removed social!")
+    }
+
+
     return (
         <div>
             <div className="flex max-w-full items-center justify-center">
@@ -168,7 +234,8 @@ export const getServerSideProps = async (ctx) => {
                         return <option value = {datum.id}>{datum.name}</option>
                     })}
                 </select>
-                <label htmlFor="add-social-modal" className="btn btn-primary" onClick = {() => handleAddSocial(props, supabase, selectedEvent, netID, setModalText, setSupabaseProfileID)}>Add Social</label>
+                <label htmlFor="add-social-modal" className="btn btn-primary mr-3" onClick = {() => handleAddSocial(props, supabase, selectedEvent, netID, setModalText, setSupabaseProfileID)}>Add Social</label>
+                <label htmlFor="remove-social-modal" className="btn btn-primary" onClick = {() => handleRemoveSocial(props, supabase, selectedEvent, netID, setRemoveModalText, setSupabaseProfileID)}>Remove Social</label>
             </div>
 
             <input type="checkbox" id="add-social-modal" className="modal-toggle" />
@@ -178,6 +245,16 @@ export const getServerSideProps = async (ctx) => {
                     <div className = "flex items-end justify-end mt-5">
                         <label htmlFor="add-social-modal" className="btn mr-3" onClick = {() => {addSocial(supabase, supabaseProfileID, selectedEvent, setActionStatusText); setModalText("Loading...")}}>Add Social</label>
                         <label htmlFor="add-social-modal" className="btn" onClick = {() => {setModalText("Loading..."); setActionStatusText("")}}>Cancel</label>
+                    </div>
+                </div>
+            </div>
+            <input type="checkbox" id="remove-social-modal" className="modal-toggle" />
+            <div className="modal">
+                <div className="modal-box">
+                    <div><h4>{removeModalText}</h4></div>
+                    <div className = "flex items-end justify-end mt-5">
+                        <label htmlFor="remove-social-modal" className="btn mr-3" onClick = {() => {RemoveSocial(supabase, supabaseProfileID, selectedEvent, setActionStatusText); setRemoveModalText("Loading...")}}>Remove Social</label>
+                        <label htmlFor="remove-social-modal"  className="btn" onClick = {() => {setRemoveModalText("Loading..."); setActionStatusText("")}}>Cancel</label>
                     </div>
                 </div>
             </div>
