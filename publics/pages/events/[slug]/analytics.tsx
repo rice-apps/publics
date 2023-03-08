@@ -298,12 +298,18 @@ function convert_to_coordinate(data): coordinate[][] {
   }
 
   /* Sorting the data in place*/
-  data.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+  data.sort(
+    (a, b) =>
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  )
   //getting the number of d ata points to use (dividing by 10 is an arbitary value, can be replaced with something else if chart's get too crowded or what not)
   let num_groups = Math.max(data.length / 100, 15) //number of buckets we put arrange data points around
 
   //making an equally spaced array of dates between the first and last event
-  let date_interval = (new Date(data[data.length - 1].created_at).getTime() - new Date(data[0].created_at).getTime()) / num_groups
+  let date_interval =
+    (new Date(data[data.length - 1].created_at).getTime() -
+      new Date(data[0].created_at).getTime()) /
+    num_groups
   let date_array: Date[] = []
   //These are the total in/total out/total attendees data
   let accumulated_in_counts: coordinate[] = []

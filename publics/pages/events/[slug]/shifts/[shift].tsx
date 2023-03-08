@@ -36,10 +36,10 @@ type volunteerRowObject = {
   netid: string
   //residential college that that registered person is contained within
   college: string
-  //start time of this volunteers shift
-  start_time: string
+  //check in time of volunteer
+  start_shift: string
   //end time of this volunteers shift
-  end_time: string
+  end_shift: string
   //is this volunteer checked in?
   checked_in: boolean
   //is this volunteer a counter(?)
@@ -117,6 +117,8 @@ async function getVolunteers(
             created_at,
             checked_in,
             is_counter,
+            start_shift,  
+            end_shift,
             profiles (
                 id,
                 first_name,
@@ -127,10 +129,9 @@ async function getVolunteers(
                 netid
             ),
             shifts!inner (
-                start,
-                end,
-                id
+              id
             )
+
         `
     )
     .eq("event", event_detail.eventID)
@@ -148,7 +149,6 @@ async function getVolunteers(
   for (var i = 0; i < data.length; i++) {
     let current_object = data[i]
     let profiles = current_object["profiles"] as Object
-    let shifts = current_object["shifts"] as Object
     if (profiles == null) {
       return []
     }
@@ -161,8 +161,8 @@ async function getVolunteers(
       email: profiles["netid"] + "@rice.edu",
       netid: profiles["netid"],
       college: profiles["organizations"].name,
-      start_time: shifts["start"],
-      end_time: shifts["end"],
+      start_shift: current_object["start_shift"], //time volunteer actually checked in
+      end_shift: current_object["end_shift"],
       checked_in: current_object["checked_in"],
       is_counter: current_object["is_counter"],
     }
@@ -414,20 +414,6 @@ function VolunteerPage(props) {
     setRegistration(registration.filter((v, i) => v.person_id !== user_id))
   }
 
-  async function updateCheckedInStatus(row: volunteerRowObject) {
-    const { error } = await supabase
-      .from("volunteers")
-      .update({ checked_in: !row["checked_in"] })
-      //Ensuring we only update the person who is registered for this event
-      .eq("event", eventDetails?.eventID)
-      .eq("profile", row["person_id"])
-      .eq("shift", shift)
-
-    if (error) {
-      console.log(error)
-    }
-  }
-
   async function updateIsCounterStatus(row: volunteerRowObject) {
     const { error } = await supabase
       .from("volunteers")
@@ -472,7 +458,7 @@ function VolunteerPage(props) {
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
                 <g
                   id="SVGRepo_tracerCarrier"
                   strokeLinecap="round"
@@ -583,9 +569,9 @@ function VolunteerPage(props) {
               <th>Email Address</th>
               <th>NetID</th>
               <th>Residential College</th>
-              <th>Shift Start</th>
-              <th>Shift End</th>
-              <th>Checked In?</th>
+              <th>Check In Time</th>
+              <th>Check Out Time</th>
+              <th>Status</th>
               <th>Counter?</th>
             </tr>
           </thead>
@@ -664,22 +650,32 @@ function VolunteerPage(props) {
                       <td>{row["netid"]}</td>
                       <td>{row["college"]}</td>
                       <td>
-                        {new Date(row["start_time"]).toLocaleString("en-US", {
-                          timeZone: "CST",
-                        })}
+                        {row["start_shift"] === null
+                          ? ""
+                          : new Date(row["start_shift"]).toLocaleString(
+                              "en-US",
+                              {
+                                timeZone: "CST",
+                              }
+                            )}
                       </td>
                       <td>
-                        {new Date(row["end_time"]).toLocaleString("en-US", {
-                          timeZone: "CST",
-                        })}
+                        {row["end_shift"] === null
+                          ? ""
+                          : new Date(row["end_shift"]).toLocaleString("en-US", {
+                              timeZone: "CST",
+                            })}
                       </td>
                       <td>
-                        <input
-                          type="checkbox"
-                          className="checkbox"
-                          defaultChecked={checkedIn}
-                          onChange={(e) => updateCheckedInStatus(row)}
-                        />
+                        {row["start_shift"] === null &&
+                        row["end_shift"] === null
+                          ? "Not Checked In"
+                          : row["checked_in"] &&
+                            row["start_shift"] != null &&
+                            !row["checked_out"] &&
+                            row["end_shift"] == null
+                          ? "Checked In"
+                          : "Checked Out"}
                       </td>
                       <td>
                         <input
