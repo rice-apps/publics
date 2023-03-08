@@ -3,6 +3,7 @@ import ShiftCard from "../../../../components/shifts/ShiftCard"
 import { redirect_url } from "../../../../utils/admin"
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
 import { useSession } from "@supabase/auth-helpers-react"
+import Link from "next/link"
 
 export default function Shifts({ shifts, event }) {
   const session = useSession()
@@ -11,7 +12,16 @@ export default function Shifts({ shifts, event }) {
     <div className="mx-auto mx-4 space-y-4">
       <div className="flex justify-between mt-4">
         <h1>{event.name}: Shifts</h1>
-        <AddShiftModal eventId={event.id} />
+        <div>
+          <Link
+            href={`/events/${event.slug}/analytics`}
+            passHrefc
+            className="mr-3"
+          >
+            <button className="btn btn-primary btn-outline">Analytics</button>
+          </Link>
+          <AddShiftModal eventId={event.id} />
+        </div>
       </div>
       {/* create a grid with 3 columns of shiftcards */}
       <div key="shifts" className="grid md:grid-cols-3 gap-4">
