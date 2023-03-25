@@ -2,6 +2,8 @@ import { registrationOpen } from "../../utils/registration"
 import { ListEvent } from "../../utils/types"
 import { eventCardDate } from "./cardDate"
 import Link from "next/link"
+import DeleteMsg from "../DeleteMsg"
+import { useEffect, useState } from "react"
 
 type Props = {
   event: ListEvent
@@ -11,6 +13,9 @@ type Props = {
 
 const LargeEventCard = (props: Props) => {
   const link = "/events/" + props.event.slug
+  const [modalOpen, setModalOpen] = useState(false);
+  
+
   const setButtons = () => {
     if (props.type === "hosting") {
       return (
@@ -46,6 +51,10 @@ const LargeEventCard = (props: Props) => {
       )
     }
   }
+  //have modal pop up when link is clicked
+  const modalOpener = () => {
+    setModalOpen(true);
+  }
   return (
     <div className="card md:card-side bg-base-100 shadow-xl max-w-4xl max-h-[600px]">
       <figure className="max-w-sm max-h-sm">
@@ -65,6 +74,11 @@ const LargeEventCard = (props: Props) => {
           {props.type === "hosting" && (
             <Link className="text-primary" href={`${link}/edit`}>
               Edit
+            </Link>
+          )}
+          {props.type === "hosting" && (
+            <Link className="text-error" href={`${link}/delete`}>
+              Delete
             </Link>
           )}
         </div>
