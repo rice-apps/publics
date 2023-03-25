@@ -157,8 +157,9 @@ export const getServerSideProps = async (ctx) => {
         setModalText("Are you sure you want to remove " + full_name + " as an admin for " + event_name[0].name + "?");
     }
 
+    
     /*
-    * Populates backend with new social that the superadmin selected
+    * Populates backend with new social that the superadmin selected.
     */
     async function addSocial(supabase, supabaseProfileID: string, selectedEvent: string, setActionStatusText) {
         /* Checks if this person is already an admin for this event */
@@ -180,9 +181,6 @@ export const getServerSideProps = async (ctx) => {
         /* Uploads the user to be an admin for the given event */
         const {data, error} = await supabase.from("organizations_admins")
         .upsert({"profile" : supabaseProfileID, "organization" : selectedEvent});
-
-        console.log(supabaseProfileID)
-        console.log(data);
 
         if (error) {
             console.log(error)
