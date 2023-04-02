@@ -17,8 +17,10 @@ After you have installed node and npm, simply clone the repo into a directory of
 ###### Supabase 
 This app uses supabase for its backend. Specifically, it uses two supabase instaces, with a simple PROD/DEV split. You will need to do a couple things to use these instances. The dev backend can be changed freely to test and debug during development without fear of affecting the public-facing site. 
 - Add Contributors for Backend
+
 If you already have access to the supabase, you can invite new users by navigating to "Authentication" and clicking on the Users tab. On the right you can will se an "+ Invite" button. Click on this and add the email of the person you wish to invite. If you don't have access, ask your team leads. If you are a team lead and don't have access, try and get in touch with whoever worked on the project last and see if they can help. 
 - Env 
+
 Add an .env file in the publics/publics directory, and add your environment variables here. Ask your team lead for these. You will change this based on which backend (prod/dev) you are using. They will be in the form of: 
 ```
 NEXT_PUBLIC_SUPABASE_URL = {your url}
