@@ -1,9 +1,5 @@
 # Party Owl
 
-## Testing
-
-Run `npm run test` in the /publics directory to run the tests.
-
 ### How to Run
 ###### Node.JS and npm Installation
 This app requires node.js and npm. 
@@ -29,3 +25,19 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY = {your anon key}
 Make sure you're using the correct backend! Don't push to prod if you don't mean to!
 ###### Running the App
 Now that everything is installed, simply navigate to publics/publics and run ```npm run dev``` (Run scripts found at package.json as per usual). This will launch a local instance of the app that will try to run at ```localhost:3000```. If successful, you can view the app at this url. 
+
+## Great, I'm all set up - but now I want to make changes. Anything I should be aware of?
+Thanks for asking! Yes, there is just one thing: make sure to create a NEW BRANCH before making changes! We will use the `main` branch for production; so this branch will not be directly editable. Furthermore, it is just good practice in development to not make direct changes to production or staging branches. Instead, it is advisable to create a new branch when you'd like to build a new feature, and then use a Pull Request to merge your changes into the deployed version.
+
+The typical workflow will look like this:
+1. Create a new branch using `git checkout -b feature/<CUSTOM_BRANCH_NAME>`, and replace <CUSTOM_BRANCH_NAME>.
+2. Make your necessary commits, and once they're ready to be integrated with the deployed version, submit a pull request on Github.
+3. From there, your mentor will review the PR. They may recommend some changes or revisions that should be made, and in that case you will need to make another commit or two before the PR is approved. 
+4. Once the PR is approved, the mentor will merge your PR into the deployed version, and now your code will be integrated in the deployed version of PartyOwl. Congratulations!
+
+# What if I want to make changes to the Database.
+If you need to change the database schema you'll need to create a database migration, since the production project can not be edited directly. Currently we are only usisng manual migrations; meaning you'll need to write DDL statements manually into a migration file, however in future we hope to use a migration manager. Our git actions will automatically apply the diff when you merge the commit with a new migration.
+
+### Testing
+
+Run `npm run test` in the /publics directory to run the tests.
