@@ -57,6 +57,7 @@ const fetchCounts = async (
       profile: userId,
       event: eventData.id,
       is_counter: true,
+      checked_in: true,
       checked_out: false,
     })
 
@@ -311,7 +312,7 @@ export const getServerSideProps = async (ctx) => {
   if (!authorized) {
     return {
       redirect: {
-        destination: `http://${ctx.req.headers.host}/404`,
+        destination: `http://${ctx.req.headers.host}/events/${ctx.query.slug}/countererror`,
         permanent: false,
       },
     }
